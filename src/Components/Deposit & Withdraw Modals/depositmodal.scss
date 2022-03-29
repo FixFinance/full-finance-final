@@ -1,0 +1,106 @@
+.deposit-modal {
+    .modal-content{
+        border-radius: 40px;
+    }
+  .middle_part {
+    max-width: 649px;
+    margin: 0 auto;
+    .text-part {
+      max-width: 290px;
+      margin: 0 auto;
+      margin-top: 20px;
+    }
+  }
+  .modal-dialog {
+    max-width: 690px;
+    height: 481px;
+    margin: auto;
+  }
+  .form-field {
+    border: 1px solid #7d8282;
+    box-sizing: border-box;
+    border-radius: 40px;
+    width: 100%;
+    max-width: 340px;
+    margin: auto;
+    padding: 10px 20px 10px 20px;
+    height: 100%;
+    min-height: 56px;
+
+   
+  }
+  .highlight {
+    background: #edf0eb;
+    border-radius: 40px;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.9;
+
+    align-items: center;
+    letter-spacing: 0.02em;
+
+    color: #0f1010;
+    width: 47px;
+    height: 28px;
+    margin-top: 3px;
+    font-family: "Roobert-Regular";
+    position: absolute;
+    top: 20%;
+    left: 67%;
+  }
+  .btn-deactive {
+    background: #0F1010;
+    border-radius: 70px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.6;
+    /* identical to box height, or 21px */
+
+    letter-spacing: 0.02em;
+    text-transform: capitalize;
+
+    color: #646868;
+    width: 100%;
+    font-family: "Roobert-Regular";
+    padding: 20px 40px;
+    margin-top: 75px;
+  }
+  .btn-active {
+    background: #7e3ac3;
+    border-radius: 70px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.6;
+    /* identical to box height, or 21px */
+
+    letter-spacing: 0.02em;
+    text-transform: capitalize;
+
+    color: #edf0eb;
+    width: 100%;
+    font-family: "Roobert-Regular";
+    padding: 20px 40px;
+    margin-top: 75px;
+  }
+ 
+  p {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.6;
+    /* or 18px */
+
+    letter-spacing: 0.02em;
+    text-transform: capitalize;
+
+    
+    font-family: "Roobert-Regular";
+  }
+  .tick_img{
+      width: 100%;
+      max-width: 211.8px;
+      height:161px;
+  }
+  .border_bottom{
+    border-bottom: 1px solid #313535;
+  }
+}

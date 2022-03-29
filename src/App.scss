@@ -1,0 +1,345 @@
+@font-face {
+  font-family: "Nib Pro SemiBold";
+  src: url("./assets/fonts/Nib-Pro-SemiBold.eot");
+  src: url("./assets/fonts/Nib-Pro-SemiBold.eot?#iefix")
+      format("embedded-opentype"),
+    url("./assets/fonts/Nib-Pro-SemiBold.woff2") format("woff2"),
+    url("./assets/fonts/Nib-Pro-SemiBold.woff") format("woff"),
+    url("./assets/fonts/Nib-Pro-SemiBold.ttf") format("truetype"),
+    url("./assets/fonts/Nib-Pro-SemiBold.svg#Nib Pro SemiBold") format("svg");
+}
+@font-face {
+  font-family: "Roobert-Regular";
+  src: url("./assets/fonts/Roobert-Regular.eot");
+  src: url("./assets/fonts/Roobert-Regular.eot?#iefix")
+      format("embedded-opentype"),
+    url("./assets/fonts/Roobert-Regular.woff2") format("woff2"),
+    url("./assets/fonts/Roobert-Regular.woff") format("woff"),
+    url("./assets/fonts/Roobert-Regular.ttf") format("truetype"),
+    url("./assets/fonts/Roobert-Regular.svg#Roobert-Regular") format("svg");
+}
+
+.marginclass {
+  margin-top: 6em;
+}
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+button,.btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+body,
+html {
+  width: 100%;
+}
+
+body {
+  background: #0F1010;
+  color: #edf0eb;
+  margin: 0;
+  padding: 0;
+  font-family: "Roobert-Regular";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 18px;
+  line-height: 1.4;
+  @media (max-width: 992px) {
+    font-size: 15px;
+  }
+}
+
+b,
+strong {
+  font-weight: 700;
+}
+
+p {
+  margin: 0 0 10px 0;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Nib Pro SemiBold";
+  margin: 0 0 10px 0;
+  padding: 0;
+  color: #fff;
+  font-weight: 700;
+}
+
+h1:last-child,
+h2:last-child,
+h3:last-child,
+h4:last-child,
+h5:last-child,
+h6:last-child {
+  margin-bottom: 0;
+}
+
+h2 {
+  font-size: 70px;
+  line-height: 1.2;
+  @media (max-width: 992px) {
+    font-size: 64px;
+  }
+  @media (max-width: 767px) {
+    font-size: 54px;
+  }
+  @media (max-width: 576px) {
+    font-size: 45px;
+  }
+}
+
+h3 {
+  font-size: 40px;
+  line-height: 1;
+}
+
+h4 {
+  font-size: 52px;
+  line-height: 1.2;
+  @media (max-width: 992px) {
+    font-size: 48px;
+  }
+  @media (max-width: 767px) {
+    font-size: 38px;
+  }
+}
+
+a {
+  margin: 0;
+  padding: 0;
+  text-decoration: none !important;
+  outline: none !important;
+  color: #ecb61e;
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  -ms-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+
+a:hover {
+  color: red;
+}
+
+img {
+  max-width: 100%;
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="password"],
+input[type="email"],
+select {
+  background-color: transparent;
+  width: 100%;
+  //   -webkit-appearance: none;
+  //   appearance: none;
+  //   -webkit-border-radius: 0;
+  //   -moz-border-radius: 0;
+  //   -ms-border-radius: 0;
+  //   border-radius: 0;
+  //   color: #000;
+  //   border: 1px solid rgba(255, 255, 255, 0.7);
+  //   height: 58px;
+  //   padding: 0 16px;
+  outline: none !important;
+  font-family: "Roobert-Regular";
+}
+
+textarea {
+  background-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  -ms-border-radius: 0;
+  border-radius: 0;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  padding: 12px 16px;
+  width: 100%;
+  color: #000;
+  height: 158px;
+  outline: none !important;
+}
+
+select {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  width: 100%;
+  padding: 0 11px;
+  // background: url(images/arrow_bottom.svg) no-repeat calc(100% - 16px) center transparent;
+  background-size: 18px;
+  padding-right: 40px;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+input[type="submit"] {
+  background: #eab71e;
+  color: #000000;
+  height: 58px;
+  border: none;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  -ms-border-radius: 0;
+  border-radius: 0;
+  padding-left: 30px;
+  padding-right: 30px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-size: 24px;
+  font-weight: 700;
+  outline: none !important;
+  -webkit-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+
+input[type="submit"]:hover {
+  background: #000;
+  color: #eab71e;
+}
+
+::-webkit-input-placeholder {
+  opacity: 0.7;
+  color: #000;
+}
+
+:-ms-input-placeholder {
+  opacity: 0.7;
+  color: #000;
+}
+
+::-moz-placeholder {
+  opacity: 0.7;
+  color: #000;
+}
+
+:-moz-placeholder {
+  opacity: 0.7;
+  color: #000;
+}
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  pointer-events: auto;
+  background: #191a1a;
+  border-radius: 20px;
+  background-clip: padding-box;
+  border: 1px solid transparent;
+  color: #edf0eb;
+  outline: 0;
+ 
+}
+.modal-header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center !important;
+    padding: 1rem 1rem;
+    border-bottom: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    position: relative;
+    h5 {
+      font-size: 28px;
+      line-height: 1.6;
+      text-align: center;
+      margin-top: 2px;
+      @media (max-width: 500px) {
+        font-size: 24px;
+      }
+    }
+
+}
+.modal-body {
+    position: relative;
+    flex: 1 1 auto;
+    padding: 1rem;
+  
+}
+.btn-close {
+  box-sizing: content-box;
+  width: 38px;
+  height: 38px;
+
+  background: #252727;
+  border-radius: 48px;
+  padding: 0.25em 0.25em;
+  color: #000;
+  background: url("./assets/image/Union.svg");
+  background-position: center;
+  background-size: cover;
+  border: 0;
+  position: absolute;
+    right: 20px;
+    top: 20px;
+    @media(max-width:500px){
+        width: 28px;
+  height: 28px;
+    }
+}
+input[type="text"],
+input[type="tel"],
+input[type="password"],
+input[type="email"],
+select:focus {
+  color: #edf0eb;
+  background-color: transparent;
+  border-color: none;
+  outline: 0;
+  box-shadow: none;
+  text-align: center;
+}
+input::placeholder {
+  font-size: 15px;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  color: #edf0eb;
+}
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1050;
+    width: 100vw;
+    height: 100vh;
+    background-image: url("./assets/image/bannerbg.svg");
+    background-position: center;
+    background-size: cover;
+    backdrop-filter: blur(124px);
+    opacity: 1 !important;
+}
+.connect-wallet-modal .modal-dialog {
+    max-width: 466px;
+    height: 468px;
+    margin: auto;
+}
+.relative{
+  position: relative;
+}

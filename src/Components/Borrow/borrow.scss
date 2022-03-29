@@ -1,0 +1,197 @@
+.borrow_section {
+    padding: 40px 0 40px;
+    .container {
+        max-width: 98%;
+    }
+    .borrow_box {
+        text-align: center;
+        background: #191A1A;
+        border-radius: 50px;
+        padding: 10px 30px;
+        @media(max-width:736px){
+            margin: 10px 0;
+        }
+        h5 {
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
+            letter-spacing: 0.02em;
+            color: #7D8282;
+            text-align: left;
+        }
+        .borrow_box_text {
+            padding: 30px 0;
+            h2 {
+                font-style: normal;
+                font-weight: 400;
+                font-size: 60px;
+                line-height: 72px;
+                text-align: center;
+                letter-spacing: 0.02em;
+                text-transform: uppercase;
+                color: #EDF0EB;
+            }
+            p {
+                font-style: normal;
+                font-weight: 400;
+                font-size: 14px;
+                line-height: 20px;
+                text-align: center;
+                letter-spacing: 0.02em;
+                color: #EDF0EB;
+            }
+        }
+    }
+    
+    .borrow_box_add {
+        background: #9059DE;
+        border-radius: 150px;
+        padding: 60px 50px;
+        text-align: center;
+        cursor: pointer;
+        @media(max-width:812px){
+            border-radius: 70px;
+            padding: 50px 50px;
+        }
+        .plus_added {
+            button {
+                background: no-repeat;
+                border: none;
+                color: #fff;
+                font-size: 45px;
+            }
+        }
+    }
+}
+
+.borrow_position {
+    background: #191A1A;
+    border-radius: 50px;
+    padding: 30px 30px;
+    overflow: hidden;
+    margin: 15px 0 !important;
+    h4 {
+        font-style: normal;
+        font-weight: 600;
+        font-size: 28px;
+        line-height: 120%;
+        color: #EDF0EB;
+        text-align: center;
+        margin: 0 0 20px;
+    }
+    .borrow_position_wrap {
+        background: #252727;
+        border-radius: 50px;
+        padding: 30px 30px;
+        margin: 15px 0;
+        @media(max-width:375px){
+            padding: 10px 10px;
+        }
+        .borrow_position_box {
+            background: #0F1010;
+            border-radius: 30px;
+            padding: 40px 40px;
+            margin: 15px 0;
+            @media(max-width:1199px){
+                padding: 20px 20px;
+            }
+            @media(max-width:375px){
+                    padding: 10px;
+            }
+            h5 {
+                font-style: normal;
+                font-weight: 400;
+                font-size: 16px;
+                line-height: 100%;
+                letter-spacing: 0.02em;
+                text-transform: capitalize;
+                color: #7D8282;
+                margin: 0 0 60px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                @media(max-width:375px){
+                    justify-content: center;
+                    text-transform: capitalize;
+                    flex-wrap: wrap;
+                }
+            }
+            h2 {
+                font-style: normal;
+                font-weight: 400;
+                font-size: 30px;
+                line-height: 48px;
+                letter-spacing: 0.02em;
+                color: #EDF0EB;
+                @media(max-width:1199px){
+                    font-size: 20px;
+                }
+                @media(max-width:812px){
+                    line-height: 30px;
+                }
+                @media(max-width:375px){
+                    font-size: 20px;
+                    display: flex;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                }
+            }
+            p {
+                font-style: normal;
+                font-weight: 400;
+                font-size: 16px;
+                line-height: 130%;
+                letter-spacing: -0.01em;
+                font-feature-settings: 'liga' off;
+                color: #7D8282;
+                @media(max-width:1199px){
+                    font-size: 14px;
+                }
+            }
+        }
+        .total_debt_box {
+            text-align: center;
+            button {
+                border: none;
+                background: #0f1010;
+                padding: 10px 10px;
+                h5{
+                    justify-content: center;
+                    margin: 0 0;
+                }
+            }
+            
+        }
+    } 
+    
+    .borrow_stablecoins {
+        text-align: center;
+        padding: 60px 0 200px;
+        @media(max-width:991px){
+            padding: 60px 0 60px;
+        }
+        li {
+            display: inline-block;
+            margin: 0 0 0 -15px;
+            border: 5px solid #000;
+            border-radius: 50%;
+            width: 50px;
+            position: relative;
+            button {
+                border: none;
+                color: #fff;
+                font-size: 30px;
+                height: 50px;
+                line-height: 20px;
+                width: 50px;
+                background: #252727;
+                border-radius: 50%;
+                border: 5px solid #000;
+                position: absolute;
+                top: -25px;
+                left: -8px;
+            }
+        }
+    }
+}

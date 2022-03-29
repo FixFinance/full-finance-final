@@ -1,0 +1,27 @@
+.connect-modal.account-modal {
+  .modal-body {
+    text-align: center;
+    .ellips {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 8px;
+    }
+    h5 {
+      font-weight: 400;
+      font-size: 36px;
+      line-height: 1.2;
+      font-family: "Roobert-Regular";
+
+      color: #edf0eb;
+    }
+    h6 {
+      font-weight: 400;
+      font-size: 24px;
+      line-height: 1.4;
+
+      letter-spacing: 0.02em;
+      font-family: "Roobert-Regular";
+      color: #7d8282;
+    }
+  }
+}

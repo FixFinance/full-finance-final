@@ -1,0 +1,131 @@
+.header {
+  // color: green;
+}
+.header {
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  right: 0%;
+  bottom: 0%;
+  height: 180px;
+  @media (max-width: 992px) {
+    padding-top: 0px;
+  }
+  .navbar {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    @media (max-width: 992px) {
+      background-color: #2527276b;
+    }
+  }
+}
+.header2 {
+  position: static;
+  .eth_btn {
+    background: #7e3ac3;
+    font-family: "Roobert-Regular";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 2.6;
+
+    letter-spacing: 0.02em;
+    text-transform: capitalize;
+
+    border-radius: 50px 10px 10px 50px;
+
+    color: #edf0eb;
+    padding: 0 45px 0 30px;
+    
+  }
+  .num_btn {
+    background: #252727;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 2.6;
+    font-family: "Roobert-Regular";
+
+    letter-spacing: 0.02em;
+    text-transform: capitalize;
+    border-radius: 50px;
+    color: #edf0eb;
+    padding: 0 30px 0 14px;
+   margin-left: -30px;
+  }
+  .ellip_img{
+    width: 24px;
+height: 24px;
+margin-right:5px ;
+  }
+}
+.header-top {
+  padding-top: 10px;
+  padding-bottom: 50px;
+  .container {
+    max-width: 98%;
+  }
+}
+
+.connect-wallet {
+  background-color: #7e3ac3;
+  border: 2px solid transparent;
+
+  border-radius: 50rem !important;
+  color: #fff;
+  padding: 15px 50px;
+  text-decoration: none;
+  &:hover {
+    background-color: transparent;
+    border: 2px solid #7e3ac3;
+    color: #7e3ac3;
+  }
+  @media (max-width: 810px) {
+    padding: 15px 25px;
+  }
+}
+
+.navbar-nav {
+  li {
+    padding: 0 20px;
+    color: #fff;
+    font-size: 15px;
+    line-height: 20px;
+    text-decoration: none;
+    @media (max-width: 992px) {
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    a {
+      color: #edf0eb;
+      text-decoration: none;
+
+      &:hover {
+        width: fit-content;
+        border-bottom: 1px solid #edf0eb;
+        padding-bottom: 5px;
+      }
+    }
+  }
+  li a.active {
+    width: fit-content;
+    border-bottom: 1px solid #edf0eb;
+    padding-bottom: 5px;
+  }
+  li:last-child a {
+    background: #252727;
+    border-radius: 6px;
+    color: #fff;
+    border-bottom: none;
+    padding: 0px 10px 10px 10px;
+  }
+}
+.navbar-brand img {
+  width: 100%;
+  min-width: 225px;
+}

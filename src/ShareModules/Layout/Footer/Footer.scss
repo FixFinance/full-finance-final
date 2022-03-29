@@ -1,0 +1,46 @@
+.footer {
+  color: gold;
+  background: #7E3AC3;
+  padding: 45px 27px 22px 27px;
+  display: flex;
+  justify-content: space-between;
+  ul{
+    display: flex;
+    list-style: none;
+    padding-left: 0;
+    margin-top: 50px;
+    font-family: 'Nib Pro SemiBold';
+    li{
+      padding: 8px;
+     a{
+      color: #EDF0EB;
+     }
+     a:hover{color: #191A1A;}
+     
+    }
+  }
+  .parcent_img{
+    width: 100%;
+    max-width: 258px;
+    height: 100%;
+    min-height: 197px;
+    @media(max-width:990px){
+      max-width: 200px;
+      min-height: 100px;
+    }
+    @media(max-width:600px){
+      max-width: 150px;
+    }
+    @media(max-width:400px){
+      max-width: 100px;
+    }
+  }
+  .f_img{
+    width: 100%;
+    max-width: 80px;
+    // @media(max-width:990px){
+    //   max-width: 50px;
+    // }
+  }
+
+}

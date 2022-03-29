@@ -1,0 +1,103 @@
+.connect-modal {
+  
+  
+  .modal-body {
+    margin-top: 2px;
+    .warning_msg {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 1.6;
+
+      text-align: center;
+      letter-spacing: 0.01em;
+
+      text-decoration-line: unset;
+      color: #ef767a;
+      max-width: 346px;
+      margin: 0 auto;
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+    .field-text{
+      font-weight: 400;
+font-size: 14px;
+line-height: 16px;
+
+align-items: center;
+letter-spacing: 0.02em;
+
+
+color: #EDF0EB;
+
+    }
+    .form-field {
+      padding: 10px 20px 10px 40px;
+
+      background: #313535;
+      border-radius: 90px;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+    .icon_img {
+      width: 48px;
+      height: 48px;
+    }
+    p {
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 100%;
+      /* identical to box height, or 16px */
+
+      letter-spacing: 0.02em;
+      text-decoration-line: underline;
+      text-transform: capitalize;
+
+      color: #929095;
+      text-align: center;
+      padding-top: 30px;
+      padding-bottom: 15px;
+    }
+    h6 {
+      font-weight: 400;
+      font-size: 24px;
+      line-height: 1.4;
+      /* or 34px */
+
+      text-align: center;
+      letter-spacing: 0.02em;
+
+      color: #7d8282;
+      max-width: 346px;
+      margin: 0 auto;
+      font-family: "Roobert-Regular";
+    }
+    .common_btn {
+      border-radius: 100px;
+      padding: 20px 40px;
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.4;
+
+      align-items: center;
+      letter-spacing: 0.02em;
+      text-transform: capitalize;
+      width: 100%;
+      margin-top: 15px;
+      font-family: "Roobert-Regular";
+    }
+    .cancel {
+      border: 2px solid #3e4242;
+      box-sizing: border-box;
+
+      color: #edf0eb;
+    }
+    .switch {
+      background: #edf0eb;
+      color: #0f1010;
+    }
+    ._margin_ {
+      margin-top: 3.7em;
+      margin-bottom: 1em;
+    }
+  }
+}

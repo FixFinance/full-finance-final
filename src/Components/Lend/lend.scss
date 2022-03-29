@@ -1,0 +1,113 @@
+.lend {
+  max-width: 650px;
+  margin: 0 auto;
+  .empty {
+    width: 100%;
+    max-width: 650px;
+    height: 100%;
+    min-height: 468px;
+    background: #191a1a;
+    border-radius: 30px;
+    padding: 30px;
+    margin-top: 60px;
+    span {
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 1.6;
+
+      letter-spacing: 0.02em;
+
+      color: #7d8282;
+      align-self: center;
+    }
+    h5 {
+      font-weight: 400;
+      font-size: 40px;
+      line-height: 1.1;
+
+      color: #edf0eb;
+      font-family: "Roobert-Regular";
+      margin: 0 5px;
+      @media (max-width: 576px) {
+        font-size: 35px;
+      }
+      @media (max-width: 440px) {
+        font-size: 30px;
+      }
+    }
+    p {
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 2.2;
+
+      letter-spacing: 0.02em;
+      text-transform: capitalize;
+
+      color: #7d8282;
+      text-align: end;
+      @media (max-width: 500px) {
+        text-align: start;
+      }
+      @media (max-width: 0.576px) {
+        font-size: 14px;
+      }
+      @media (max-width: 0.44px) {
+        font-size: 12px;
+      }
+    }
+    .question_img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    .rupee_img {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+    }
+    .margin_small {
+      margin-top: 67px;
+    }
+    .flex_class {
+      display: flex;
+      justify-content: space-between;
+      @media (max-width: 500px) {
+        display: block;
+      }
+    }
+    .common_btn {
+      border-radius: 100px;
+      padding: 20px 40px;
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.4;
+
+      align-items: center;
+      letter-spacing: 0.02em;
+      text-transform: capitalize;
+      width: 100%;
+      margin-top: 15px;
+      font-family: "Roobert-Regular";
+    }
+    .deposit {
+      background: #7e3ac3;
+
+      color: #edf0eb;
+      border: 2px solid transparent;
+      &:hover {
+        background: transparent;
+        border: 2px solid #7e3ac3;
+        color: #7e3ac3;
+        transition: all 0.3s ease-in-out;
+      }
+    }
+    .withdraw {
+      background: #0f1010;
+      color: #646868;
+      border: 2px solid transparent;
+      &:hover {
+        border: 2px solid #646868;
+      }
+    }
+  }
+}
