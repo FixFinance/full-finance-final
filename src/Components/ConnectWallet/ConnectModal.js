@@ -8,7 +8,7 @@ import icon3 from "../../assets/image/icon3.svg";
 import icon4 from "../../assets/image/icon4.svg";
 import { Link } from "react-router-dom";
 import DepositPopup from "../Deposit & Withdraw Modals/DepositPopup";
-import ConnectModal2 from "./ConnectModal2";
+import ConnectModal2 from "./WrongNetworkModal";
 import AccountModal2 from "../AccountModals/AccountModal2";
 const ConnectModal = ({ handleClose }) => {
   const [show2, setShow2] = useState(false);

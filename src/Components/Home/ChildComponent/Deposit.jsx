@@ -15,9 +15,8 @@ const Deposit=()=> {
             title:"Total Deposits",
             price:"672.12B",
             ButtonText:"Lend Now",
-            CurentDeposite:"Curent Deposite Rate",
+            CurrentDeposit:"Current Deposit Rate",
             price1:"12.10%",
-            click:handleShow,
 
             
         },
@@ -25,7 +24,7 @@ const Deposit=()=> {
             title:"Total Borrowed",
             price:"32.98B",
             ButtonText:"Borrow Now",
-            CurentDeposite:"Curent Deposite Rate",
+            CurrentDeposit:"Current Deposit Rate",
             price1:"12.10%",
            
           
@@ -34,7 +33,7 @@ const Deposit=()=> {
     ]
   return (
     <div className='deposit_section'>
-    <div className='container deposite'>
+    <div className='container deposit'>
         <div className='row'>
 
         
@@ -52,7 +51,7 @@ const Deposit=()=> {
                   
                   <button  className='button-text-one' onClick={item.click}>{item.ButtonText}</button>
                   <Card.Text className='p1'>
-                    {item.CurentDeposite}
+                    {item.CurrentDeposit}
                   </Card.Text>
                   <Card.Text className='item-price-one'> 
                     {item.price1}

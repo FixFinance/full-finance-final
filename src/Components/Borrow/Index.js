@@ -10,9 +10,12 @@ import ManagePositionPopup from './ManageModal/ManagePositionPopup';
 
 function Index() {
   const [modal1, setModal1] = useState(false);
+  const [modal2, setModal2] = useState(false);
 
   const handleClose1 = () => setModal1(false);
+  const handleClose2 = () => setModal2(false);
   const handleShow1 = () => setModal1(true);
+  const handleShow2 = () => setModal2(true);
   
   return (
     <div>
@@ -38,7 +41,8 @@ function Index() {
             </div>
           </div>
           <div className="col-lg-4 col-md-4">
-            <div className="borrow_box_add">
+            <div className="borrow_box_add"
+            onClick={() => handleShow2()}>
               <div className="plus_added">
                 <button>+</button>
                 <p>open Borrowing positions</p>
@@ -138,6 +142,15 @@ function Index() {
           className="deposit-modal"
         >
           <ManagePopup handleClose={handleClose1} />
+        </Modal>
+        <Modal
+          show={modal2}
+          onHide={handleClose2}
+          centered
+          animation={false}
+          className="deposit-modal"
+        >
+          <ManagePositionPopup handleClose={handleClose2} />
         </Modal>
 
        

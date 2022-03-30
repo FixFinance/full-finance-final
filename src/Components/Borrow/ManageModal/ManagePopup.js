@@ -22,11 +22,11 @@ const ManagePopup = ({ handleClose }) => {
         <div>
           <div className="manage_popup">
             <Modal.Header closeButton>
-              <h5>Withdraw DAI</h5>
+              <h5>Manage Position</h5>
             </Modal.Header>
             <Modal.Body>
               <div className="managepopup_details">
-                <p className="errorr_message">
+                <p className="error_message">
                   There is not enough collateral to withdraw or borrow. Please
                   repay your debt, or add more collatral to avoid liquidation.
                 </p>
@@ -41,13 +41,13 @@ const ManagePopup = ({ handleClose }) => {
                 </button>
                 <button
                   onClick={() => handleModalType("Withdraw")}
-                  className="btn active"
+                  className="btn"
                 >
                   Withdraw Collateral
                 </button>
                 <button
                   onClick={() => handleModalType("borrowMore")}
-                  className="btn active"
+                  className="btn"
                 >
                   Borrow More
                 </button>
@@ -58,9 +58,7 @@ const ManagePopup = ({ handleClose }) => {
                   Close Position
                 </button>
                 <button
-               
                   className="btn link"
-                  onClick={handleShow2}
                 >
                   FAQ link
                 </button>

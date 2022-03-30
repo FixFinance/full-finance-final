@@ -36,16 +36,17 @@
             &.active {
                 background: #0F1010;
             }
-            .close {
-                background: #EF767A;
-            }
+            
+        }
+        button.btn.close{
+            background: #EF767A;
         }
         button.btn.link {
             background: transparent !important;
             color: #929095 !important;
             padding: 0;
         }
-        p.errorr_message {
+        p.error_message {
             font-style: normal;
             font-weight: 400;
             font-size: 12px;
