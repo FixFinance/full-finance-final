@@ -4,6 +4,7 @@ import AddCollateral from "../../Collateral Modals/AddCollateral";
 import WithdrawCollateral from "../../Collateral Modals/WithdrawCollateral";
 import BorrowMore from "../../RepayModals/BorrowMore";
 import Debt from "../../RepayModals/Debt";
+import ClosePosition from "../../RepayModals/ClosePosition";
 import "./managepopup.scss";
 import ManagePositionPopup from './ManagePositionPopup';
 
@@ -28,7 +29,7 @@ const ManagePopup = ({ handleClose }) => {
               <div className="managepopup_details">
                 <p className="error_message">
                   There is not enough collateral to withdraw or borrow. Please
-                  repay your debt, or add more collatral to avoid liquidation.
+                  repay your debt, or add more collateral to avoid liquidation.
                 </p>
                 <button
                   className="btn"
@@ -52,7 +53,7 @@ const ManagePopup = ({ handleClose }) => {
                   Borrow More
                 </button>
                 <button
-                  onClick={handleClose}
+                  onClick={() => handleModalType("closePosition")}
                   className="btn close"
                 >
                   Close Position
@@ -71,6 +72,7 @@ const ManagePopup = ({ handleClose }) => {
       {modalType === "Withdraw" && <WithdrawCollateral />}{" "}
       {(modalType === "debt" || modalType === "repay") && <Debt />}{" "}
       {modalType === "borrowMore" && <BorrowMore />}
+      {modalType === "closePosition" && <ClosePosition />}
       <Modal
           show={modal2}
           onHide={handleClose2}
