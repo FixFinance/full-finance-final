@@ -43,14 +43,6 @@ function Footer() {
               <Link to="/..">Cookies</Link>
             </li>
           </ul>
-          <button className="btn" onClick={handleShow1}>
-            Add collateral
-          </button>
-          <button className="btn" onClick={handleShow2}>
-            withdraw collateral
-          </button>
-          <button className="btn" onClick={handleShow3}>Repay Debt</button>
-          <button className="btn" onClick={handleShow4}>Repay borrow</button>
         </div>
         <img src={parcent} alt="img" className="parcent_img" />
       </div>
