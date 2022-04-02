@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import ellips2 from "../../assets/image/ellips2.svg";
 import "./accountmodal.scss";
 import AccountModal1 from "./AccountModal1";
-const AccountModal2 = ({ handleClose }) => {
+
+const AccountModal2 = ({ handleClose, walletType, address, ens }) => {
   const [modalType, setModalType] = useState("basicColor");
+
+  let abbreviatedAddress = address.substring(0, 10)+'...'+address.substring(address.length-9);
 
   return (
     <div>
@@ -17,8 +20,14 @@ const AccountModal2 = ({ handleClose }) => {
             </Modal.Header>
             <Modal.Body>
               <img src={ellips2} alt="img" className="ellips" />
-              <h5>poydo.eth</h5>
-              <h6>0x12345678...123456789</h6>
+              {ens !== null && 
+                <>
+                  <h5>{ens}</h5>
+                  <h6>{abbreviatedAddress}</h6>
+                </>
+              }
+              {ens === null && <h5>{abbreviatedAddress}</h5>}
+
               <div className="mb-4 mt-5">
                 <div className="text-center">
                   <button

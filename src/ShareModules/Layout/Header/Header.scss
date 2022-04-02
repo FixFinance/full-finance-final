@@ -24,51 +24,57 @@
     }
   }
 }
+
 .header2 {
   position: static;
-  .eth_btn {
-    background: #7e3ac3;
-    font-family: "Roobert-Regular";
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 2.6;
 
-    letter-spacing: 0.02em;
-    text-transform: capitalize;
-
-    border-radius: 50px 10px 10px 50px;
-
-    color: #edf0eb;
-    padding: 0 45px 0 30px;
-    
-  }
-  .num_btn {
-    background: #252727;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 2.6;
-    font-family: "Roobert-Regular";
-
-    letter-spacing: 0.02em;
-    text-transform: capitalize;
-    border-radius: 50px;
-    color: #edf0eb;
-    padding: 0 30px 0 14px;
-   margin-left: -30px;
-  }
-  .ellip_img{
-    width: 24px;
-height: 24px;
-margin-right:5px ;
-  }
 }
+
 .header-top {
   padding-top: 10px;
   padding-bottom: 50px;
   .container {
     max-width: 98%;
   }
+}
+
+.eth_btn {
+  background: #7e3ac3;
+  font-family: "Roobert-Regular";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 2.6;
+
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+
+  border-radius: 50px 10px 10px 50px;
+
+  color: #edf0eb;
+  padding: 0 45px 0 30px;
+  
+}
+
+.ellip_img{
+  width: 24px;
+  height: 24px;
+  margin-right:5px;
+}
+
+.num_btn {
+  background: #252727;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 2.6;
+  font-family: "Roobert-Regular";
+
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+  border-radius: 50px;
+  color: #edf0eb;
+  padding: 0 30px 0 14px;
+ margin-left: -30px;
 }
 
 .connect-wallet {
