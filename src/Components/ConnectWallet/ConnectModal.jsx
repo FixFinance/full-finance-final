@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import "./connectmodal.scss";
@@ -14,12 +14,12 @@ import { EthersContext } from "../EthersProvider/EthersProvider";
 
 import { TargetChains } from '../../Utils/TargetChains.js';
 
-const ConnectModal = ({ handleClose, handleConnect }) => {
+const ConnectModal = ({ handleClose }) => {
   const [show2, setShow2] = useState(false);
   const [selectedModal, setSelectedModal] = useState("basic");
   const [show3, setShow3] = useState(false);
-  const getWalletInfo = useContext(EthersContext);
-  const [provider, userAddress, userENS, chainId, walletType] = getWalletInfo(selectedModal);
+  const [getWalletInfo] = useContext(EthersContext);
+  const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo(selectedModal);
 
   const openModal3 = () => {
     handleClose();
@@ -37,15 +37,6 @@ const ConnectModal = ({ handleClose, handleConnect }) => {
 
   let connectedToWallet = selectedModal !== 'basic' && selectedModal !== 'error';
   let onWrongChain = connectedToWallet && chainId !== -1 && !TargetChains.includes(chainId);
-
-//      console.log(userAddress, selectedModal, walletType);
-  useEffect(() => {
-//    if (selectedModal !== walletType) {
-      console.log(userAddress, selectedModal, walletType);
-      handleConnect()
-
-//    }
-  }, [selectedModal, userAddress]);
 
   return (
     <div className="connect-modal">

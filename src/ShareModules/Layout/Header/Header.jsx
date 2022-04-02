@@ -12,17 +12,15 @@ import { Constants } from '../../../Utils/Consts.js';
 const { ADDRESS0 } = Constants;
 
 const Header = () => {
-  const [counter, setCounter] = useState(0);
   const [show, setShow] = useState(false);
   const [show2, setShow2] = useState(false);
 
-  const handleConnect = () => setCounter(counter+1)
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const handleShow2 = () => setShow2(true);
   const [zData, setZData] = useState("");
-  const getWalletInfo = useContext(EthersContext);
-  const [provider, userAddress, userENS, chainId, walletType] = getWalletInfo();
+  const [getWalletInfo] = useContext(EthersContext);
+  const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo();
 
   const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
 
@@ -93,7 +91,7 @@ const Header = () => {
               <div className="d-lg-flex text-center  ">
                 {userAddress !== ADDRESS0 ? (
                   <div className="d-flex justify-content-center mt-lg-0 mt-3" onClick={() => handleShow2()}>
-                    <button className="btn eth_btn">5.12345 ETH</button>
+                    <button className="btn eth_btn">{userETH} ETH</button>
                     <button className="btn num_btn d-flex">
                       <img
                         src={ellips_icon}
@@ -122,7 +120,7 @@ const Header = () => {
           animation={false}
           className="connect-wallet-modal"
         >
-          <ConnectModal handleClose={handleClose} handleConnect={handleConnect}/>
+          <ConnectModal handleClose={handleClose}/>
         </Modal>
         {/* ************ connect wallet pop up ***************/}
         {/* ************ connect wallet pop up 2 ***************/}
