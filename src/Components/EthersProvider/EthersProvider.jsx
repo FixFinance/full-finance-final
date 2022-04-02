@@ -42,9 +42,8 @@ export default function EthersProvider({children}) {
                         if (accounts.length > 0) {
                             setUserAddress(accounts[0]);
                             let getETHpromise = providerSet.getBalance(accounts[0]);
-                            let ensPromise = providerSet.lookupAddress(accounts[0]);
+                            let ensPromise = providerSet.lookupAddress(accounts[0]).catch(err => null);
                             return Promise.all([getETHpromise, ensPromise]).then(resArr => {
-                                console.log(resArr[0], typeof(resArr[0]));
                                 let divisor = BN.from(10).pow(BN.from(14));                                
                                 let str = resArr[0].div(divisor).toString();
                                 if (str.length <= 4) {

@@ -25,7 +25,7 @@ const DepositPopup = ({ handleClose }) => {
                     className="  form-field"
                     id="exampleInput1"
                     aria-describedby="textHelp"
-                    placeholder="|0.00"
+                    placeholder="       0.00"
                   />
                   <div className="highlight">max</div>
                 </div>

@@ -1,3 +1,4 @@
 export const TargetChains = [
-	1
+	1,
+	278
 ];

@@ -15,7 +15,10 @@ const Header = () => {
   const [show, setShow] = useState(false);
   const [show2, setShow2] = useState(false);
 
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false);
+    setXData('/');
+  }
   const handleShow = () => setShow(true);
   const handleShow2 = () => setShow2(true);
   const [zData, setZData] = useState("");
@@ -25,7 +28,9 @@ const Header = () => {
   const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
 
   let y = ["/lend", "/borrow"];
-  const [xData, setXData] = useState();
+  let currentPath = window.location.pathname.split('/');
+  let endLocation = currentPath.length > 0 ? '/'+currentPath[currentPath.length-1] : '/';
+  const [xData, setXData] = useState(endLocation);
   let z = y.includes(xData);
   useEffect(() => {
     setZData(z);
