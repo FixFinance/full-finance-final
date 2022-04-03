@@ -18,7 +18,6 @@ export const EthersContext = createContext();
 
 export default function EthersProvider({children}) {
 
-    const [counter, setCounter] = useState(0);
     const [walletType, setWalletType] = useState('basic');
     const [ethersProvider, setEthersProvider] = useState(null);
     const [userAddress, setUserAddress] = useState(ADDRESS0);
@@ -32,7 +31,6 @@ export default function EthersProvider({children}) {
         }
         let providerSet;
         if (selectedWalletType !== walletType) {
-            setCounter(counter+1);
             providerSet = getProvider(selectedWalletType);
             if (providerSet !== null) {
                 setEthersProvider(providerSet);
@@ -44,7 +42,7 @@ export default function EthersProvider({children}) {
                             let getETHpromise = providerSet.getBalance(accounts[0]);
                             let ensPromise = providerSet.lookupAddress(accounts[0]).catch(err => null);
                             return Promise.all([getETHpromise, ensPromise]).then(resArr => {
-                                let divisor = BN.from(10).pow(BN.from(14));                                
+                                let divisor = BN.from(10).pow(BN.from(14));
                                 let str = resArr[0].div(divisor).toString();
                                 if (str.length <= 4) {
                                     str = '0.'+'0'.repeat(4-str.length)+str;
