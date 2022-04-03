@@ -19,10 +19,12 @@ export function filterInput(str) {
 export function getDecimalString(bn, decimals, maxDecimalsShown=decimals) {
 	var ret;
 	if (bn.length <= decimals) ret = "0."+'0'.repeat(decimals-bn.length)+bn;
-	else ret = bn.substring(0, bn.length-decimals)+'.'+bn.substring(bn.length-decimals, bn.length-decimals+maxDecimalsShown);
+	else ret = bn.substring(0, bn.length-decimals)+'.'+bn.substring(bn.length-decimals, bn.length-decimals);
 	//remove trailing 0s
 	for (var i = ret.length-1; ret[i] === '0'; ret = ret.substring(0,i), i=ret.length-1){}
 	if (ret[ret.length-1]==='.')ret = ret.substring(0,ret.length-1);
+	let halves = ret.split('.');
+	if (halves.length == 2) ret = halves[0]+'.'+halves[1].substring(0, maxDecimalsShown)
 	return ret;
 }
 

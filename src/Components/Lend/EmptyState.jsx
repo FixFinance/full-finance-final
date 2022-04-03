@@ -6,7 +6,8 @@ import DepositPopup from "../Deposit & Withdraw Modals/DepositPopup";
 import WithdrawModal from "../Deposit & Withdraw Modals/WithdrawModal";
 import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
-import { getDecimalString } from '../../Utils/StringAlteration.js';
+import { getDecimalString } from '../../Utils/StringAlteration';
+import { getAnnualizedRate, TOTAL_SBPS } from '../../Utils/RateMath';
 
 const IERC20ABI = require('../../abi/IERC20.json');
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
@@ -17,6 +18,7 @@ const EmptyState = () => {
 
   const [balanceLendShares, setBalanceLendShares] = useState(null);
   const [lendShareValue, setLendShareValue] = useState(null);
+  const [annualLendRate, setAnnualLendRate] = useState('0');
 
   const [getWalletInfo] = useContext(EthersContext);
   const [provider, userAddress] = getWalletInfo();
@@ -46,14 +48,23 @@ const EmptyState = () => {
   useEffect(() => {
     let asyncUseEffect = async () => {
       if (provider != null && balanceLendShares == null) {
-        let promise0 = FLT.balanceOf(userAddress).then(res => {
-          setBalanceLendShares(res);
-          return res;
-        });
-        let promise1 = FLT.totalSupply();
-        let promise2 = CMM.getSupplyLent();
 
-        let promiseArray = [promise0, promise1, promise2];
+        CMM.getPrevSILOR().then(silor => {
+          let annualized = getAnnualizedRate(silor);
+          let pct = annualized.sub(TOTAL_SBPS);
+          let rateString = getDecimalString(pct.toString(), 16, 3);
+          console.log('rstr', rateString);
+          setAnnualLendRate(rateString);
+        });
+        let promiseArray = [
+          FLT.balanceOf(userAddress).then(res => {
+            setBalanceLendShares(res);
+            return res;
+          }),
+          FLT.totalSupply(),
+          CMM.getSupplyLent()
+        ];
+
         let [_FLTbalance, tsFLT, supplyLent] = await Promise.all(promiseArray);
         let _lendShareValue = _FLTbalance.mul(supplyLent).div(tsFLT);
         setLendShareValue(_lendShareValue);
@@ -61,9 +72,6 @@ const EmptyState = () => {
     }
     asyncUseEffect();
   }, [provider, balanceLendShares]);
-
-  if (lendShareValue != null)
-    console.log('value lend shares:', parseInt(lendShareValue.toString()) / Math.pow(10, 18), lendShareValueString);
 
   return (
     <div className="empty">
@@ -82,8 +90,8 @@ const EmptyState = () => {
             <h5>DAI</h5>
           </div>
           <div className="">
-            <h5 className="m-0">12.10 %</h5>
-            <p className="text-white ">Deposit APR</p>
+            <h5 className="m-0">{annualLendRate} %</h5>
+            <p className="text-white ">Deposit APY</p>
           </div>
         </div>
         <div className="margin_small">
