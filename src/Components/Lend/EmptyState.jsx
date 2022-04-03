@@ -1,18 +1,70 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import question from "../../assets/image/question.svg";
 import rupee from "../../assets/image/rupee.svg";
 import Modal from "react-bootstrap/Modal";
 import DepositPopup from "../Deposit & Withdraw Modals/DepositPopup";
 import WithdrawModal from "../Deposit & Withdraw Modals/WithdrawModal";
-const EmptyState = () => {
-    const [show, setShow] = useState(false);
+import { ethers, BigNumber as BN } from 'ethers';
+import { EthersContext } from '../EthersProvider/EthersProvider';
+import { getDecimalString } from '../../Utils/StringAlteration.js';
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+const IERC20ABI = require('../../abi/IERC20.json');
+const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
+
+const EmptyState = () => {
+  const [show, setShow] = useState(false);
   const [show2, setShow2] = useState(false);
 
-  const handleClose2 = () => setShow2(false);
+  const [balanceLendShares, setBalanceLendShares] = useState(null);
+  const [lendShareValue, setLendShareValue] = useState(null);
+
+  const [getWalletInfo] = useContext(EthersContext);
+  const [provider, userAddress] = getWalletInfo();
+
+  const handleClose = () => {
+    setShow(false);
+    setBalanceLendShares(null);
+    setLendShareValue(null);
+  }
+  const handleShow = () => setShow(true);
+
+  const handleClose2 = () => {
+    setShow2(false);
+    setBalanceLendShares(null);
+    setLendShareValue(null);
+  }
   const handleShow2 = () => setShow2(true);
+
+
+  const lendShareValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), process.env.REACT_APP_BASE_ASSET_DECIMALS, 4);
+
+  const signer = provider == null ? null : provider.getSigner();
+  let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
+  let FLT = signer == null ? null : new ethers.Contract(process.env.REACT_APP_FLT_ADDRESS, IERC20ABI, signer);
+  let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
+
+  useEffect(() => {
+    let asyncUseEffect = async () => {
+      if (provider != null && balanceLendShares == null) {
+        let promise0 = FLT.balanceOf(userAddress).then(res => {
+          setBalanceLendShares(res);
+          return res;
+        });
+        let promise1 = FLT.totalSupply();
+        let promise2 = CMM.getSupplyLent();
+
+        let promiseArray = [promise0, promise1, promise2];
+        let [_FLTbalance, tsFLT, supplyLent] = await Promise.all(promiseArray);
+        let _lendShareValue = _FLTbalance.mul(supplyLent).div(tsFLT);
+        setLendShareValue(_lendShareValue);
+      }
+    }
+    asyncUseEffect();
+  }, [provider, balanceLendShares]);
+
+  if (lendShareValue != null)
+    console.log('value lend shares:', parseInt(lendShareValue.toString()) / Math.pow(10, 18), lendShareValueString);
+
   return (
     <div className="empty">
       <div>
@@ -24,9 +76,9 @@ const EmptyState = () => {
           <div className="d-flex">
             <div className="d-block">
               <img src={rupee} alt="img" className="rupee_img" />
-              <p>$0.00</p>
+              <p>$(DAI/USD * {lendShareValueString})</p>
             </div>
-            <h5>0.00</h5>
+            <h5>{lendShareValueString}</h5>
             <h5>DAI</h5>
           </div>
           <div className="">

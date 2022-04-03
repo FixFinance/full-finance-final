@@ -5,6 +5,7 @@ import "./depositmodal.scss";
 import SuccessModal from "./SuccessModal";
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
+import { SendTx } from '../../Utils/SendTx';
 import { ControlledInput } from '../ControlledInput/ControlledInput';
 
 const INF = '0x'+'ff'.repeat(32);
@@ -47,7 +48,7 @@ const DepositPopup = ({ handleClose }) => {
   }
   const handleClickMax = () => {
     if (DAIbalance != null && balanceString != null) {
-      setInput(balanceString);
+      setInput(balanceString+' DAI');
     }
   }
 
@@ -61,10 +62,10 @@ const DepositPopup = ({ handleClose }) => {
       return;
     }
     if (absoluteInput.gt(DAIapproval) || DAIapproval.eq(BN.from(0))) {
-      await DAI.approve(CMM.address, INF);
+      await SendTx(DAI.approve(CMM.address, INF));
     }
     else {
-      await CMM.depositSpecificUnderlying(userAddress, absoluteInput);
+      await SendTx(CMM.depositSpecificUnderlying(userAddress, absoluteInput));
     }
     setSuccess(true);
   };

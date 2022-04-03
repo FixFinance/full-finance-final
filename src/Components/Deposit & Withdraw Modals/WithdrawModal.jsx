@@ -5,6 +5,7 @@ import "./depositmodal.scss";
 import SuccessModal from "./SuccessModal";
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
+import { SendTx } from '../../Utils/SendTx';
 import { ControlledInput } from '../ControlledInput/ControlledInput';
 
 const IERC20ABI = require('../../abi/IERC20.json');
@@ -42,7 +43,7 @@ const WithdrawModal=({ handleClose2 })=> {
   }
   const handleClickMax = () => {
     if (balanceLendShares != null && lendShareBalanceString != null) {
-      setInput(lendShareBalanceString);
+      setInput(lendShareBalanceString+' FLT');
     }
   }
 
@@ -55,7 +56,7 @@ const WithdrawModal=({ handleClose2 })=> {
     if (balanceLendShares === null || lendShareValue === null) {
       return;
     }
-    await CMM.withdrawSpecificShares(userAddress, absoluteInput);
+    await SendTx(CMM.withdrawSpecificShares(userAddress, absoluteInput));
     setSuccess(true);
   }
 
