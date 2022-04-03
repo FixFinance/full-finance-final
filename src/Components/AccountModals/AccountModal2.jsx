@@ -31,7 +31,10 @@ const AccountModal2 = ({ handleClose, walletType, address, ens }) => {
               <div className="mb-4 mt-5">
                 <div className="text-center">
                   <button
-                    onClick={() => setModalType("DhikaChikaColor")}
+                    onClick={() => {
+                      setModalType("DhikaChikaColor");
+                      navigator.clipboard.writeText(address);
+                    }}
                     className="btn common_btn cancel"
                   >
                     Copy address
@@ -52,7 +55,7 @@ const AccountModal2 = ({ handleClose, walletType, address, ens }) => {
         )}
         {modalType === "DhikaChikaColor" && (
           <>
-            <AccountModal1 />
+            <AccountModal1 address={address}/>
           </>
         )}
       </div>

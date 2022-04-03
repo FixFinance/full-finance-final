@@ -3,7 +3,8 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import ellips1 from "../../assets/image/ellips1.svg";
 import "./accountmodal.scss";
-const AccountModal1 = ({ handleClose }) => {
+const AccountModal1 = ({ handleClose, address }) => {
+  let abbreviatedAddress = address.substring(0, 9)+'...'+address.substring(address.length-4)
   return (
     <div className="connect-modal account-modal">
       <Modal.Header closeButton>
@@ -11,10 +12,15 @@ const AccountModal1 = ({ handleClose }) => {
       </Modal.Header>
       <Modal.Body>
         <img src={ellips1} alt="img" className="ellips" />
-        <h5>0x1234567...1234</h5>
+        <h5>{abbreviatedAddress}</h5>
         <div className="mb-4 mt-5">
           <div className="text-center">
-            <button className="btn common_btn cancel">Copy address</button>
+            <button
+              className="btn common_btn cancel"
+              onClick={() => navigator.clipboard.writeText(address)}
+            >
+              Copy address
+            </button>
           </div>
           <div className="text-center">
             {" "}
