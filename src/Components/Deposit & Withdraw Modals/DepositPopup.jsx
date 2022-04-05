@@ -27,9 +27,9 @@ const DepositPopup = ({ handleClose }) => {
   const [getWalletInfo] = useContext(EthersContext);
   const [provider, userAddress] = getWalletInfo();
 
-  const balanceString = getDecimalString(DAIbalance == null ? '0' : DAIbalance.toString(), process.env.REACT_APP_BASE_ASSET_DECIMALS, 4);
-  const lsValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), process.env.REACT_APP_BASE_ASSET_DECIMALS, 4);
-  const absoluteInput = BN.from(getAbsoluteString('0'+getPureInput(input), process.env.REACT_APP_BASE_ASSET_DECIMALS));
+  const balanceString = getDecimalString(DAIbalance == null ? '0' : DAIbalance.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
+  const lsValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
+  const absoluteInput = BN.from(getAbsoluteString('0'+getPureInput(input), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
 
   const handleClosesuccess = () => {
     setSuccess(false);
@@ -130,7 +130,7 @@ const DepositPopup = ({ handleClose }) => {
                
               </div>
               <div className="d-flex justify-content-between text-part">
-                <p style={{ color: "#7D8282" }}>Wallet balance</p>
+                <p style={{ color: "#7D8282" }}>Wallet Balance</p>
                 <p style={{ color: "#7D8282" }}>{balanceString} DAI</p>
               </div>
 

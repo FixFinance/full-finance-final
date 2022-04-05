@@ -1,7 +1,6 @@
 import React, {createContext, useState} from 'react'
 import { ethers, BigNumber as BN } from 'ethers';
-import { Constants } from '../../Utils/Consts.js';
-const { ADDRESS0 } = Constants;
+import { ADDRESS0 } from '../../Utils/Consts.js';
 
 function getProvider(walletType)  {
     if (walletType === 'metamask') {

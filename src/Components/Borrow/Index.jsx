@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import "./borrow.scss";
 import debt_icon from "../../assets/image/rupee.svg";
 import collateral_value from "../../assets/image/collateral_value.svg";
@@ -7,79 +7,112 @@ import t_icon from "../../assets/image/t_icon.png";
 import Modal from "react-bootstrap/Modal";
 import ManagePopup from './ManageModal/ManagePopup';
 import ManagePositionPopup from './ManageModal/ManagePositionPopup';
+import { ethers } from 'ethers';
+import { EthersContext } from '../EthersProvider/EthersProvider';
+import { getDecimalString } from '../../Utils/StringAlteration';
+import { getAnnualizedRate, TOTAL_SBPS } from '../../Utils/RateMath';
+import { ADDRESS0 } from '../../Utils/Consts.js';
+
+const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
+const IERC20ABI = require('../../abi/IERC20.json');
 
 function Index() {
   const [modal1, setModal1] = useState(false);
+  const [modal2, setModal2] = useState(false);
 
-  const handleClose1 = () => setModal1(false);
+  const [annualLendRate, setAnnualLendRate] = useState('0');
+  const [annualBorrowRate, setAnnualBorrowRate] = useState('0');
+  const [userVaults, setUserVaults] = useState(null);
+  const [supplyBorrowed, setSupplyBorrowed] = useState(null);
+  const [supplyBorrowShares, setSupplyBorrowShares] = useState(null);
+
+  const [getWalletInfo] = useContext(EthersContext);
+  const [provider, userAddress] = getWalletInfo();
+
+  const handleClose1 = () => {
+    setModal1(false);
+    setUserVaults(null);
+    setSupplyBorrowed(null);
+    setSupplyBorrowShares(null);
+  }
   const handleShow1 = () => setModal1(true);
-  
-  return (
-    <div>
-      <section className="borrow_section">
-        <div className="container">
-        <div className="row">
-          <div className="col-lg-4 col-md-4">
-            <div className="borrow_box">
-              <h5>Your vaults</h5>
-              <div className="borrow_box_text">
-                <h2>12 %</h2>
-                <p>borrow fixed APR</p>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-4 col-md-4">
-            <div className="borrow_box">
-              <h5>Your vaults</h5>
-              <div className="borrow_box_text">
-                <h2>12 %</h2>
-                <p>borrow fixed APR</p>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-4 col-md-4">
-            <div className="borrow_box_add">
-              <div className="plus_added">
-                <button>+</button>
-                <p>open Borrowing positions</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        </div>
-        
-      </section>
+  const handleClose2 = () => {
+    setModal2(false);
+    setUserVaults(null);
+    setSupplyBorrowed(null);
+    setSupplyBorrowShares(null);
+  }
+  const handleShow2 = () => {
+    if (
+        provider !== null &&
+        userAddress !== ADDRESS0 &&
+        supplyBorrowed !== null &&
+        supplyBorrowShares !== null
+    ) {
+      setModal2(true);
+    }
+  }
 
-      <section>
-        <div className="row borrow_position">
-            <div className="borrow_stablecoins">
-              <h5>Borrow Stablecoins against wETH at 12% fixed rate</h5>
-              <ul>
-                <li><img src={debt_icon} alt=""/></li>
-                <li><img src={collateral_value} alt=""/></li>
-                <li><img src={t_icon} alt=""/></li>
-                <li><button>+</button></li>
-              </ul>
-            </div>
-        </div>
-      </section>
+  const signer = provider == null ? null : provider.getSigner();
 
-      <section>
-        <div className="row borrow_position">
-            <h4>Your borrowing positions</h4>
+  let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
+
+  useEffect(() => {
+    let asyncUseEffect = async () => {
+      if (provider !== null) {
+        if (annualLendRate === '0') {
+          CMM.getPrevSILOR().then(silor => {
+            let annualized = getAnnualizedRate(silor);
+            let pct = annualized.sub(TOTAL_SBPS);
+            let rateString = getDecimalString(pct.toString(), 16, 3);
+            setAnnualLendRate(rateString);
+          });
+        }
+        if (annualBorrowRate === '0') {
+          CMM.getPrevSIBOR().then(sibor => {
+            let annualized = getAnnualizedRate(sibor);
+            let pct = annualized.sub(TOTAL_SBPS);
+            let rateString = getDecimalString(pct.toString(), 16, 3);
+            setAnnualBorrowRate(rateString);
+          });
+        }
+        if (userVaults === null) {
+          CMM.getAllCVaults().then((allVaults, i) => setUserVaults(
+            allVaults
+              .map(vault => ({index: i, ...vault}))
+              .filter(vault => vault.vaultOwner.toLowerCase() === userAddress.toLowerCase())
+          ));
+        }
+        if (supplyBorrowed === null) {
+          CMM.getSupplyBorrowed().then(res => setSupplyBorrowed(res));
+        }
+        if (supplyBorrowShares === null) {
+          CMM.getTotalSupplyBorrowShares().then(res => setSupplyBorrowShares(res));
+        }
+      }
+    };
+    asyncUseEffect();
+  }, [provider, userVaults, supplyBorrowed, supplyBorrowShares]);
+
+  const vaultComponents = ([userVaults, supplyBorrowed, supplyBorrowShares].includes(null) ? [] : userVaults)
+    .map(vault => {
+      let borrowObligation = vault.borrowSharesOwed.mul(supplyBorrowed).div(supplyBorrowShares);
+      let borrowString = getDecimalString(borrowObligation.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
+      let collateralString = getDecimalString(vault.amountSupplied.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
+      return (
             <div className="row borrow_position_wrap">
               <h4>DAI / wETH</h4>
               <div className="col-lg-4 col-md-4">
                 <div className="borrow_position_box">
                   <h5>Total debt</h5>
-                  <h2><img src={debt_icon} alt="img" className="debt_icon"/> 10,000.00 DAI</h2>
+                  <h2><img src={debt_icon} alt="img" className="debt_icon"/> {borrowString} DAI</h2>
                   <p>~ $ 9,999.98</p>
                 </div>
               </div>
               <div className="col-lg-4 col-md-4">
                 <div className="borrow_position_box">
                   <h5>Collateral Value</h5>
-                  <h2><img src={collateral_value} alt=""/> 200.00 wETH</h2>
+                  <h2><img src={collateral_value} alt=""/> {collateralString} wETH</h2>
                   <p>~ $ 25,834.09</p>
                 </div>
               </div>
@@ -95,38 +128,72 @@ function Index() {
                   <h5>Total debt</h5>
                 </div>
               </div>
-            </div>
-
-            <div className="row borrow_position_wrap">
-              <h4>USDC / wETH</h4>
-              <div className="col-lg-4 col-md-4">
-                <div className="borrow_position_box">
-                  <h5>Total debt</h5>
-                  <h2><img src={debt_icon} alt="img" className="debt_icon"/> 1,000.00 USDC</h2>
-                  <p>~ $ 9,999.98</p>
-                </div>
-              </div>
-              <div className="col-lg-4 col-md-4">
-                <div className="borrow_position_box">
-                  <h5>Collateral Value</h5>
-                  <h2><img src={collateral_value} alt=""/> 200.00 wETH</h2>
-                  <p>~ $ 25,834.09</p>
-                </div>
-              </div>
-              <div className="col-lg-4 col-md-4">
-                <div className="borrow_position_box">
-                  <h5>Collateralization ratio <span><img src={ratio_question} alt=""/></span></h5>
-                  <h2>128% (need action)</h2>
-                  <p>120% min. collateralization ratio</p>
-                </div>
-              </div>
               <div className="col-lg-12 col-md-12">
                 <div className="borrow_position_box total_debt_box">
                   <button onClick={handleShow1}><h5>Manage position</h5></button>
-                  {/* <button onClick={handleShow2}><h5>Manage position</h5></button> */}
                 </div>
               </div>
             </div>
+      );
+    });
+  const borrowMessage = vaultComponents.length > 0 ? 'Your Borrow Positions' : 'No Borrow Positions';
+
+  return (
+    <div>
+      <section className="borrow_section">
+        <div className="container">
+        <div className="row">
+          <div className="col-lg-4 col-md-4">
+            <div className="borrow_box">
+              <h5>Lend Rate</h5>
+              <div className="borrow_box_text">
+                <h2>{annualLendRate} %</h2>
+                <p>Lend Variable APY</p>
+              </div>
+            </div>
+          </div>
+          <div className="col-lg-4 col-md-4">
+            <div className="borrow_box">
+              <h5>Borrow Rate</h5>
+              <div className="borrow_box_text">
+                <h2>{annualBorrowRate} %</h2>
+                <p>Borrow Variable APR</p>
+              </div>
+            </div>
+          </div>
+          <div className="col-lg-4 col-md-4">
+            <div className="borrow_box_add">
+              <div className="plus_added"
+                onClick={() => handleShow2()}
+              >
+                <button>+</button>
+                <p>open Borrowing positions</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+        
+      </section>
+
+      <section>
+        <div className="row borrow_position">
+            <div className="borrow_stablecoins">
+              <h5>Borrow Stablecoins against wETH at {annualBorrowRate}% annually</h5>
+              <ul>
+                <li><img src={debt_icon} alt=""/></li>
+                <li><img src={collateral_value} alt=""/></li>
+                <li><img src={t_icon} alt=""/></li>
+                <li><button>+</button></li>
+              </ul>
+            </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="row borrow_position">
+            <h4>{borrowMessage}</h4>
+            {vaultComponents}
         </div>
       </section> 
 
@@ -137,7 +204,32 @@ function Index() {
           animation={false}
           className="deposit-modal"
         >
-          <ManagePopup handleClose={handleClose1} />
+          <ManagePopup 
+            handleClose={handleClose1}
+            provider={provider}
+            userAddress={userAddress}
+            CMM={CMM}
+            userVaults={userVaults}
+            supplyBorrowed={supplyBorrowed}
+            supplyBorrowShares={supplyBorrowShares}
+          />
+        </Modal>
+
+        <Modal
+          show={modal2}
+          onHide={handleClose2}
+          centered
+          animation={false}
+          className="deposit-modal"
+        >
+          <ManagePositionPopup 
+            handleClose={handleClose2}
+            userAddress={userAddress}
+            CMM={CMM}
+            userVaults={userVaults}
+            supplyBorrowed={supplyBorrowed}
+            supplyBorrowShares={supplyBorrowShares}
+          />
         </Modal>
 
        

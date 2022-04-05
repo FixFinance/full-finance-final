@@ -4,7 +4,7 @@ import rupee from "../../assets/image/rupee.svg";
 import Modal from "react-bootstrap/Modal";
 import DepositPopup from "../Deposit & Withdraw Modals/DepositPopup";
 import WithdrawModal from "../Deposit & Withdraw Modals/WithdrawModal";
-import { ethers, BigNumber as BN } from 'ethers';
+import { ethers } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate, TOTAL_SBPS } from '../../Utils/RateMath';
@@ -38,7 +38,7 @@ const EmptyState = () => {
   const handleShow2 = () => setShow2(true);
 
 
-  const lendShareValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), process.env.REACT_APP_BASE_ASSET_DECIMALS, 4);
+  const lendShareValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
 
   const signer = provider == null ? null : provider.getSigner();
   let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
@@ -53,7 +53,6 @@ const EmptyState = () => {
           let annualized = getAnnualizedRate(silor);
           let pct = annualized.sub(TOTAL_SBPS);
           let rateString = getDecimalString(pct.toString(), 16, 3);
-          console.log('rstr', rateString);
           setAnnualLendRate(rateString);
         });
         let promiseArray = [

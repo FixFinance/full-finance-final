@@ -6,8 +6,9 @@ import BorrowMore from "../../RepayModals/BorrowMore";
 import Debt from "../../RepayModals/Debt";
 import "./managepopup.scss";
 import ManagePositionPopup from './ManagePositionPopup';
+import { ADDRESS0 } from '../../../Utils/Consts.js';
 
-const ManagePopup = ({ handleClose }) => {
+const ManagePopup = ({ handleClose, provider, userAddress, CMM, userVaults, supplyBorrowed, supplyBorrowShares }) => {
   const [modalType, setModalType] = useState("basic");
   const handleModalType = (type) => {
     setModalType(type);
@@ -16,6 +17,15 @@ const ManagePopup = ({ handleClose }) => {
 
   const handleClose2 = () => setModal2(false);
   const handleShow2 = () => setModal2(true);
+
+
+
+  const allInitialized =
+    provider !== null &&
+    userAddress !== ADDRESS0 &&
+    CMM !== null &&
+    userVaults !== null;
+
   return (
     <>
       {modalType === "basic" && (

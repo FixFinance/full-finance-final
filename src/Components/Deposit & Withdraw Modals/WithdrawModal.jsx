@@ -23,8 +23,8 @@ const WithdrawModal=({ handleClose2 })=> {
   const [getWalletInfo] = useContext(EthersContext);
   const [provider, userAddress] = getWalletInfo();
 
-  const lendShareBalanceString = getDecimalString(balanceLendShares == null ? '0' : balanceLendShares.toString(), process.env.REACT_APP_BASE_ASSET_DECIMALS, 4);
-  const lendShareValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), process.env.REACT_APP_BASE_ASSET_DECIMALS, 4);
+  const lendShareBalanceString = getDecimalString(balanceLendShares == null ? '0' : balanceLendShares.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
+  const lendShareValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
   const absoluteInput = BN.from(getAbsoluteString('0'+getPureInput(input), process.env.REACT_APP_BASE_ASSET_DECIMALS));
 
   const handleClosesuccess = () => {

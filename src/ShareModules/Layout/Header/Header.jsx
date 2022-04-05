@@ -8,8 +8,7 @@ import ConnectModal from "../../../Components/ConnectWallet/ConnectModal";
 import ConnectModal2 from "../../../Components/ConnectWallet/ConnectModal2";
 import ellips_icon from "../../../assets/image/ellips2.svg";
 import { EthersContext } from '../../../Components/EthersProvider/EthersProvider';
-import { Constants } from '../../../Utils/Consts.js';
-const { ADDRESS0 } = Constants;
+import { ADDRESS0 } from '../../../Utils/Consts.js';
 
 const Header = () => {
   const [show, setShow] = useState(false);
