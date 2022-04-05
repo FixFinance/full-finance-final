@@ -100,40 +100,40 @@ function Index() {
       let borrowString = getDecimalString(borrowObligation.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
       let collateralString = getDecimalString(vault.amountSupplied.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
       return (
-            <div className="row borrow_position_wrap">
-              <h4>DAI / wETH</h4>
-              <div className="col-lg-4 col-md-4">
-                <div className="borrow_position_box">
-                  <h5>Total debt</h5>
-                  <h2><img src={debt_icon} alt="img" className="debt_icon"/> {borrowString} DAI</h2>
-                  <p>~ $ 9,999.98</p>
-                </div>
-              </div>
-              <div className="col-lg-4 col-md-4">
-                <div className="borrow_position_box">
-                  <h5>Collateral Value</h5>
-                  <h2><img src={collateral_value} alt=""/> {collateralString} wETH</h2>
-                  <p>~ $ 25,834.09</p>
-                </div>
-              </div>
-              <div className="col-lg-4 col-md-4">
-                <div className="borrow_position_box">
-                  <h5>Collateralization ratio <span><img src={ratio_question} alt=""/></span></h5>
-                  <h2>258%</h2>
-                  <p>120% min. collateralization ratio</p>
-                </div>
-              </div>
-              <div className="col-lg-12 col-md-12">
-                <div className="borrow_position_box total_debt_box">
-                  <h5>Total debt</h5>
-                </div>
-              </div>
-              <div className="col-lg-12 col-md-12">
-                <div className="borrow_position_box total_debt_box">
-                  <button onClick={handleShow1}><h5>Manage position</h5></button>
-                </div>
-              </div>
+        <div className="row borrow_position_wrap">
+          <h4>DAI / wETH</h4>
+          <div className="col-lg-4 col-md-4">
+            <div className="borrow_position_box">
+              <h5>Total debt</h5>
+              <h2><img src={debt_icon} alt="img" className="debt_icon"/> {borrowString} DAI</h2>
+              <p>~ $ 9,999.98</p>
             </div>
+          </div>
+          <div className="col-lg-4 col-md-4">
+            <div className="borrow_position_box">
+              <h5>Collateral Value</h5>
+              <h2><img src={collateral_value} alt=""/> {collateralString} wETH</h2>
+              <p>~ $ 25,834.09</p>
+            </div>
+          </div>
+          <div className="col-lg-4 col-md-4">
+            <div className="borrow_position_box">
+              <h5>Collateralization ratio <span><img src={ratio_question} alt=""/></span></h5>
+              <h2>258%</h2>
+              <p>120% min. collateralization ratio</p>
+            </div>
+          </div>
+          <div className="col-lg-12 col-md-12">
+            <div className="borrow_position_box total_debt_box">
+              <h5>Total debt</h5>
+            </div>
+          </div>
+          <div className="col-lg-12 col-md-12">
+            <div className="borrow_position_box total_debt_box">
+              <button onClick={handleShow1}><h5>Manage position</h5></button>
+            </div>
+          </div>
+        </div>
       );
     });
   const borrowMessage = vaultComponents.length > 0 ? 'Your Borrow Positions' : 'No Borrow Positions';
@@ -179,7 +179,7 @@ function Index() {
       <section>
         <div className="row borrow_position">
             <div className="borrow_stablecoins">
-              <h5>Borrow Stablecoins against wETH at {annualBorrowRate}% annually</h5>
+              <h5>Borrow DAI against wETH at {annualBorrowRate}% annually</h5>
               <ul>
                 <li><img src={debt_icon} alt=""/></li>
                 <li><img src={collateral_value} alt=""/></li>

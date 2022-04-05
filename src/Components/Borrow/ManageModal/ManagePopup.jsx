@@ -4,6 +4,7 @@ import AddCollateral from "../../Collateral Modals/AddCollateral";
 import WithdrawCollateral from "../../Collateral Modals/WithdrawCollateral";
 import BorrowMore from "../../RepayModals/BorrowMore";
 import Debt from "../../RepayModals/Debt";
+import ClosePosition from "../../RepayModals/ClosePosition";
 import "./managepopup.scss";
 import ManagePositionPopup from './ManagePositionPopup';
 import { ADDRESS0 } from '../../../Utils/Consts.js';
@@ -62,7 +63,7 @@ const ManagePopup = ({ handleClose, provider, userAddress, CMM, userVaults, supp
                   Borrow More
                 </button>
                 <button
-                  onClick={handleClose}
+                  onClick={() => handleModalType("closePosition")}
                   className="btn close"
                 >
                   Close Position
@@ -83,6 +84,7 @@ const ManagePopup = ({ handleClose, provider, userAddress, CMM, userVaults, supp
       {modalType === "Withdraw" && <WithdrawCollateral />}{" "}
       {(modalType === "debt" || modalType === "repay") && <Debt />}{" "}
       {modalType === "borrowMore" && <BorrowMore />}
+      {modalType === "closePosition" && <ClosePosition />}
       <Modal
           show={modal2}
           onHide={handleClose2}

@@ -36,7 +36,6 @@ const WithdrawModal=({ handleClose2 })=> {
   }
   const handleShow = () => setSuccess(true);
   const handleInput = (param) => {
-    console.log('input input')
     let value = param.target.value;
     let filteredValue = filterInput(value)+' FLT';
     setInput(filteredValue);

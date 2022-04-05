@@ -4,13 +4,14 @@ import rupee from "../../assets/image/rupee.svg";
 import Modal from "react-bootstrap/Modal";
 import DepositPopup from "../Deposit & Withdraw Modals/DepositPopup";
 import WithdrawModal from "../Deposit & Withdraw Modals/WithdrawModal";
-import { ethers } from 'ethers';
+import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate, TOTAL_SBPS } from '../../Utils/RateMath';
 
 const IERC20ABI = require('../../abi/IERC20.json');
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
+const IChainlinkAggregatorABI = require('../../abi/IChainlinkAggregator.json');
 
 const EmptyState = () => {
   const [show, setShow] = useState(false);
@@ -18,6 +19,7 @@ const EmptyState = () => {
 
   const [balanceLendShares, setBalanceLendShares] = useState(null);
   const [lendShareValue, setLendShareValue] = useState(null);
+  const [lendShareUSDValue, setLendShareUSDValue] = useState(null);
   const [annualLendRate, setAnnualLendRate] = useState('0');
 
   const [getWalletInfo] = useContext(EthersContext);
@@ -39,11 +41,13 @@ const EmptyState = () => {
 
 
   const lendShareValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
+  const lendShareUSDValueString = getDecimalString(lendShareUSDValue == null ? '0' : lendShareUSDValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
 
   const signer = provider == null ? null : provider.getSigner();
   let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
   let FLT = signer == null ? null : new ethers.Contract(process.env.REACT_APP_FLT_ADDRESS, IERC20ABI, signer);
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
+  let BaseAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
 
   useEffect(() => {
     let asyncUseEffect = async () => {
@@ -61,12 +65,17 @@ const EmptyState = () => {
             return res;
           }),
           FLT.totalSupply(),
-          CMM.getSupplyLent()
+          CMM.getSupplyLent(),
+          BaseAgg.latestAnswer(),
+          BaseAgg.decimals()
         ];
 
-        let [_FLTbalance, tsFLT, supplyLent] = await Promise.all(promiseArray);
+        let [_FLTbalance, tsFLT, supplyLent, baseAnswer, baseAggDecimals] = await Promise.all(promiseArray);
         let _lendShareValue = _FLTbalance.mul(supplyLent).div(tsFLT);
+        let denominator = BN.from(10).pow(BN.from(baseAggDecimals.toString()));
+        let _lendShareUSDValue = _lendShareValue.mul(baseAnswer).div(denominator);
         setLendShareValue(_lendShareValue);
+        setLendShareUSDValue(_lendShareUSDValue);
       }
     }
     asyncUseEffect();
@@ -83,7 +92,7 @@ const EmptyState = () => {
           <div className="d-flex">
             <div className="d-block">
               <img src={rupee} alt="img" className="rupee_img" />
-              <p>$(DAI/USD * {lendShareValueString})</p>
+              <p>$ {lendShareUSDValueString}</p>
             </div>
             <h5>{lendShareValueString}</h5>
             <h5>DAI</h5>
