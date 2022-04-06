@@ -7,7 +7,7 @@ import t_icon from "../../assets/image/t_icon.png";
 import Modal from "react-bootstrap/Modal";
 import ManagePopup from './ManageModal/ManagePopup';
 import ManagePositionPopup from './ManageModal/ManagePositionPopup';
-import { ethers } from 'ethers';
+import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate, TOTAL_SBPS } from '../../Utils/RateMath';
@@ -15,6 +15,7 @@ import { ADDRESS0 } from '../../Utils/Consts.js';
 
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
 const IERC20ABI = require('../../abi/IERC20.json');
+const IChainlinkAggregatorABI = require('../../abi/IChainlinkAggregator.json');
 
 function Index() {
   const [modal1, setModal1] = useState(false);
@@ -25,6 +26,10 @@ function Index() {
   const [userVaults, setUserVaults] = useState(null);
   const [supplyBorrowed, setSupplyBorrowed] = useState(null);
   const [supplyBorrowShares, setSupplyBorrowShares] = useState(null);
+  const [baseAggAnswer, setBaseAggAnswer] = useState(null);
+  const [baseAggDecimals, setBaseAggDecimals] = useState(null);
+  const [collateralAggAnswer, setCollateralAggAnswer] = useState(null);
+  const [collateralAggDecimals, setCollateralAggDecimals] = useState(null);
 
   const [getWalletInfo] = useContext(EthersContext);
   const [provider, userAddress] = getWalletInfo();
@@ -56,6 +61,8 @@ function Index() {
   const signer = provider == null ? null : provider.getSigner();
 
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
+  let BaseAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
+  let CollateralAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_COLLATERAL_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
 
   useEffect(() => {
     let asyncUseEffect = async () => {
@@ -89,6 +96,18 @@ function Index() {
         if (supplyBorrowShares === null) {
           CMM.getTotalSupplyBorrowShares().then(res => setSupplyBorrowShares(res));
         }
+        if (baseAggAnswer == null) {
+          BaseAgg.latestAnswer().then(res => setBaseAggAnswer(res));
+        }
+        if (baseAggDecimals == null) {
+          BaseAgg.decimals().then(res => setBaseAggDecimals(res));
+        }
+        if (collateralAggAnswer == null) {
+          CollateralAgg.latestAnswer().then(res => setCollateralAggAnswer(res));
+        }
+        if (collateralAggDecimals == null) {
+          CollateralAgg.decimals().then(res => setCollateralAggDecimals(res));
+        }
       }
     };
     asyncUseEffect();
@@ -97,8 +116,12 @@ function Index() {
   const vaultComponents = ([userVaults, supplyBorrowed, supplyBorrowShares].includes(null) ? [] : userVaults)
     .map(vault => {
       let borrowObligation = vault.borrowSharesOwed.mul(supplyBorrowed).div(supplyBorrowShares);
+      let borrowUSDValue = baseAggAnswer == null || baseAggDecimals == null ? '0' : borrowObligation.mul(baseAggAnswer).div(BN.from(10).pow(baseAggDecimals));
+      let collateralUSDVaule = collateralAggAnswer == null || collateralAggDecimals == null ? '0' : vault.amountSupplied.mul(collateralAggAnswer).div(BN.from(10).pow(collateralAggDecimals));
       let borrowString = getDecimalString(borrowObligation.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
+      let borrowUSDString = getDecimalString(borrowUSDValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
       let collateralString = getDecimalString(vault.amountSupplied.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
+      let collateralUSDString = getDecimalString(collateralUSDVaule.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
       return (
         <div className="row borrow_position_wrap">
           <h4>DAI / wETH</h4>
@@ -106,14 +129,14 @@ function Index() {
             <div className="borrow_position_box">
               <h5>Total debt</h5>
               <h2><img src={debt_icon} alt="img" className="debt_icon"/> {borrowString} DAI</h2>
-              <p>~ $ 9,999.98</p>
+              <p>~ $ {borrowUSDString}</p>
             </div>
           </div>
           <div className="col-lg-4 col-md-4">
             <div className="borrow_position_box">
               <h5>Collateral Value</h5>
               <h2><img src={collateral_value} alt=""/> {collateralString} wETH</h2>
-              <p>~ $ 25,834.09</p>
+              <p>~ $ {collateralUSDString}</p>
             </div>
           </div>
           <div className="col-lg-4 col-md-4">
