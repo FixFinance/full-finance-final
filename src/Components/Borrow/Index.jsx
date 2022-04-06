@@ -10,8 +10,8 @@ import ManagePositionPopup from './ManageModal/ManagePositionPopup';
 import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { getDecimalString } from '../../Utils/StringAlteration';
-import { getAnnualizedRate, TOTAL_SBPS } from '../../Utils/RateMath';
-import { ADDRESS0 } from '../../Utils/Consts.js';
+import { getAnnualizedRate } from '../../Utils/RateMath';
+import { ADDRESS0, TOTAL_SBPS, _0 } from '../../Utils/Consts.js';
 
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
 const IERC20ABI = require('../../abi/IERC20.json');
@@ -116,12 +116,14 @@ function Index() {
   const vaultComponents = ([userVaults, supplyBorrowed, supplyBorrowShares].includes(null) ? [] : userVaults)
     .map(vault => {
       let borrowObligation = vault.borrowSharesOwed.mul(supplyBorrowed).div(supplyBorrowShares);
-      let borrowUSDValue = baseAggAnswer == null || baseAggDecimals == null ? '0' : borrowObligation.mul(baseAggAnswer).div(BN.from(10).pow(baseAggDecimals));
-      let collateralUSDVaule = collateralAggAnswer == null || collateralAggDecimals == null ? '0' : vault.amountSupplied.mul(collateralAggAnswer).div(BN.from(10).pow(collateralAggDecimals));
+      let borrowUSDValue = baseAggAnswer == null || baseAggDecimals == null ? _0 : borrowObligation.mul(baseAggAnswer).div(BN.from(10).pow(baseAggDecimals));
+      let collateralUSDValue = collateralAggAnswer == null || collateralAggDecimals == null ? _0 : vault.amountSupplied.mul(collateralAggAnswer).div(BN.from(10).pow(collateralAggDecimals));
       let borrowString = getDecimalString(borrowObligation.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
       let borrowUSDString = getDecimalString(borrowUSDValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
       let collateralString = getDecimalString(vault.amountSupplied.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
-      let collateralUSDString = getDecimalString(collateralUSDVaule.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
+      let collateralUSDString = getDecimalString(collateralUSDValue.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
+      let collateralizationRatio = collateralUSDValue.eq(_0) || borrowUSDValue.eq(_0) ? _0 : collateralUSDValue.mul(TOTAL_SBPS).div(borrowUSDValue);
+      let collateralizationRatioString = collateralizationRatio == null ? '0' : getDecimalString(collateralizationRatio.toString(), 16, 2);
       return (
         <div className="row borrow_position_wrap">
           <h4>DAI / wETH</h4>
@@ -142,8 +144,8 @@ function Index() {
           <div className="col-lg-4 col-md-4">
             <div className="borrow_position_box">
               <h5>Collateralization ratio <span><img src={ratio_question} alt=""/></span></h5>
-              <h2>258%</h2>
-              <p>120% min. collateralization ratio</p>
+              <h2>{collateralizationRatioString}%</h2>
+              <p>{process.env.REACT_APP_COLLATERALIZATION_RATIO}% min. collateralization ratio</p>
             </div>
           </div>
           <div className="col-lg-12 col-md-12">
