@@ -7,9 +7,24 @@ import Debt from "../../RepayModals/Debt";
 import ClosePosition from "../../RepayModals/ClosePosition";
 import "./managepopup.scss";
 import ManagePositionPopup from './ManagePositionPopup';
+import { ethers, BigNumber as BN } from 'ethers';
 import { ADDRESS0 } from '../../../Utils/Consts.js';
 
-const ManagePopup = ({ handleClose, provider, userAddress, CMM, userVaults, supplyBorrowed, supplyBorrowShares }) => {
+const IERC20ABI = require('../../../abi/IERC20.json');
+
+const ManagePopup = ({
+  handleClose,
+  provider,
+  userAddress,
+  CMM,
+  userVaults,
+  supplyBorrowed,
+  supplyBorrowShares,
+  baseAggAnswer,
+  baseAggDecimals,
+  collateralAggAnswer,
+  collateralAggDecimals
+}) => {
   const [modalType, setModalType] = useState("basic");
   const handleModalType = (type) => {
     setModalType(type);
@@ -19,13 +34,16 @@ const ManagePopup = ({ handleClose, provider, userAddress, CMM, userVaults, supp
   const handleClose2 = () => setModal2(false);
   const handleShow2 = () => setModal2(true);
 
-
-
   const allInitialized =
     provider !== null &&
     userAddress !== ADDRESS0 &&
     CMM !== null &&
     userVaults !== null;
+
+  const signer = provider == null ? null : provider.getSigner();
+
+  let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
+  let CASSET = signer == null ? null : new ethers.Contract(process.env.REACT_APP_COLLATERAL_ADDRESS, IERC20ABI, signer);
 
   return (
     <>

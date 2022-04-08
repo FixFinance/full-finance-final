@@ -1,6 +1,7 @@
 import React, {createContext, useState} from 'react'
 import { ethers, BigNumber as BN } from 'ethers';
 import { ADDRESS0 } from '../../Utils/Consts.js';
+import { TargetChains } from '../../Utils/TargetChains.js';
 
 function getProvider(walletType)  {
     if (walletType === 'metamask') {
@@ -24,20 +25,32 @@ export default function EthersProvider({children}) {
     const [userENS, setUserENS] = useState(null);
     const [chainId, setChainId] = useState(-1);
     
-    function getWalletInfo(selectedWalletType='basic') {
+    function setWrongChainState() {
+        setWalletType('basic');
+        setEthersProvider(null);
+        setUserAddress(ADDRESS0);
+        setUserETH('0');
+        setUserENS(null);
+        setChainId(-1);
+    }
+
+    function getWalletInfo(selectedWalletType='basic', setWrongChainCallback=(() => {})) {
         if (selectedWalletType === 'basic' && walletType !== 'basic') {
             selectedWalletType = walletType;
         }
         let providerSet;
         if (selectedWalletType !== walletType) {
+            console.log('in1');
             providerSet = getProvider(selectedWalletType);
             if (providerSet !== null) {
-                setEthersProvider(providerSet);
-                setWalletType(selectedWalletType);
+                let _userAddress = ADDRESS0;
+                let _userETH = '0';
+                let _userENS = null;
+                let _chainId = -1;
                 let promiseArray = [
                     providerSet.send("eth_requestAccounts", []).then(accounts => {
                         if (accounts.length > 0) {
-                            setUserAddress(accounts[0]);
+                            _userAddress = accounts[0];
                             let getETHpromise = providerSet.getBalance(accounts[0]);
                             let ensPromise = providerSet.lookupAddress(accounts[0]).catch(err => null);
                             return Promise.all([getETHpromise, ensPromise]).then(resArr => {
@@ -49,17 +62,28 @@ export default function EthersProvider({children}) {
                                 else {
                                     str = str.substring(0, str.length-4)+'.'+str.substring(str.length-4);
                                 }
-                                setUserETH(str);
-                                setUserENS(resArr[1]);
+                                _userETH = str;
+                                _userENS = resArr[1]
                             });
                         }
-                        else {
-                            setUserAddress(ADDRESS0);
-                            return null;
-                        }
                     }),
-                    providerSet.getNetwork().then(res => setChainId(res.chainId))
+                    providerSet.getNetwork()
                 ];
+                Promise.all(promiseArray).then(res => {
+                    let network = res[1];
+                    if (typeof(network) !== 'undefined' && TargetChains.includes(network.chainId)) {
+                        setEthersProvider(providerSet);
+                        setWalletType(selectedWalletType);
+                        setUserAddress(_userAddress);
+                        setUserETH(_userETH);
+                        setUserENS(_userENS);
+                        setChainId(network.chainId);
+                    }
+                    else {
+                        setWrongChainState();
+                        setWrongChainCallback();
+                    }
+                });
             }
         }
         let providerToReturn = walletType === selectedWalletType ? ethersProvider : providerSet;

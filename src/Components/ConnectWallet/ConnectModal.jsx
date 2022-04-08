@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useRef } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import "./connectmodal.scss";
@@ -15,25 +15,13 @@ import { EthersContext } from "../EthersProvider/EthersProvider";
 import { TargetChains } from '../../Utils/TargetChains.js';
 
 const ConnectModal = ({ handleClose }) => {
-  const [show2, setShow2] = useState(false);
   const [selectedModal, setSelectedModal] = useState("basic");
-  const [show3, setShow3] = useState(false);
+  const [showWrongNetwork, setShowWrongNetwork] = useState(false);
+
+  const handleSetWrongNetwork = () => setShowWrongNetwork(true);
+
   const [getWalletInfo] = useContext(EthersContext);
-  const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo(selectedModal);
-
-  const openModal3 = () => {
-    handleClose();
-    setShow3(true);
-  };
-  const closeModal3 = () => {
-    setShow3(false);
-  };
-
-  const handleClose2 = () => setShow2(false);
-  const handleShow = () => {
-    setShow2(true);
-    handleClose();
-  };
+  const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo(selectedModal, handleSetWrongNetwork);
 
   let connectedToWallet = selectedModal !== 'basic' && selectedModal !== 'error';
   let onWrongChain = connectedToWallet && chainId !== -1 && !TargetChains.includes(chainId);
@@ -47,13 +35,11 @@ const ConnectModal = ({ handleClose }) => {
       )}
 
       <Modal.Body>
-        {onWrongChain && (
+        {showWrongNetwork && (
           <>
             <ConnectModal2 />
           </>
         )}
-
-        {/* <div className="warning_msg">Something went wrong with your wallet connection. Try again text description.</div> */}
 
         {selectedModal === "basic" && (
           <>
@@ -62,7 +48,6 @@ const ConnectModal = ({ handleClose }) => {
                   className="d-flex form-field justify-content-between"
                   onClick={() => {
                     setSelectedModal("metamask");
-                    //handleShow();
                   }}
               >
                 <div className="field-text align-self-center">
@@ -104,17 +89,10 @@ const ConnectModal = ({ handleClose }) => {
           </>
         )}
 
-        {selectedModal !== "error" && selectedModal !== "basic" && !onWrongChain && 
+        {selectedModal !== "error" && selectedModal !== "basic" && !showWrongNetwork && 
           <AccountModal2 walletType={selectedModal} address={userAddress} ens={userENS}/>
         }
       </Modal.Body>
-      {/* <Modal
-        show={show3}
-        onHide={closeModal3}
-        centered
-        animation={false}
-        className="connect-wallet-modal"
-      ></Modal> */}
     </div>
   );
 };
