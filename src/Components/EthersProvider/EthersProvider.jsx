@@ -1,7 +1,8 @@
 import React, {createContext, useState} from 'react'
 import { ethers, BigNumber as BN } from 'ethers';
-import { ADDRESS0 } from '../../Utils/Consts.js';
-import { TargetChains } from '../../Utils/TargetChains.js';
+import { ADDRESS0 } from '../../Utils/Consts';
+import { TargetChains } from '../../Utils/TargetChains';
+import { getDecimalString } from '../../Utils/StringAlteration';
 
 function getProvider(walletType)  {
     if (walletType === 'metamask') {
@@ -40,7 +41,6 @@ export default function EthersProvider({children}) {
         }
         let providerSet;
         if (selectedWalletType !== walletType) {
-            console.log('in1');
             providerSet = getProvider(selectedWalletType);
             if (providerSet !== null) {
                 let _userAddress = ADDRESS0;
@@ -54,15 +54,7 @@ export default function EthersProvider({children}) {
                             let getETHpromise = providerSet.getBalance(accounts[0]);
                             let ensPromise = providerSet.lookupAddress(accounts[0]).catch(err => null);
                             return Promise.all([getETHpromise, ensPromise]).then(resArr => {
-                                let divisor = BN.from(10).pow(BN.from(14));
-                                let str = resArr[0].div(divisor).toString();
-                                if (str.length <= 4) {
-                                    str = '0.'+'0'.repeat(4-str.length)+str;
-                                }
-                                else {
-                                    str = str.substring(0, str.length-4)+'.'+str.substring(str.length-4);
-                                }
-                                _userETH = str;
+                                _userETH = getDecimalString(resArr[0].toString(), 18, 4);
                                 _userENS = resArr[1]
                             });
                         }

@@ -6,9 +6,9 @@ import SuccessModal from "./SuccessModal";
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
 import { SendTx } from '../../Utils/SendTx';
+import { INF } from '../../Utils/Consts';
 import { ControlledInput } from '../ControlledInput/ControlledInput';
 
-const INF = '0x'+'ff'.repeat(32);
 const IERC20ABI = require('../../abi/IERC20.json');
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
 
@@ -62,7 +62,7 @@ const DepositPopup = ({ handleClose }) => {
       return;
     }
     if (absoluteInput.gt(DAIapproval) || DAIapproval.eq(BN.from(0))) {
-      await SendTx(DAI.approve(CMM.address, INF));
+      await SendTx(DAI.approve(CMM.address, INF.toString()));
     }
     else {
       await SendTx(CMM.depositSpecificUnderlying(userAddress, absoluteInput));

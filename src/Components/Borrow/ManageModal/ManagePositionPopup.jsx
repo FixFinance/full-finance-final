@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Modal from "react-bootstrap/Modal";
 import "./managepopup.scss";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../../Utils/StringAlteration.js';
-import { TOTAL_SBPS, _0 } from '../../../Utils/Consts.js';
+import { TOTAL_SBPS, _0, INF } from '../../../Utils/Consts.js';
 import { ethers, BigNumber as BN } from 'ethers';
 import { SendTx } from '../../../Utils/SendTx';
 
@@ -20,37 +20,72 @@ const ManagePositionPopup = ({
     baseAggDecimals,
     collateralAggAnswer,
     collateralAggDecimals
-})=> {
+}) => {
 
     const [cInput, setCInput] = useState(null);
     const [dInput, setDInput] = useState(null);
 
     const [balanceCollateral, setBalanceCollateral] = useState(null);
+    const [approvedCollateral, setApprovedCollateral] = useState(null);
     const [maxBorrowAmount, setMaxBorrowAmount] = useState(null);
 
     const collateralBalanceString = balanceCollateral == null ? '0' : getDecimalString(balanceCollateral.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
     const maxBorrowString = maxBorrowAmount == null ? '0' : getDecimalString(maxBorrowAmount.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
 
+    const collateralAmountInput = cInput == null ? _0 : BN.from(getAbsoluteString(cInput, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
+    const debtAmountInput = dInput == null ? _0 : BN.from(getAbsoluteString(dInput, parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
 
+    function getEffCollatRatioBN() {
+        let canFind = ![balanceCollateral, baseAggAnswer, baseAggDecimals, collateralAggAnswer, collateralAggDecimals].includes(null);
+        if (!canFind || (collateralAmountInput.eq(_0) && debtAmountInput.eq(_0))) {
+            return _0;
+        }
+        if (debtAmountInput.eq(_0)) {
+            return INF;
+        }
+        let baseAggInflator = BN.from(10).pow(baseAggDecimals);
+        let baseAssetInflator = BN.from(10).pow(BN.from(process.env.REACT_APP_BASE_ASSET_DECIMALS));
+        let collateralAggInflator = BN.from(10).pow(collateralAggDecimals);
+        let collateralAssetInflator = BN.from(10).pow(BN.from(process.env.REACT_APP_COLLATERAL_DECIMALS));
+        let collateralUSDValue = collateralAmountInput.mul(collateralAggAnswer).div(collateralAggInflator).mul(TOTAL_SBPS).div(collateralAssetInflator);
+        let debtUSDValue = debtAmountInput.mul(baseAggAnswer).div(baseAggInflator).mul(TOTAL_SBPS).div(baseAssetInflator);
+        let absCRatioBN = collateralUSDValue.mul(TOTAL_SBPS).div(debtUSDValue);
+        return absCRatioBN;
+    }
 
     function getEffCollatRatioString() {
         let canFind = ![balanceCollateral, baseAggAnswer, baseAggDecimals, collateralAggAnswer, collateralAggDecimals].includes(null);
-        let collateralAmount = cInput == null ? _0 : BN.from(getAbsoluteString(cInput, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
-        let debtAmount = dInput == null ? _0 : BN.from(getAbsoluteString(dInput, parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
-        if (!canFind || (collateralAmount.eq(_0) && debtAmount.eq(_0))) {
+        if (!canFind || (collateralAmountInput.eq(_0) && debtAmountInput.eq(_0))) {
             return '0';
         }
-        if (debtAmount.eq(_0)) {
+        if (debtAmountInput.eq(_0)) {
             return '\u221E';
         }
         let baseAggInflator = BN.from(10).pow(baseAggDecimals);
         let baseAssetInflator = BN.from(10).pow(BN.from(process.env.REACT_APP_BASE_ASSET_DECIMALS));
         let collateralAggInflator = BN.from(10).pow(collateralAggDecimals);
         let collateralAssetInflator = BN.from(10).pow(BN.from(process.env.REACT_APP_COLLATERAL_DECIMALS));
-        let collateralUSDValue = collateralAmount.mul(collateralAggAnswer).div(collateralAggInflator).mul(TOTAL_SBPS).div(collateralAssetInflator);
-        let debtUSDValue = debtAmount.mul(baseAggAnswer).div(baseAggInflator).mul(TOTAL_SBPS).div(baseAssetInflator);
+        let collateralUSDValue = collateralAmountInput.mul(collateralAggAnswer).div(collateralAggInflator).mul(TOTAL_SBPS).div(collateralAssetInflator);
+        let debtUSDValue = debtAmountInput.mul(baseAggAnswer).div(baseAggInflator).mul(TOTAL_SBPS).div(baseAssetInflator);
         let absCRatioString = collateralUSDValue.mul(TOTAL_SBPS).div(debtUSDValue).toString();
         return getDecimalString(absCRatioString, 16, 2);
+    }
+
+    async function approveOnClick() {
+        if (CASSET !== null && CMM !== null) {
+            await SendTx(CASSET.approve(CMM.address, INF.toString()));
+            setBalanceCollateral(null);
+            setApprovedCollateral(null);
+        }
+    }
+
+    async function openVaultOnClick() {
+        if (
+            approvedCollateral != null && balanceCollateral != null && !collateralAmountInput.eq(_0) && !debtAmountInput.eq(_0) &&
+            getEffCollatRatioBN().div(BN.from(10).pow(BN.from(16))).gte(BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)))
+        ) {
+            await SendTx(CMM.openCVault(process.env.REACT_APP_COLLATERAL_ADDRESS, collateralAmountInput, debtAmountInput));
+        }
     }
 
     const handleCInput = (param) => {
@@ -85,10 +120,15 @@ const ManagePositionPopup = ({
     useEffect(() => {
         if (balanceCollateral == null) {
             CASSET.balanceOf(userAddress).then(res => {
-                setBalanceCollateral(res)
+                setBalanceCollateral(res);
             });
         }
-    }, []);
+        if (approvedCollateral == null) {
+            CASSET.allowance(userAddress, CMM.address).then(res => {
+                setApprovedCollateral(res);
+            });
+        }
+    }, [balanceCollateral, approvedCollateral]);
 
 
     let selectCollateralAmount = (
@@ -129,17 +169,17 @@ const ManagePositionPopup = ({
 
             <div className="amount_section_text">
                 <h3>Implied Collateralization Ratio <span>{getEffCollatRatioString()} %</span></h3>
-                <h3>Maximum Collateralization Ratio <span>{parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5} %</span></h3> 
+                <h3>Minimum Collateralization Ratio <span>{parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5} %</span></h3> 
             </div>
 
         </div>
     );
 
-    let sufficientWETHApproval = true;
+    let sufficientWETHApproval = approvedCollateral == null || balanceCollateral == null || approvedCollateral.eq(_0) || approvedCollateral.gte(balanceCollateral);
     let buttons = (
         <>
-            {!sufficientWETHApproval && <button className="btn activate">Approve WETH</button>}
-            <button className={"btn "+(sufficientWETHApproval ? "" : "di")+"activate"}>Open Vault, Borrow DAI</button>
+            {!sufficientWETHApproval && <button className="btn activate" onClick={approveOnClick}>Approve WETH</button>}
+            <button className={"btn "+(sufficientWETHApproval ? "" : "di")+"activate"} onClick={openVaultOnClick}>Open Vault, Borrow DAI</button>
         </>
     );
 
