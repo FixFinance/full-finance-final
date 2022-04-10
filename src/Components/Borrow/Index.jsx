@@ -21,6 +21,9 @@ function Index() {
   const [modal1, setModal1] = useState(false);
   const [modal2, setModal2] = useState(false);
 
+  const [selectedVaultIndex, setSelectedVaultIndex] = useState(null);
+  const [selectedVault, setSelectedVault] = useState(null);
+
   const [annualLendRate, setAnnualLendRate] = useState('0');
   const [annualBorrowRate, setAnnualBorrowRate] = useState('0');
   const [userVaults, setUserVaults] = useState(null);
@@ -34,13 +37,27 @@ function Index() {
   const [getWalletInfo] = useContext(EthersContext);
   const [provider, userAddress] = getWalletInfo();
 
-  const handleClose1 = () => {
+  const forceUpdateVault = () => {
+    if (selectedVault !== null) {
+      setSelectedVaultIndex(selectedVault.index);
+    }
+    setUserVaults(null);
+  }
+
+  const closeManagePosition = () => {
     setModal1(false);
     setUserVaults(null);
     setSupplyBorrowed(null);
     setSupplyBorrowShares(null);
+    setSelectedVault(null);
   }
-  const handleShow1 = () => setModal1(true);
+  const clickManagePositionFactory = (vault) => {
+    const clickManagePosition = () => {
+      setModal1(true);
+      setSelectedVault(vault);
+    }
+    return clickManagePosition;
+  };
   const handleClose2 = () => {
     setModal2(false);
     setUserVaults(null);
@@ -85,12 +102,43 @@ function Index() {
             setAnnualBorrowRate(rateString);
           });
         }
-        if (userVaults === null) {
-          CMM.getAllCVaults().then((allVaults, i) => setUserVaults(
-            allVaults
-              .map(vault => ({index: i, ...vault}))
+        if (
+            userVaults === null &&
+            baseAggAnswer !== null &&
+            baseAggDecimals !== null &&
+            collateralAggAnswer !== null &&
+            collateralAggDecimals !== null &&
+            supplyBorrowed !== null &&
+            supplyBorrowShares !== null
+        ) {
+          CMM.getAllCVaults().then(allVaults => {
+            let _selectedVault = selectedVault;
+            let _selectedVaultIndex = selectedVaultIndex;
+            let mappedVaults = allVaults
+              .map((vault, i) => ({index: i, ...vault}));
+            let _userVaults = allVaults
+              .map((vault, i) => ({index: i, ...vault}))
               .filter(vault => vault.vaultOwner.toLowerCase() === userAddress.toLowerCase())
-          ));
+              .map(vault => {
+                let borrowInflator = BN.from(10).pow(BN.from(process.env.REACT_APP_BASE_ASSET_DECIMALS));
+                let borrowAggInflator = BN.from(10).pow(baseAggDecimals);
+                let borrowObligation = vault.borrowSharesOwed.mul(supplyBorrowed).div(supplyBorrowShares);
+                let borrowUSDValue = borrowObligation.mul(baseAggAnswer).mul(TOTAL_SBPS).div(borrowInflator).div(borrowAggInflator);
+                let collateralInflator = BN.from(10).pow(BN.from(process.env.REACT_APP_COLLATERAL_DECIMALS));
+                let collateralAggInflator = BN.from(10).pow(collateralAggDecimals);
+                let collateralUSDValue = vault.amountSupplied.mul(collateralAggAnswer).mul(TOTAL_SBPS).div(collateralInflator).div(collateralAggInflator);
+                let collateralizationRatio = collateralUSDValue.mul(TOTAL_SBPS).div(borrowUSDValue);
+                let toReturn = {borrowObligation, borrowUSDValue, collateralUSDValue, collateralizationRatio, ...vault};
+                if (selectedVault !== null && selectedVaultIndex !== null && selectedVaultIndex === toReturn.index) {
+                  _selectedVault = toReturn;
+                  _selectedVaultIndex = null;
+                }
+                return toReturn;
+              })
+            setUserVaults(_userVaults);
+            setSelectedVault(_selectedVault);
+            setSelectedVaultIndex(_selectedVaultIndex);
+          });
         }
         if (supplyBorrowed === null) {
           CMM.getSupplyBorrowed().then(res => setSupplyBorrowed(res));
@@ -113,7 +161,7 @@ function Index() {
       }
     };
     asyncUseEffect();
-  }, [provider, userVaults, supplyBorrowed, supplyBorrowShares]);
+  });
 
   const vaultComponents = ([userVaults, supplyBorrowed, supplyBorrowShares].includes(null) ? [] : userVaults)
     .map(vault => {
@@ -157,7 +205,7 @@ function Index() {
           </div>
           <div className="col-lg-12 col-md-12">
             <div className="borrow_position_box total_debt_box">
-              <button onClick={handleShow1}><h5>Manage position</h5></button>
+              <button onClick={clickManagePositionFactory(vault)}><h5>Manage position</h5></button>
             </div>
           </div>
         </div>
@@ -226,21 +274,22 @@ function Index() {
 
         <Modal
           show={modal1}
-          onHide={handleClose1}
+          onHide={closeManagePosition}
           centered
           animation={false}
           className="deposit-modal"
         >
           <ManagePopup 
-            handleClose={handleClose1}
+            handleClose={closeManagePosition}
             provider={provider}
             userAddress={userAddress}
             CMM={CMM}
             DAI={DAI}
             CASSET={CASSET}
-            userVaults={userVaults}
+            vault={selectedVault}
             supplyBorrowed={supplyBorrowed}
             supplyBorrowShares={supplyBorrowShares}
+            forceUpdateVault={forceUpdateVault}
           />
         </Modal>
 

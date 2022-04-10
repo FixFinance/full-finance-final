@@ -8,7 +8,7 @@ import ClosePosition from "../../RepayModals/ClosePosition";
 import "./managepopup.scss";
 import ManagePositionPopup from './ManagePositionPopup';
 import { ethers, BigNumber as BN } from 'ethers';
-import { ADDRESS0 } from '../../../Utils/Consts.js';
+import { ADDRESS0, TOTAL_SBPS } from '../../../Utils/Consts.js';
 
 const IERC20ABI = require('../../../abi/IERC20.json');
 
@@ -17,13 +17,12 @@ const ManagePopup = ({
   provider,
   userAddress,
   CMM,
-  userVaults,
+  DAI,
+  CASSET,
   supplyBorrowed,
   supplyBorrowShares,
-  baseAggAnswer,
-  baseAggDecimals,
-  collateralAggAnswer,
-  collateralAggDecimals
+  vault,
+  forceUpdateVault
 }) => {
   const [modalType, setModalType] = useState("basic");
   const handleModalType = (type) => {
@@ -38,12 +37,9 @@ const ManagePopup = ({
     provider !== null &&
     userAddress !== ADDRESS0 &&
     CMM !== null &&
-    userVaults !== null;
+    vault !== null;
 
-  const signer = provider == null ? null : provider.getSigner();
-
-  let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
-  let CASSET = signer == null ? null : new ethers.Contract(process.env.REACT_APP_COLLATERAL_ADDRESS, IERC20ABI, signer);
+  const hasGoodCollatRatio = vault.collateralizationRatio.mul(BN.from(100)).div(TOTAL_SBPS).gte(BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)));
 
   return (
     <>
@@ -55,28 +51,31 @@ const ManagePopup = ({
             </Modal.Header>
             <Modal.Body>
               <div className="managepopup_details">
-                <p className="errorr_message">
-                  There is not enough collateral to withdraw or borrow. Please
+                {!hasGoodCollatRatio && <p className="errorr_message">
+                  "There is not enough collateral to withdraw or borrow. Please
                   repay your debt, or add more collatral to avoid liquidation.
-                </p>
+                </p>}
                 <button
                   className="btn"
                   onClick={() => handleModalType("repay")}
                 >
                   Repay Debt
                 </button>
-                <button onClick={() => handleModalType("add")} className="btn">
+                <button
+                  className="btn"
+                  onClick={() => handleModalType("add")}
+                >
                   Add Collateral
                 </button>
                 <button
-                  onClick={() => handleModalType("Withdraw")}
-                  className="btn active"
+                  onClick={() => hasGoodCollatRatio ? handleModalType("Withdraw") : ""}
+                  className={hasGoodCollatRatio ? "btn" : "btn active"}
                 >
                   Withdraw Collateral
                 </button>
                 <button
-                  onClick={() => handleModalType("borrowMore")}
-                  className="btn active"
+                  onClick={() => hasGoodCollatRatio ? handleModalType("borrowMore") : ""}
+                  className={hasGoodCollatRatio ? "btn" : "btn active"}
                 >
                   Borrow More
                 </button>
@@ -98,20 +97,11 @@ const ManagePopup = ({
           </div>
         </div>
       )}
-      {modalType === "add" && <AddCollateral />}
-      {modalType === "Withdraw" && <WithdrawCollateral />}{" "}
-      {(modalType === "debt" || modalType === "repay") && <Debt />}{" "}
-      {modalType === "borrowMore" && <BorrowMore />}
-      {modalType === "closePosition" && <ClosePosition />}
-      <Modal
-          show={modal2}
-          onHide={handleClose2}
-          centered
-          animation={false}
-          className="deposit-modal"
-        >
-          <ManagePositionPopup handleClose={handleClose2} />
-        </Modal>
+      {modalType === "add" && <AddCollateral userAddress={userAddress} CMM={CMM} CASSET={CASSET} vault={vault} forceUpdateVault={forceUpdateVault}/>}
+      {modalType === "Withdraw" && hasGoodCollatRatio && <WithdrawCollateral userAddress={userAddress} CMM={CMM} CASSET={CASSET} vault={vault} forceUpdateVault={forceUpdateVault}/>}{" "}
+      {(modalType === "debt" || modalType === "repay") && <Debt userAddress={userAddress} CMM={CMM} DAI={DAI} vault={vault} forceUpdateVault={forceUpdateVault}/>}{" "}
+      {modalType === "borrowMore" && hasGoodCollatRatio && <BorrowMore userAddress={userAddress} CMM={CMM} DAI={DAI}  vault={vault} forceUpdateVault={forceUpdateVault}/>}
+      {modalType === "closePosition" && <ClosePosition handleClose={handleClose} userAddress={userAddress} CMM={CMM} DAI={DAI} vault={vault}/>}
     </>
   );
 };
