@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import "./Header.scss";
 import { Link, NavLink } from "react-router-dom";
 import Navbar from "react-bootstrap/Navbar";
@@ -6,21 +6,35 @@ import Modal from "react-bootstrap/Modal";
 
 import ConnectModal from "../../../Components/ConnectWallet/ConnectModal";
 import AccountModal2 from "../../../Components/AccountModals/AccountModal2";
+import WrongNetworkModal from "../../../Components/ConnectWallet/WrongNetworkModal";
 import ellips_icon from "../../../assets/image/ellips2.svg";
+import { EthersContext } from '../../../Components/EthersProvider/EthersProvider';
+import { ADDRESS0 } from '../../../Utils/Consts.js';
+
 const Header = () => {
   const [show, setShow] = useState(false);
   const [show2, setShow2] = useState(false);
 
-  const handleClose = () => setShow(false);
-  const handleClose2 = () => setShow2(false);
+  const handleClose = () => {
+    setShow(false);
+    setXData('/');
+  }
   const handleShow = () => setShow(true);
+  const handleClose2 = () => {
+    setShow2(false);
+    setXData('/');
+  }
   const handleShow2 = () => setShow2(true);
   const [zData, setZData] = useState("");
+  const [getWalletInfo] = useContext(EthersContext);
+  const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo();
+
+  const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
 
   let y = ["/lend", "/borrow"];
-  const [xData, setXData] = useState(); // Hardcoded logic for logged in user
-  // let x = window.location.pathname;
-  console.log(xData);
+  let currentPath = window.location.pathname.split('/');
+  let endLocation = currentPath.length > 0 ? '/'+currentPath[currentPath.length-1] : '/';
+  const [xData, setXData] = useState(endLocation);
   let z = y.includes(xData);
   useEffect(() => {
     setZData(z);
@@ -84,16 +98,16 @@ const Header = () => {
                 </li>
               </ul>
               <div className="d-lg-flex text-center  ">
-                {y.includes(xData) ? (
+                {userAddress !== ADDRESS0 ? (
                   <div className="d-flex justify-content-center mt-lg-0 mt-3" onClick={() => handleShow2()}>
-                    <button className="btn eth_btn">5.12345 ETH</button>
+                    <button className="btn eth_btn">{userETH} ETH</button>
                     <button className="btn num_btn d-flex">
                       <img
                         src={ellips_icon}
                         alt="img"
                         className="ellip_img align-self-center"
                       />
-                      <div>0x1234...1234</div>
+                      <div>{abbreviatedAddress}</div>
                     </button>
                   </div>
                 ) : (
@@ -115,7 +129,7 @@ const Header = () => {
           animation={false}
           className="connect-wallet-modal"
         >
-          <ConnectModal handleClose={handleClose} />
+          <ConnectModal handleClose={handleClose}/>
         </Modal>
         {/* ************ account logout pop up 2 ***************/}
         <Modal
