@@ -7,7 +7,6 @@ import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/St
 
 
 const AddCollateral = ({
-  handleClose1,
   userAddress,
   CMM,
   CASSET,
