@@ -8,7 +8,7 @@ import icon3 from "../../assets/image/icon3.svg";
 import icon4 from "../../assets/image/icon4.svg";
 import { Link } from "react-router-dom";
 import DepositPopup from "../Deposit & Withdraw Modals/DepositPopup";
-import ConnectModal2 from "./ConnectModal2";
+import WrongNetworkModal from "./WrongNetworkModal";
 import AccountModal2 from "../AccountModals/AccountModal2";
 import { EthersContext } from "../EthersProvider/EthersProvider";
 
@@ -37,7 +37,7 @@ const ConnectModal = ({ handleClose }) => {
       <Modal.Body>
         {showWrongNetwork && (
           <>
-            <ConnectModal2 />
+            <WrongNetworkModal handleClose={handleClose}/>
           </>
         )}
 

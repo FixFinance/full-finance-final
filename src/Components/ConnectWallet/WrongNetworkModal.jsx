@@ -1,7 +1,7 @@
 import React from "react";
 import Modal from "react-bootstrap/Modal";
 import "./connectmodal.scss";
-const ConnectModal2 = ({handleClose2}) => {
+const WrongNetworkModal = ({handleClose}) => {
   return (
     <div>
       <div className="connect-modal">
@@ -12,7 +12,7 @@ const ConnectModal2 = ({handleClose2}) => {
             
            <h6>Connect to appropriate Mainnet chain.</h6>
            <div className="_margin_">
-           <div className="text-center"><button className="btn common_btn cancel" onClick={handleClose2}>Cancel</button></div>
+           <div className="text-center"><button className="btn common_btn cancel" onClick={handleClose}>Cancel</button></div>
            <div className="text-center"> <button className="btn common_btn switch">Switch to Mainnet</button></div>
            </div>
           
@@ -23,5 +23,5 @@ const ConnectModal2 = ({handleClose2}) => {
   );
 };
 
-export default ConnectModal2;
+export default WrongNetworkModal;
 

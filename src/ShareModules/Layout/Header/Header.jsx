@@ -5,7 +5,7 @@ import Navbar from "react-bootstrap/Navbar";
 import Modal from "react-bootstrap/Modal";
 
 import ConnectModal from "../../../Components/ConnectWallet/ConnectModal";
-import ConnectModal2 from "../../../Components/ConnectWallet/ConnectModal2";
+import WrongNetworkModal from "../../../Components/ConnectWallet/WrongNetworkModal";
 import ellips_icon from "../../../assets/image/ellips2.svg";
 import { EthersContext } from '../../../Components/EthersProvider/EthersProvider';
 import { ADDRESS0 } from '../../../Utils/Consts.js';
