@@ -31,8 +31,8 @@ const Debt = ({
   const impliedBorrowObligation = vault.borrowObligation.sub(absInputAmt);
   const resultantCollateralizationRatio = vault.collateralizationRatio.mul(vault.borrowObligation).div(impliedBorrowObligation);
 
-  const borrowObligationString = getDecimalString(vault.borrowObligation.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 5);
-  const balanceDAIString = balanceDASSET == null ? '0' : getDecimalString(balanceDASSET.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
+  const borrowObligationString = getDecimalString(vault.borrowObligation.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 3);
+  const balanceDAIString = balanceDASSET == null ? '0' : getDecimalString(balanceDASSET.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 3);
   const currentCollRatioString = getDecimalString(vault.collateralizationRatio.toString(), 16, 2);
   const resultantCollRatioString = impliedBorrowObligation.lte(_0) ? INF_CHAR : getDecimalString(resultantCollateralizationRatio.toString(), 16, 2);
 
