@@ -2,6 +2,8 @@ import { BigNumber as BN } from 'ethers';
 
 export const ADDRESS0 = '0x'+'0'.repeat(40);
 
+export const INF_CHAR = '\u221E';
+
 export const _0 = BN.from(0);
 
 export const TOTAL_SBPS = BN.from(10).pow(BN.from(18));

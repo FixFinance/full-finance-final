@@ -39,7 +39,7 @@ const ManagePopup = ({
     CMM !== null &&
     vault !== null;
 
-  const hasGoodCollatRatio = vault.collateralizationRatio.mul(BN.from(100)).div(TOTAL_SBPS).gte(BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)));
+  const hasGoodCollatRatio = vault == null ? true : vault.collateralizationRatio.mul(BN.from(100)).div(TOTAL_SBPS).gte(BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)));
 
   return (
     <>
