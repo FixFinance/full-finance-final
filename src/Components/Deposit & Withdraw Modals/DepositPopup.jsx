@@ -62,10 +62,10 @@ const DepositPopup = ({ handleClose }) => {
       return;
     }
     if (absoluteInput.gt(DAIapproval) || DAIapproval.eq(BN.from(0))) {
-      await SendTx(DAI.approve(CMM.address, INF.toString()));
+      await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
     }
     else {
-      await SendTx(CMM.depositSpecificUnderlying(userAddress, absoluteInput));
+      await SendTx(userAddress, CMM, 'depositSpecificUnderlying', [userAddress, absoluteInput.toString()]);
     }
     setSuccess(true);
   };

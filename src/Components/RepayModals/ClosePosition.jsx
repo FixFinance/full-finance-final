@@ -13,14 +13,14 @@ const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
 
   const handleClickApprove = async () => {
     if (approval != null) {
-      await SendTx(DAI.approve(CMM.address, INF));
+      await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
       setApproval(null);
     }
   }
 
   const handleClickClose = async () => {
     if (approval != null && sufficientApproval) {
-      await SendTx(CMM.closeCVault(vault.index));
+      await SendTx(userAddress, CMM, 'closeCVault', [vault.index]);
       handleClose();
     }
   };

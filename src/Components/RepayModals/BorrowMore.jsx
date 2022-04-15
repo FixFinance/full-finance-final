@@ -42,7 +42,7 @@ const BorrowMore=({
 
   const handleClickBorrow = async () => {
     if (resultantBorrowObligation.lte(maxBorrowObligation)) {
-      await SendTx(CMM.borrowFromCVault(vault.index, absInputAmt, true));
+      await SendTx(userAddress, CMM, 'borrowFromCVault', [vault.index, absInputAmt.toString(), true]);
       forceUpdateVault();
       setBalanceDASSET(null);
       setInput('');

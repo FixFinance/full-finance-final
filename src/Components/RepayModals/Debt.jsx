@@ -53,10 +53,10 @@ const Debt = ({
   const handleClickRepay = async () => {
     if (balanceDASSET != null && approvalDASSET != null && balanceDASSET.gte(absInputAmt)) {
       if (maxClicked) {
-        await SendTx(CMM.repayCVault(vault.index, vault.borrowSharesOwed, false));
+        await SendTx(userAddress, CMM, 'repayCVault', [vault.index, vault.borrowSharesOwed.toString(), false]);
       }
       else {
-        await SendTx(CMM.repayCVault(vault.index, absInputAmt, true));
+        await SendTx(userAddress, CMM, 'repayCVault', [vault.index, absInputAmt.toString(), true]);
       }
       forceUpdateVault();
       setBalanceDASSET(null);
@@ -68,7 +68,7 @@ const Debt = ({
 
   const handleClickApprove = async () => {
     if (balanceDASSET != null && approvalDASSET != null) {
-      await SendTx(DAI.approve(CMM.address, INF));
+      await SendTx(userAddress, DAI, 'approve', [CMM.address, INF]);
       setAllowanceDASSET(null);
     }
   }

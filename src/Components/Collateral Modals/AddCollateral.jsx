@@ -47,14 +47,14 @@ const AddCollateral = ({
 
   const approveCollateral = async () => {
     if (collApproval != null) {
-      await SendTx(CASSET.approve(CMM.address, INF));
+      await SendTx(userAddress, CASSET, 'approve', [CMM.address, INF]);
       setCollApproval(null);
     }
   }
 
   const addCollateral = async () => {
     if (collApproval != null && walletBalance != null && !absInputAmt.eq(_0) && absInputAmt.lte(walletBalance)) {
-      await SendTx(CMM.supplyToCVault(vault.index, absInputAmt));
+      await SendTx(userAddress, CMM, 'supplyToCVault', [vault.index, absInputAmt]);
       forceUpdateVault();
       setCollApproval(null);
       setWalletBalance(null);
