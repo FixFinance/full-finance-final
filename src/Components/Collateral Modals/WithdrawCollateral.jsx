@@ -26,6 +26,8 @@ const WithdrawCollateral = ({
   const currentCollRatioString = vault.collateralizationRatio == null ? '0' : getDecimalString(vault.collateralizationRatio.toString(), 16, 2);
   const impliedCollRatioString = getDecimalString(impliedCollateralizationRatio.toString(), 16, 2);
 
+  const [collatRatioCheck, setCollatRatioCheck] = useState(false); // This variable controls the color of the Implied Collateralization Ratio
+
   const handleInput = (param) => {
     let value = param.target.value;
     let filteredValue = filterInput(value);
@@ -67,12 +69,12 @@ const WithdrawCollateral = ({
               <p style={{ color: "#7D8282" }}>{amtSuppliedStringAbbreviated} WETH</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
-              <p style={{ color: "#7D8282" }}>Implied Coll. Ratio</p>
-              <p style={{ color: "#7D8282" }}>{impliedCollRatioString}%</p>
+              <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>Implied Coll. Ratio</p>
+              <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>{impliedCollRatioString}%</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
-              <p style={{ color: "#7D8282" }}>Current Coll. Ratio</p>
-              <p style={{ color: "#7D8282" }}>{currentCollRatioString}%</p>
+              <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>Current Coll. Ratio</p>
+              <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>{currentCollRatioString}%</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
               <p style={{ color: "#7D8282" }}>Min. Coll. Ratio</p>

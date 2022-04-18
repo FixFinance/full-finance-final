@@ -68,9 +68,9 @@ function Index() {
   const handleShow2 = () => {
     if (
         provider !== null &&
-        userAddress !== ADDRESS0 &&
-        supplyBorrowed !== null &&
-        supplyBorrowShares !== null
+        userAddress !== ADDRESS0 // &&
+        // supplyBorrowed !== null &&
+        // supplyBorrowShares !== null
     ) {
       setModal2(true);
     }
@@ -252,26 +252,30 @@ function Index() {
         </div>
       </section>
 
-      <section className="">
-        <div className="row borrow_position">
-            <div className="borrow_stablecoins">
-              <h5>Borrow DAI against wETH at {annualBorrowRate}% annually</h5>
-              <ul>
-                <li><img src={debt_icon} alt=""/></li>
-                <li><img src={collateral_value} alt=""/></li>
-                <li><img src={t_icon} alt=""/></li>
-                <li><button>+</button></li>
-              </ul>
-            </div>
+      <section className="borrow_section">
+        <div className="container">
+          <div className="row borrow_position">
+              <div className="borrow_stablecoins">
+                <h5>Borrow DAI against wETH at {annualBorrowRate}% annually</h5>
+                <ul>
+                  <li><img src={debt_icon} alt=""/></li>
+                  <li><img src={collateral_value} alt=""/></li>
+                  <li><img src={t_icon} alt=""/></li>
+                  <li><button>+</button></li>
+                </ul>
+              </div>
+          </div>
         </div>
       </section>
 
-      <section>
-        <div className="row borrow_position">
-            <h4>{borrowMessage}</h4>
-            {vaultComponents}
+      <section className="borrow_section">
+        <div className="container">
+          <div className="row borrow_position">
+              <h4>{borrowMessage}</h4>
+              {vaultComponents}
+          </div>
         </div>
-      </section> 
+      </section>
 
         <Modal
           show={modal1}

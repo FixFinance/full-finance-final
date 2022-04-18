@@ -28,12 +28,14 @@ const ManagePositionPopup = ({
     const [balanceCollateral, setBalanceCollateral] = useState(null);
     const [approvedCollateral, setApprovedCollateral] = useState(null);
     const [maxBorrowAmount, setMaxBorrowAmount] = useState(null);
+    const [collatRatioCheck, setCollatRatioCheck] = useState(false); // This variable controls the color of the Implied Collateralization Ratio
 
     const collateralBalanceString = balanceCollateral == null ? '0' : getDecimalString(balanceCollateral.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
     const maxBorrowString = maxBorrowAmount == null ? '0' : getDecimalString(maxBorrowAmount.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
 
     const collateralAmountInput = cInput == null ? _0 : BN.from(getAbsoluteString(cInput, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
     const debtAmountInput = dInput == null ? _0 : BN.from(getAbsoluteString(dInput, parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
+
 
     function getEffCollatRatioBN() {
         let canFind = ![balanceCollateral, baseAggAnswer, baseAggDecimals, collateralAggAnswer, collateralAggDecimals].includes(null);
@@ -168,7 +170,7 @@ const ManagePositionPopup = ({
             <h3>Max Available to borrow <span>{maxBorrowString} DAI</span></h3>
 
             <div className="amount_section_text">
-                <h3>Implied Collateralization Ratio <span>{getEffCollatRatioString()} %</span></h3>
+                <h3 className={!collatRatioCheck ? "unhealthy_collat_ratio" : "healthy_collat_ratio"}>Implied Collateralization Ratio <span>{getEffCollatRatioString()} %</span></h3>
                 <h3>Minimum Collateralization Ratio <span>{parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5} %</span></h3> 
             </div>
 

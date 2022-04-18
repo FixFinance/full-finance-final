@@ -17,6 +17,8 @@ const AddCollateral = ({
   const [input, setInput] = useState('');
   const [walletBalance, setWalletBalance] = useState(null);
   const [collApproval, setCollApproval] = useState(null);
+  const [collatRatioCheck, setCollatRatioCheck] = useState(false); // This variable controls the color of the Implied Collateralization Ratio
+
 
   useEffect(() => {
     if (walletBalance == null) {
@@ -101,12 +103,12 @@ const AddCollateral = ({
               <p style={{ color: "#7D8282" }}>{walletBalString} wETH</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
-              <p style={{ color: "#7D8282" }}>Implied Coll. Ratio</p>
-              <p style={{ color: "#7D8282" }}>{impliedCollRatioString}%</p>
+              <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>Implied Coll. Ratio</p>
+              <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>{impliedCollRatioString}%</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
-              <p style={{ color: "#7D8282" }}>Current Coll. Ratio</p>
-              <p style={{ color: "#7D8282" }}>{currentCollRatioString}%</p>
+              <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>Current Coll. Ratio</p>
+              <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>{currentCollRatioString}%</p>
             </div>
             <div className="d-flex justify-content-between text-part mt-2">
               <p style={{ color: "#7D8282" }}>Minimum Coll. Ratio</p>

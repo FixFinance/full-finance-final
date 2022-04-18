@@ -84,7 +84,6 @@ const EmptyState = () => {
 
   return (
     <>
-    <Header z={false}/>
     <div className="empty">
       <div>
         <div className="d-flex justify-content-between">

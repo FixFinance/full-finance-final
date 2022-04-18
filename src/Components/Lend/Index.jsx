@@ -1,11 +1,16 @@
 import React from 'react'
+import Header from '../../ShareModules/Layout/Header/Header';
 import EmptyState from './EmptyState';
 import "./lend.scss"
 const Index=()=> {
   return (
-    <div className='lend'>
-      <EmptyState/>
-    </div>
+    <>
+    <Header z={true} />
+      <div className='lend'>
+        <EmptyState/>
+      </div>
+    </>
+
   )
 }
 

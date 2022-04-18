@@ -49,9 +49,9 @@ const ManagePopup = ({
             <Modal.Header closeButton>
               <h5>Withdraw DAI</h5>
             </Modal.Header>
-            <Modal.Body>
+            <Modal.Body style={!hasGoodCollatRatio ? { height: "550px" } : {height: "500px"}}>
               <div className="managepopup_details">
-                {!hasGoodCollatRatio && <p className="errorr_message">
+                {!hasGoodCollatRatio && <p className="error_message">
                   "There is not enough collateral to withdraw or borrow. Please
                   repay your debt, or add more collatral to avoid liquidation.
                 </p>}
@@ -86,7 +86,6 @@ const ManagePopup = ({
                   Close Position
                 </button>
                 <button
-               
                   className="btn link"
                   onClick={handleShow2}
                 >
