@@ -11,31 +11,31 @@ import ellips_icon from "../../../assets/image/ellips2.svg";
 import { EthersContext } from '../../../Components/EthersProvider/EthersProvider';
 import { ADDRESS0 } from '../../../Utils/Consts.js';
 
-const Header = () => {
+const Header = ({ z }) => {
   const [show, setShow] = useState(false);
   const [show2, setShow2] = useState(false);
 
   const handleClose = () => {
     setShow(false);
-    setXData('/');
+    // setXData('/');
   }
   const handleShow = () => setShow(true);
   const handleClose2 = () => {
     setShow2(false);
-    setXData('/');
+    // setXData('/');
   }
   const handleShow2 = () => setShow2(true);
-  const [zData, setZData] = useState("");
+  const [zData, setZData] = useState(z);
   const [getWalletInfo] = useContext(EthersContext);
   const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo();
 
   const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
 
-  let y = ["/lend", "/borrow"];
-  let currentPath = window.location.pathname.split('/');
-  let endLocation = currentPath.length > 0 ? '/'+currentPath[currentPath.length-1] : '/';
-  const [xData, setXData] = useState(endLocation);
-  let z = y.includes(xData);
+  // let y = ["/lend", "/borrow"];
+  // let currentPath = window.location.pathname.split('/');
+  // let endLocation = currentPath.length > 0 ? '/'+currentPath[currentPath.length-1] : '/';
+  // const [xData, setXData] = useState(endLocation);
+  // let z = y.includes(xData);
   useEffect(() => {
     setZData(z);
   }, [z]);
@@ -61,10 +61,10 @@ const Header = () => {
                 <li>
                   <NavLink
                     to="/"
-                    activClassName="active"
-                    onClick={() => {
-                      setXData("");
-                    }}
+                    activeClassName="active"
+                    // onClick={() => {
+                    //   setXData("");
+                    // }}
                   >
                     Home
                   </NavLink>{" "}
@@ -72,10 +72,10 @@ const Header = () => {
                 <li>
                   <NavLink
                     to="/lend"
-                    activClassName="active"
-                    onClick={() => {
-                      setXData("/lend");
-                    }}
+                    activeClassName="active"
+                  //   onClick={() => {
+                  //     setXData("/lend");
+                  //   }}
                   >
                     Lend
                   </NavLink>{" "}
@@ -83,16 +83,16 @@ const Header = () => {
                 <li>
                   <NavLink
                     to="/borrow"
-                    activClassName="active"
-                    onClick={() => {
-                      setXData("/borrow");
-                    }}
+                    activeClassName="active"
+                    // onClick={() => {
+                    //   setXData("/borrow");
+                    // }}
                   >
                     Borrow{" "}
                   </NavLink>
                 </li>
                 <li>
-                  <NavLink to="" activClassName="active">
+                  <NavLink to="" activeClassName="active">
                     ...{" "}
                   </NavLink>
                 </li>

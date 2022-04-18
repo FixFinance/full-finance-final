@@ -12,6 +12,7 @@ import { EthersContext } from '../EthersProvider/EthersProvider';
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate } from '../../Utils/RateMath';
 import { ADDRESS0, TOTAL_SBPS, _0 } from '../../Utils/Consts.js';
+import Header from "../../ShareModules/Layout/Header/Header";
 
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
 const IERC20ABI = require('../../abi/IERC20.json');
@@ -215,6 +216,7 @@ function Index() {
 
   return (
     <div>
+    <Header z={true}/>
       <section className="borrow_section">
         <div className="container">
         <div className="row">
@@ -248,10 +250,9 @@ function Index() {
           </div>
         </div>
         </div>
-        
       </section>
 
-      <section>
+      <section className="">
         <div className="row borrow_position">
             <div className="borrow_stablecoins">
               <h5>Borrow DAI against wETH at {annualBorrowRate}% annually</h5>

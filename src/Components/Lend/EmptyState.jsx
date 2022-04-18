@@ -8,6 +8,7 @@ import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate, TOTAL_SBPS } from '../../Utils/RateMath';
+import Header from "../../ShareModules/Layout/Header/Header";
 
 const IERC20ABI = require('../../abi/IERC20.json');
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
@@ -82,6 +83,8 @@ const EmptyState = () => {
   }, [provider, balanceLendShares]);
 
   return (
+    <>
+    <Header z={false}/>
     <div className="empty">
       <div>
         <div className="d-flex justify-content-between">
@@ -130,6 +133,7 @@ const EmptyState = () => {
           <WithdrawModal handleClose2={handleClose2} />
         </Modal>
     </div>
+    </>
   );
 };
 

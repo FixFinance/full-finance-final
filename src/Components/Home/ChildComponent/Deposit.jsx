@@ -4,6 +4,7 @@ import Button  from 'react-bootstrap/Button';
 import Modal from "react-bootstrap/Modal";
 import AccountModal1 from '../../AccountModals/AccountModal1';
 import AccountModal2 from '../../AccountModals/AccountModal2';
+import { Link } from 'react-router-dom';
 const Deposit=()=> {
   const [show, setShow] = useState(false);
 
@@ -17,8 +18,7 @@ const Deposit=()=> {
             ButtonText:"Lend Now",
             CurrentDeposit:"Current Deposit Rate",
             price1:"12.10%",
-
-            
+            link: "/lend",
         },
         {
             title:"Total Borrowed",
@@ -26,9 +26,7 @@ const Deposit=()=> {
             ButtonText:"Borrow Now",
             CurrentDeposit:"Current Deposit Rate",
             price1:"12.10%",
-           
-          
-
+            link: "/borrow"
         }
     ]
   return (
@@ -48,8 +46,9 @@ const Deposit=()=> {
             <h3 className='mt-4'>${item.price}</h3>
                   
                   </Card.Text>
-                  
-                  <button  className='button-text-one' onClick={item.click}>{item.ButtonText}</button>
+                  <Link to={item.link}>
+                    <button  className='button-text-one' onClick={item.click}>{item.ButtonText}</button>
+                  </Link>
                   <Card.Text className='p1'>
                     {item.CurrentDeposit}
                   </Card.Text>

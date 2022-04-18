@@ -1,8 +1,6 @@
 import logo from "./logo.svg";
 import "./App.scss";
 import { Route, Routes } from "react-router-dom";
-import Header from "./ShareModules/Layout/Header/Header";
-import Footer from "./ShareModules/Layout/Footer/Footer";
 import Index from "./Components/Home/Index";
 import Lend from "./Components/Lend/Index";
 import Borrow from "./Components/Borrow/Index";
@@ -13,7 +11,6 @@ function App() {
   return (
     <>
       <EthersProvider>
-        <Header />
         <Routes>
           {/**************  Start public Route *********************/}
           <Route path="/" exact element={<Index />} />

@@ -1,5 +1,6 @@
 import React from "react";
 import Footer from "../../ShareModules/Layout/Footer/Footer";
+import Header from "../../ShareModules/Layout/Header/Header";
 import Banner from "./ChildComponent/Banner";
 import Deposit from "./ChildComponent/Deposit";
 import GetStarted from "./ChildComponent/GetStarted";
@@ -12,6 +13,7 @@ function Index() {
   return (
     <>
       <div className="aa ">
+        <Header setZData={false}/>
        <section>
          <Banner/>
        </section>
