@@ -68,9 +68,9 @@ function Index() {
   const handleShow2 = () => {
     if (
         provider !== null &&
-        userAddress !== ADDRESS0 // &&
-        // supplyBorrowed !== null &&
-        // supplyBorrowShares !== null
+        userAddress !== ADDRESS0 &&
+        supplyBorrowed !== null &&
+        supplyBorrowShares !== null
     ) {
       setModal2(true);
     }
