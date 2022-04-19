@@ -15,6 +15,8 @@ const BorrowMore=({
 
   const [input, setInput] = useState('');
   const [balanceDASSET, setBalanceDASSET] = useState(null);
+  const [collatRatioCheck, setCollatRatioCheck] = useState(false); // This variable controls the color of the Implied Collateralization Ratio
+
 
   useEffect(() => {
     if (balanceDASSET == null) {
@@ -83,12 +85,12 @@ const BorrowMore=({
             </div>
           </div>
           <div className="d-flex justify-content-between text-part mt-2 border_bottom">
-            <p style={{ color: "#7D8282" }}>Current Coll. Ratio</p>
-            <p style={{ color: "#7D8282" }}>{currentCollRatioString}%</p>
+            <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>Current Coll. Ratio</p>
+            <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>{currentCollRatioString}%</p>
           </div>
           <div className="d-flex justify-content-between text-part mt-2 border_bottom">
-            <p style={{ color: "#7D8282" }}>Resultant Coll. Ratio</p>
-            <p style={{ color: "#7D8282" }}>{resultantCollRatioString}%</p>
+            <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>Resultant Coll. Ratio</p>
+            <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>{resultantCollRatioString}%</p>
           </div>
           <div className="d-flex justify-content-between text-part mt-2 border_bottom">
             <p style={{ color: "#7D8282" }}>Liquidaiton Coll. Ratio</p>

@@ -88,7 +88,7 @@
         @media(max-width:375px){
             padding: 10px 10px;
         }
-        .borrow_position_box {
+        .borrow_position_box { // add a max height to fix the third box growing (Need to recreate to make the pixels/% accurate
             background: #0F1010;
             border-radius: 30px;
             padding: 40px 40px;
