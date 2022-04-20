@@ -1,0 +1,39 @@
+#gradient-canvas {
+    width: 100%;
+    height: 720px;
+    --gradient-color-1: #7e3ac3;
+    --gradient-color-2: #0f1010;
+    --gradient-color-3: #0f1010;
+    --gradient-color-4: #0f1010;
+  }
+
+.layout {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    .banner-text{
+        text-align: center;
+        padding-top: 12em;
+        h2{
+          max-width: 873px;
+          margin: 0 auto;
+        }
+        p{
+          max-width: 650px;
+          margin: 0 auto;
+          font-size: 24px;
+          line-height: 140%;
+          @media(max-width:992px){
+            font-size: 20px;
+          }
+          @media(max-width:767px){
+            font-size: 19px;
+          }
+          @media(max-width:576px){
+            font-size: 17px;
+            margin-top: 15px;
+          }
+        }
+      }
+}

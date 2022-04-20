@@ -34,7 +34,7 @@ const Deposit=()=> {
     <div className='container deposit'>
         <div className='row'>
 
-        
+
         {loop.map((item,index)=>{
             return(
                 <div className='col-sm-6 m-auto mt-sm-0 mt-3'>
@@ -44,7 +44,7 @@ const Deposit=()=> {
                   <Card.Title >{item.title}</Card.Title>
                   <Card.Text>
             <h3 className='mt-4'>${item.price}</h3>
-                  
+
                   </Card.Text>
                   <Link to={item.link}>
                     <button  className='button-text-one' onClick={item.click}>{item.ButtonText}</button>
