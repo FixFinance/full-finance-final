@@ -52,7 +52,7 @@ const Deposit=()=> {
                   <Card.Text className='p1'>
                     {item.CurrentDeposit}
                   </Card.Text>
-                  <Card.Text className='item-price-one'> 
+                  <Card.Text className='item-price-one'>
                     {item.price1}
                   </Card.Text>
                 </Card.Body>

@@ -199,12 +199,12 @@ function Index() {
               <p>{process.env.REACT_APP_COLLATERALIZATION_FACTOR}% min. collateralization ratio</p>
             </div>
           </div>
-          <div className="col-lg-12 col-md-12">
+          <div className="col-lg-4 col-md-4">
             <div className="borrow_position_box total_debt_box">
               <h5>Total debt</h5>
             </div>
           </div>
-          <div className="col-lg-12 col-md-12">
+          <div className="col-lg-4 col-md-4">
             <div className="borrow_position_box total_debt_box">
               <button onClick={clickManagePositionFactory(vault)}><h5>Manage position</h5></button>
             </div>

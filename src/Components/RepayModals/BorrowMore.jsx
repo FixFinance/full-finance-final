@@ -4,6 +4,7 @@ import { BigNumber as BN } from 'ethers';
 import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
 import { SendTx } from '../../Utils/SendTx';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
+import './collateral-ratio.scss';
 
 const BorrowMore=({
   userAddress,
@@ -84,13 +85,13 @@ const BorrowMore=({
               {/* <p style={{ color: "#7D8282" }}>→ 500.00 DAI</p> */}
             </div>
           </div>
-          <div className="d-flex justify-content-between text-part mt-2 border_bottom">
-            <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>Current Coll. Ratio</p>
-            <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>{currentCollRatioString}%</p>
+          <div className={!collatRatioCheck ? "d-flex justify-content-between text-part mt-2 border_bottom red_collat_ratio" : "d-flex justify-content-between text-part mt-2 border_bottom"}>
+            <p>Current Coll. Ratio</p>
+            <p>{currentCollRatioString}%</p>
           </div>
-          <div className="d-flex justify-content-between text-part mt-2 border_bottom">
-            <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>Resultant Coll. Ratio</p>
-            <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>{resultantCollRatioString}%</p>
+          <div className={!collatRatioCheck ? "d-flex justify-content-between text-part mt-2 border_bottom red_collat_ratio" : "d-flex justify-content-between text-part mt-2 border_bottom"}>
+            <p>Resultant Coll. Ratio</p>
+            <p>{resultantCollRatioString}%</p>
           </div>
           <div className="d-flex justify-content-between text-part mt-2 border_bottom">
             <p style={{ color: "#7D8282" }}>Liquidaiton Coll. Ratio</p>

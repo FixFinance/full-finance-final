@@ -11,7 +11,6 @@ function Banner() {
 
   useEffect(() => {
     if (ref.current) {
-      console.log(ref);
       gradient.initGradient("#gradient-canvas");
     }
   }, [ref]);
