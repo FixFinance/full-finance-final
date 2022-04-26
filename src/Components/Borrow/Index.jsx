@@ -194,14 +194,9 @@ function Index() {
           </div>
           <div className="col-lg-4 col-md-4">
             <div className="borrow_position_box">
-              <h5>Collateralization ratio <span><img src={ratio_question} alt=""/></span></h5>
+              <h5>Collateralization Ratio</h5>
               <h2>{collateralizationRatioString}%</h2>
               <p>{process.env.REACT_APP_COLLATERALIZATION_FACTOR}% min. collateralization ratio</p>
-            </div>
-          </div>
-          <div className="col-lg-4 col-md-4">
-            <div className="borrow_position_box total_debt_box">
-              <h5>Total debt</h5>
             </div>
           </div>
           <div className="col-lg-4 col-md-4">
