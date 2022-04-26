@@ -86,7 +86,7 @@ const ManagePositionPopup = ({
             approvedCollateral != null && balanceCollateral != null && !collateralAmountInput.eq(_0) && !debtAmountInput.eq(_0) &&
             getEffCollatRatioBN().div(BN.from(10).pow(BN.from(16))).gte(BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)))
         ) {
-            await SendTx(userAddress, CMM, 'openCVault', [process.env.REACT_APP_COLLATERAL_ADDRESS, collateralAmountInput, debtAmountInput]);
+            await SendTx(userAddress, CMM, 'openCVault', [process.env.REACT_APP_COLLATERAL_ADDRESS, collateralAmountInput.toString(), debtAmountInput.toString()]);
         }
     }
 

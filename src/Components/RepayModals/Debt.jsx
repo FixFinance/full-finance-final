@@ -68,7 +68,7 @@ const Debt = ({
 
   const handleClickApprove = async () => {
     if (balanceDASSET != null && approvalDASSET != null) {
-      await SendTx(userAddress, DAI, 'approve', [CMM.address, INF]);
+      await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
       setAllowanceDASSET(null);
     }
   }

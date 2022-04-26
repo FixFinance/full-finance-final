@@ -36,7 +36,7 @@ const WithdrawCollateral = ({
 
   const handleClickWithdraw = async () => {
     if (absInputAmt.gt(_0) && impliedAmountSupplied.gte(minimumCollateral)) {
-      await SendTx(userAddress, CMM, 'withdrawFromCVault', [vault.index, absInputAmt]);
+      await SendTx(userAddress, CMM, 'withdrawFromCVault', [vault.index, absInputAmt.toString()]);
       forceUpdateVault();
       setInput('');
     }
