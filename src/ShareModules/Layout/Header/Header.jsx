@@ -42,6 +42,7 @@ const Header = ({ z }) => {
 
   return (
     <>
+    <div class="header-container position-relative mx-auto">
       <div className={zData ? "header2 header-top" : "header header-top"}>
         <Navbar
           expand="lg"
@@ -137,7 +138,8 @@ const Header = ({ z }) => {
           <AccountModal2 handleClose={handleClose2} />
         </Modal>
       </div>
-    </>
+    </div>
+  </>
   );
 };
 

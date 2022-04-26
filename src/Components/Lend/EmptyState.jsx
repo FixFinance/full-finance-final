@@ -88,7 +88,6 @@ const EmptyState = () => {
       <div>
         <div className="d-flex justify-content-between">
           <span>Your Deposit Balance</span>
-          <img src={question} alt="img" className="question_img" />
         </div>
         <div className="flex_class margin_small">
           <div className="d-flex">
@@ -104,6 +103,7 @@ const EmptyState = () => {
             <p className="text-white ">Deposit APY</p>
           </div>
         </div>
+        {signer !== null ?
         <div className="margin_small">
           <div className="text-center">
             <button className="btn common_btn deposit" onClick={handleShow}>Deposit DAI</button>
@@ -112,6 +112,13 @@ const EmptyState = () => {
             <button className="btn common_btn withdraw" onClick={handleShow2}>Withdraw DAI</button>
           </div>
         </div>
+        :
+        <div className="margin_small">
+          <div className="text-center">
+            <button className="btn common_btn deposit" onClick={handleShow}>Connect Wallet</button>
+          </div>
+        </div>
+        }
       </div>
       <Modal
           show={show}

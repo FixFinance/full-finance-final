@@ -1,4 +1,6 @@
-
+.header-container {
+  max-width: 1320px;
+}
 .header {
   position: absolute;
   top: 0%;
@@ -7,7 +9,6 @@
   bottom: 0%;
   height: 180px;
   z-index: 2;
-  max-width: 1320px;
   @media (max-width: 992px) {
     padding-top: 0px;
   }
@@ -27,6 +28,8 @@
 
 .header2 {
   position: static;
+  margin-left: 60px;
+  margin-right: 60px;
 }
 
 .header-top {
