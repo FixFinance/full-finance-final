@@ -1,14 +1,13 @@
-.header {
-  // color: green;
-}
+
 .header {
   position: absolute;
   top: 0%;
-  left: 0%;
-  right: 0%;
+  left: 4.5454545454545%;
+  right: 4.5454545454545%;
   bottom: 0%;
   height: 180px;
   z-index: 2;
+  max-width: 1320px;
   @media (max-width: 992px) {
     padding-top: 0px;
   }
@@ -122,13 +121,6 @@
     width: fit-content;
     border-bottom: 1px solid #edf0eb;
     padding-bottom: 5px;
-  }
-  li:last-child a {
-    background: #252727;
-    border-radius: 6px;
-    color: #fff;
-    border-bottom: none;
-    padding: 0px 10px 10px 10px;
   }
 }
 .navbar-brand img {

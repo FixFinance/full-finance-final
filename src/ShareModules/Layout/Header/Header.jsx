@@ -91,11 +91,6 @@ const Header = ({ z }) => {
                     Borrow{" "}
                   </NavLink>
                 </li>
-                <li>
-                  <NavLink to="" activeClassName="active">
-                    ...{" "}
-                  </NavLink>
-                </li>
               </ul>
               <div className="d-lg-flex text-center  ">
                 {userAddress !== ADDRESS0 ? (
