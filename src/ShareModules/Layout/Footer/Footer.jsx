@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./Footer.scss";
 import ff from "../../../assets/image/ff.png";
-import parcent from "../../../assets/image/parcent.png";
+import percent from "../../../assets/image/percent.png";
 import { Link } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import AddCollateral from "../../../Components/Collateral Modals/AddCollateral";
@@ -27,25 +27,27 @@ function Footer() {
   const handleShow4 = () => setModal4(true);
   return (
     <>
-      <div className="footer marginclass">
-        <div>
-          <Link to="/..">
-            <img src={ff} alt="img" className="f_img" />
-          </Link>
-          <ul>
-            <li>
-              <Link to="/..">Terms</Link>
-            </li>
-            <li>
-              <Link to="/..">Privacy</Link>
-            </li>
-            <li>
-              <Link to="/..">Cookies</Link>
-            </li>
-          </ul>
-        </div>
-        <img src={parcent} alt="img" className="parcent_img" />
+    <div className="footer-background">
+      <div className="footer marginclass mx-auto">
+          <div>
+            <Link to="/..">
+              <img src={ff} alt="img" className="f_img" />
+            </Link>
+            <ul>
+              <li>
+                <Link to="/..">Terms</Link>
+              </li>
+              <li>
+                <Link to="/..">Privacy</Link>
+              </li>
+              <li>
+                <Link to="/..">Cookies</Link>
+              </li>
+            </ul>
+          </div>
+          <img src={percent} alt="img" className="percent_img" />
       </div>
+    </div>
 
       <Modal
         show={modal1}

@@ -1,6 +1,6 @@
 .footer {
   color: gold;
-  background: #7E3AC3;
+  max-width: 1440px;
   padding: 45px 27px 22px 27px;
   display: flex;
   justify-content: space-between;
@@ -16,10 +16,9 @@
       color: #EDF0EB;
      }
      a:hover{color: #191A1A;}
-     
     }
   }
-  .parcent_img{
+  .percent_img{
     width: 100%;
     max-width: 258px;
     height: 100%;
@@ -43,4 +42,7 @@
     // }
   }
 
+}
+.footer-background {
+  background: #7E3AC3;
 }

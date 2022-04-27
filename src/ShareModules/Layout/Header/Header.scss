@@ -82,10 +82,10 @@
 .connect-wallet {
   background-color: #7e3ac3;
   border: 2px solid transparent;
-
+  font-size: 13px;
   border-radius: 50rem !important;
   color: #fff;
-  padding: 15px 50px;
+  padding: 12.25px 15.375px;
   text-decoration: none;
   &:hover {
     background-color: transparent;
@@ -127,6 +127,6 @@
   }
 }
 .navbar-brand img {
-  width: 100%;
-  min-width: 225px;
+  width: 176px;
+  height: 24px;
 }

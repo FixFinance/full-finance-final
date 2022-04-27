@@ -32,7 +32,7 @@ const Deposit=()=> {
     ]
   return (
     <>
-      <div className='deposit-section-container mx-auto'>
+      <div className='section-container mx-auto'>
         <div className='deposit_section'>
         <div className='container deposit'>
             <div className='row'>

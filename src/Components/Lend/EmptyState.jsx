@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import question from "../../assets/image/question.svg";
-import rupee from "../../assets/image/rupee.svg";
+import dai from "../../assets/image/dai.svg";
 import Modal from "react-bootstrap/Modal";
 import DepositPopup from "../Deposit & Withdraw Modals/DepositPopup";
 import WithdrawModal from "../Deposit & Withdraw Modals/WithdrawModal";
@@ -92,13 +92,13 @@ const EmptyState = () => {
         <div className="flex_class margin_small">
           <div className="d-flex">
             <div className="d-block">
-              <img src={rupee} alt="img" className="rupee_img" />
+              <img src={dai} alt="img" className="dai_img" />
               <p>$ {lendShareUSDValueString}</p>
             </div>
             <h5>{lendShareValueString}</h5>
             <h5>DAI</h5>
           </div>
-          <div className="">
+          <div className="deposit-container">
             <h5 className="m-0">{annualLendRate} %</h5>
             <p className="text-white ">Deposit APY</p>
           </div>

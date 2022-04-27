@@ -8,7 +8,7 @@
     min-height: 468px;
     background: #191a1a;
     border-radius: 30px;
-    padding: 30px;
+    padding: 15px 30px 15px 30px;
     margin-top: 60px;
     span {
       font-weight: 400;
@@ -39,12 +39,11 @@
       font-weight: 400;
       font-size: 16px;
       line-height: 2.2;
-
       letter-spacing: 0.02em;
       text-transform: capitalize;
 
       color: #7d8282;
-      text-align: end;
+      text-align: left;
       @media (max-width: 500px) {
         text-align: start;
       }
@@ -100,6 +99,9 @@
         color: #7e3ac3;
         transition: all 0.3s ease-in-out;
       }
+    }
+    .deposit-container {
+      text-align: right;
     }
     .withdraw {
       background: #0f1010;

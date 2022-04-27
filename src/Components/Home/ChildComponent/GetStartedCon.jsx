@@ -43,24 +43,26 @@ const GetStartedCon = () => {
     },
   ];
   return (
-    <div className="container accordion">
-      <div className="main-con px-3">
-        <Accordion defaultActiveKey="0">
-          {loop.map((item, index) => {
-            return (
-              <Accordion.Item
-                eventKey={item.key_no}
-                className={`bg-transparent ${item.key_no==="5"?"border_none":"none"} `}
-                key={index}
-              >
-                <Accordion.Header className="bg-transparent">
-                  {item?.heading}
-                </Accordion.Header>
-                <Accordion.Body>{item?.description}</Accordion.Body>
-              </Accordion.Item>
-            );
-          })}
-        </Accordion>
+    <div className="section-container mx-auto">
+      <div className="container accordion">
+        <div className="main-con px-3">
+          <Accordion defaultActiveKey="0">
+            {loop.map((item, index) => {
+              return (
+                <Accordion.Item
+                  eventKey={item.key_no}
+                  className={`bg-transparent ${item.key_no==="5"?"border_none":"none"} `}
+                  key={index}
+                >
+                  <Accordion.Header className="bg-transparent">
+                    {item?.heading}
+                  </Accordion.Header>
+                  <Accordion.Body>{item?.description}</Accordion.Body>
+                </Accordion.Item>
+              );
+            })}
+          </Accordion>
+        </div>
       </div>
     </div>
   );

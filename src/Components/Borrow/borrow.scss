@@ -1,5 +1,5 @@
 .borrow_section {
-    padding: 40px 0 40px;
+        padding: 20px 0 40px;
     .container {
         max-width: 98%;
     }
@@ -8,6 +8,7 @@
         background: #191A1A;
         border-radius: 50px;
         padding: 10px 30px;
+        margin-right: -15px;
         @media(max-width:736px){
             margin: 10px 0;
         }

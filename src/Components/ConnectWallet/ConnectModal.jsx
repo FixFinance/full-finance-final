@@ -53,7 +53,9 @@ const ConnectModal = ({ handleClose }) => {
                 <div className="field-text align-self-center">
                   Metamask
                 </div>
-                <img src={icon1} alt="img" className="icon_img" />
+                <div>
+                  <img src={icon1} alt="img" className="icon_img" />
+                </div>
               </div>
             </div>
             <div className="form-group">

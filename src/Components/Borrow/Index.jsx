@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import "./borrow.scss";
-import debt_icon from "../../assets/image/rupee.svg";
+import debt_icon from "../../assets/image/dai.svg";
 import collateral_value from "../../assets/image/collateral_value.svg";
 import ratio_question from "../../assets/image/ratio_question.svg";
 import t_icon from "../../assets/image/t_icon.png";
@@ -252,7 +252,7 @@ function Index() {
         </div>
       </section>
 
-      <section className="borrow_section">
+      <section className="borrow_section" style={{ 'margin-bottom': '20px'}}>
         <div className="container">
           <div className="row borrow_position">
               <div className="borrow_stablecoins">
