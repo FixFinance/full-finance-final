@@ -9,37 +9,31 @@ const GetStartedCon = () => {
       key_no: "0",
       heading: "What assets can be used as collateral?",
       description:
-        "Because NFT chose some centralised consensus process behind few dump, Zilliqa cut off lots of moon in a unspent transaction output. Basic Attention Token thinking a consensus process for a proof of stake.",
+        "STETH and WETH are currently the only assets supported as collateral though more may be added in the future",
     },
     {
       key_no: "1",
-      heading: "What is fixed rate?",
+      heading: "What happens if I am liquidated?",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmoLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmoLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmo",
+        "If you are liquidated your debt obligation will disappear from your borrow position along with a chunk of your collateral",
     },
     {
       key_no: "2",
       heading: "Will I be charged fees?",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmoLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmoLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmo",
+        "A small percentage of interest paid by borrowers may be collected by the protocol the rest is distributed evenly amongst all lenders. All fees are accounted for in the rates presented on this website.",
     },
     {
       key_no: "3",
       heading: "When do I need to repay borrowed assets?",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmoLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmoLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmo",
+        "You can repay whenever you see fit though you must be cognizant of the potential for liquidations if you let your collateralization ratio dip too low",
     },
     {
       key_no: "4",
-      heading: "How can I withdraw collateral?",
+      heading: "How can manage an existing borrow position?",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmoLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmoLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmo",
-    },
-    {
-      key_no: "5",
-      heading: "How can I withdraw collateral?",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmoLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmoLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmo",
+        "Management functionality of borrow positions can be accessed via the manage posiiton button found on vaults in the borrow section",
     },
   ];
   return (

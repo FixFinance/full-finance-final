@@ -21,11 +21,11 @@ function Banner() {
         <div ref={ref} id="app" className="App"></div>
           <div className="layout">
             <div className="banner-text px-3">
-              <h2>New way of investing</h2>
+              <h2>Optimized Rate Market</h2>
               <p>
-                fix finance allows both fixed rate borrowing and lending as well
-                as the ability to gain leveraged exposure to variable  yield with
-                the use of YTs{" "}
+                full finance creates a highly efficient borrow/lend experience for
+                stablecoins by using reactive interest rates and a stablecoin centric
+                model{" "}
               </p>
             </div>
           </div>

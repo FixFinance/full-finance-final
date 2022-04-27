@@ -26,6 +26,7 @@ export function getDecimalString(bn, decimals, maxDecimalsShown=decimals) {
 	if (ret[ret.length-1]==='.')ret = ret.substring(0,ret.length-1);
 	let halves = ret.split('.');
 	if (halves.length == 2) ret = halves[0]+'.'+halves[1].substring(0, maxDecimalsShown);
+	if (ret[ret.length-1]==='.')ret = ret.substring(0,ret.length-1);
 	return ret;
 }
 
