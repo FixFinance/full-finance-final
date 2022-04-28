@@ -25,8 +25,6 @@ function Index() {
   const [selectedVaultIndex, setSelectedVaultIndex] = useState(null);
   const [selectedVault, setSelectedVault] = useState(null);
 
-  const [annualLendRate, setAnnualLendRate] = useState('0');
-  const [annualBorrowRate, setAnnualBorrowRate] = useState('0');
   const [userVaults, setUserVaults] = useState(null);
   const [supplyBorrowed, setSupplyBorrowed] = useState(null);
   const [supplyBorrowShares, setSupplyBorrowShares] = useState(null);
@@ -35,8 +33,16 @@ function Index() {
   const [collateralAggAnswer, setCollateralAggAnswer] = useState(null);
   const [collateralAggDecimals, setCollateralAggDecimals] = useState(null);
 
-  const [getWalletInfo] = useContext(EthersContext);
+  const [getWalletInfo, getBasicInfo, updateBasicInfo] = useContext(EthersContext);
+  const { annualLendRateString, annualBorrowRateString } = getBasicInfo();
   const [provider, userAddress] = getWalletInfo();
+
+  if (
+    annualLendRateString == '0' &&
+    annualBorrowRateString == '0'
+  ) {
+    updateBasicInfo();
+  }
 
   const forceUpdateVault = () => {
     if (selectedVault !== null) {
@@ -87,22 +93,6 @@ function Index() {
   useEffect(() => {
     let asyncUseEffect = async () => {
       if (provider !== null) {
-        if (annualLendRate === '0') {
-          CMM.getPrevSILOR().then(silor => {
-            let annualized = getAnnualizedRate(silor);
-            let pct = annualized.sub(TOTAL_SBPS);
-            let rateString = getDecimalString(pct.toString(), 16, 3);
-            setAnnualLendRate(rateString);
-          });
-        }
-        if (annualBorrowRate === '0') {
-          CMM.getPrevSIBOR().then(sibor => {
-            let annualized = getAnnualizedRate(sibor);
-            let pct = annualized.sub(TOTAL_SBPS);
-            let rateString = getDecimalString(pct.toString(), 16, 3);
-            setAnnualBorrowRate(rateString);
-          });
-        }
         if (
             userVaults === null &&
             baseAggAnswer !== null &&
@@ -194,14 +184,9 @@ function Index() {
           </div>
           <div className="col-lg-4 col-md-4">
             <div className="borrow_position_box">
-              <h5>Collateralization ratio <span><img src={ratio_question} alt=""/></span></h5>
+              <h5>Collateralization Ratio</h5>
               <h2>{collateralizationRatioString}%</h2>
               <p>{process.env.REACT_APP_COLLATERALIZATION_FACTOR}% min. collateralization ratio</p>
-            </div>
-          </div>
-          <div className="col-lg-4 col-md-4">
-            <div className="borrow_position_box total_debt_box">
-              <h5>Total debt</h5>
             </div>
           </div>
           <div className="col-lg-4 col-md-4">
@@ -224,7 +209,7 @@ function Index() {
             <div className="borrow_box">
               <h5>Lend Rate</h5>
               <div className="borrow_box_text">
-                <h2>{annualLendRate} %</h2>
+                <h2>{annualLendRateString} %</h2>
                 <p>Lend Variable APY</p>
               </div>
             </div>
@@ -233,7 +218,7 @@ function Index() {
             <div className="borrow_box">
               <h5>Borrow Rate</h5>
               <div className="borrow_box_text">
-                <h2>{annualBorrowRate} %</h2>
+                <h2>{annualBorrowRateString} %</h2>
                 <p>Borrow Variable APR</p>
               </div>
             </div>
@@ -256,7 +241,7 @@ function Index() {
         <div className="container">
           <div className="row borrow_position">
               <div className="borrow_stablecoins">
-                <h5>Borrow DAI against wETH at {annualBorrowRate}% annually</h5>
+                <h5>Borrow DAI against wETH at {annualBorrowRateString}% annually</h5>
                 <ul>
                   <li><img src={debt_icon} alt=""/></li>
                   <li><img src={collateral_value} alt=""/></li>

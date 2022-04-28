@@ -55,7 +55,7 @@ const WithdrawModal=({ handleClose2 })=> {
     if (balanceLendShares === null || lendShareValue === null) {
       return;
     }
-    await SendTx(userAddress, CMM, 'withdrawSpecificShares', [userAddress, absoluteInput]);
+    await SendTx(userAddress, CMM, 'withdrawSpecificShares', [userAddress, absoluteInput.toString()]);
     setSuccess(true);
   }
 

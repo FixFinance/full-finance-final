@@ -21,10 +21,14 @@ const EmptyState = () => {
   const [balanceLendShares, setBalanceLendShares] = useState(null);
   const [lendShareValue, setLendShareValue] = useState(null);
   const [lendShareUSDValue, setLendShareUSDValue] = useState(null);
-  const [annualLendRate, setAnnualLendRate] = useState('0');
 
-  const [getWalletInfo] = useContext(EthersContext);
+  const [getWalletInfo, getBasicInfo, updateBasicInfo] = useContext(EthersContext);
+  const { annualLendRateString } = getBasicInfo();
   const [provider, userAddress] = getWalletInfo();
+
+  if (annualLendRateString == '0') {
+    updateBasicInfo();
+  }
 
   const handleClose = () => {
     setShow(false);
@@ -53,13 +57,6 @@ const EmptyState = () => {
   useEffect(() => {
     let asyncUseEffect = async () => {
       if (provider != null && balanceLendShares == null) {
-
-        CMM.getPrevSILOR().then(silor => {
-          let annualized = getAnnualizedRate(silor);
-          let pct = annualized.sub(TOTAL_SBPS);
-          let rateString = getDecimalString(pct.toString(), 16, 3);
-          setAnnualLendRate(rateString);
-        });
         let promiseArray = [
           FLT.balanceOf(userAddress).then(res => {
             setBalanceLendShares(res);
@@ -99,7 +96,7 @@ const EmptyState = () => {
             <h5>DAI</h5>
           </div>
           <div className="deposit-container">
-            <h5 className="m-0">{annualLendRate} %</h5>
+            <h5 className="m-0">{annualLendRateString} %</h5>
             <p className="text-white ">Deposit APY</p>
           </div>
         </div>

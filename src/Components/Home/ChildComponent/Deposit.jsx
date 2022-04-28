@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Card from "react-bootstrap/Card";
 import Button  from 'react-bootstrap/Button';
 import Modal from "react-bootstrap/Modal";
@@ -6,30 +6,61 @@ import AccountModal1 from '../../AccountModals/AccountModal1';
 import AccountModal2 from '../../AccountModals/AccountModal2';
 import './home.scss';
 import { Link } from 'react-router-dom';
+import { ethers, BigNumber as BN } from 'ethers';
+import { EthersContext } from '../../EthersProvider/EthersProvider';
+import { getDecimalString } from '../../../Utils/StringAlteration';
+import { getAnnualizedRate } from '../../../Utils/RateMath';
+import { ADDRESS0, TOTAL_SBPS, _0 } from '../../../Utils/Consts.js';
+
+const ICoreMoneyMarketABI = require('../../../abi/ICoreMoneyMarket.json');
+const IERC20ABI = require('../../../abi/IERC20.json');
+const IChainlinkAggregatorABI = require('../../../abi/IChainlinkAggregator.json');
+
 const Deposit=()=> {
+
   const [show, setShow] = useState(false);
+
+  const [getWalletInfo, getBasicInfo, updateBasicInfo] = useContext(EthersContext);
+  const [provider, userAddress] = getWalletInfo();
+  const {
+    annualLendRateString,
+    annualBorrowRateString,
+    valueLentString,
+    valueBorrowedString
+  } = getBasicInfo();
+
+  if (
+    annualLendRateString === '0' &&
+    annualBorrowRateString === '0' &&
+    valueLentString === '0' &&
+    valueBorrowedString === '0'
+  ) {
+    updateBasicInfo();
+  }
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-    const loop=[
-        {
-          
-            title:"Total Deposits",
-            price:"672.12B",
-            ButtonText:"Lend Now",
-            CurrentDeposit:"Current Deposit Rate",
-            price1:"12.10%",
-            link: "/lend",
-        },
-        {
-            title:"Total Borrowed",
-            price:"32.98B",
-            ButtonText:"Borrow Now",
-            CurrentDeposit:"Current Deposit Rate",
-            price1:"12.10%",
-            link: "/borrow"
-        }
-    ]
+
+  const loop = [
+      {
+        
+          title:"Total Deposits",
+          price:valueLentString,
+          ButtonText:"Lend Now",
+          CurrentDeposit:"Current Deposit Rate",
+          price1:annualLendRateString+"%",
+          link: "/lend",
+      },
+      {
+          title:"Total Borrowed",
+          price:valueBorrowedString,
+          ButtonText:"Borrow Now",
+          CurrentDeposit:"Current Deposit Rate",
+          price1:annualBorrowRateString+"%",
+          link: "/borrow"
+      }
+  ]
+
   return (
     <>
       <div className='section-container mx-auto'>
