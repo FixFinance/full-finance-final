@@ -19,48 +19,26 @@ const Deposit=()=> {
 
   const [show, setShow] = useState(false);
 
-  const [getWalletInfo] = useContext(EthersContext);
+  const [getWalletInfo, getBasicInfo, updateBasicInfo] = useContext(EthersContext);
   const [provider, userAddress] = getWalletInfo();
+  const {
+    annualLendRateString,
+    annualBorrowRateString,
+    valueLentString,
+    valueBorrowedString
+  } = getBasicInfo();
 
-  const [annualLendRate, setAnnualLendRate] = useState('0');
-  const [annualBorrowRate, setAnnualBorrowRate] = useState('0');
-  const [valueLentString, setValueLentString] = useState('0');
-  const [valueBorrowedString, setValueBorrowedString] = useState('0');
+  if (
+    annualLendRateString === '0' &&
+    annualBorrowRateString === '0' &&
+    valueLentString === '0' &&
+    valueBorrowedString === '0'
+  ) {
+    updateBasicInfo();
+  }
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-
-  const signer = provider == null ? null : provider.getSigner();
-  let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
-  let BaseAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
-
-  useEffect(() => {
-    BaseAgg.latestAnswer().then(answer => {
-      CMM.getSupplyLent().then(supplyLent => {
-        let valueBN = answer.mul(supplyLent).div(TOTAL_SBPS);
-        setValueLentString(getDecimalString(valueBN.toString(), 18, 0));
-      });
-      CMM.getSupplyBorrowed().then(supplyBorrowed => {
-        let valueBN = answer.mul(supplyBorrowed).div(TOTAL_SBPS);
-        setValueBorrowedString(getDecimalString(valueBN.toString(), 18, 0));
-      });
-    });
-
-    CMM.getPrevSILOR().then(silor => {
-      let annualized = getAnnualizedRate(silor);
-      let pct = annualized.sub(TOTAL_SBPS);
-      let rateString = getDecimalString(pct.toString(), 16, 3);
-      setAnnualLendRate(rateString);
-    });
-
-    CMM.getPrevSIBOR().then(sibor => {
-      let annualized = getAnnualizedRate(sibor);
-      let pct = annualized.sub(TOTAL_SBPS);
-      let rateString = getDecimalString(pct.toString(), 16, 3);
-      setAnnualBorrowRate(rateString);
-    });
-
-  }, []);
 
   const loop = [
       {
@@ -69,7 +47,7 @@ const Deposit=()=> {
           price:valueLentString,
           ButtonText:"Lend Now",
           CurrentDeposit:"Current Deposit Rate",
-          price1:annualLendRate+"%",
+          price1:annualLendRateString+"%",
           link: "/lend",
       },
       {
@@ -77,7 +55,7 @@ const Deposit=()=> {
           price:valueBorrowedString,
           ButtonText:"Borrow Now",
           CurrentDeposit:"Current Deposit Rate",
-          price1:annualBorrowRate+"%",
+          price1:annualBorrowRateString+"%",
           link: "/borrow"
       }
   ]

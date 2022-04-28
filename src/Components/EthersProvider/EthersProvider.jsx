@@ -1,8 +1,13 @@
 import React, {createContext, useState} from 'react'
 import { ethers, BigNumber as BN } from 'ethers';
-import { ADDRESS0 } from '../../Utils/Consts';
+import { ADDRESS0, TOTAL_SBPS, _0 } from '../../Utils/Consts.js';
 import { TargetChains } from '../../Utils/TargetChains';
 import { getDecimalString } from '../../Utils/StringAlteration';
+import { getAnnualizedRate } from '../../Utils/RateMath';
+
+const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
+const IERC20ABI = require('../../abi/IERC20.json');
+const IChainlinkAggregatorABI = require('../../abi/IChainlinkAggregator.json');
 
 function getProvider(walletType)  {
     if (walletType === 'metamask') {
@@ -25,7 +30,12 @@ export default function EthersProvider({children}) {
     const [userETH, setUserETH] = useState('0');
     const [userENS, setUserENS] = useState(null);
     const [chainId, setChainId] = useState(-1);
-    
+
+    const [annualLendRateString, setAnnualLendRateString] = useState('0');
+    const [annualBorrowRateString, setAnnualBorrowRateString] = useState('0');
+    const [valueLentString, setValueLentString] = useState('0');
+    const [valueBorrowedString, setValueBorrowedString] = useState('0');
+
     function setWrongChainState() {
         setWalletType('basic');
         setEthersProvider(null);
@@ -82,8 +92,50 @@ export default function EthersProvider({children}) {
         return [providerToReturn, userAddress, userETH, userENS, chainId, walletType];
     }
 
+    function getBasicInfo() {
+        return {
+            annualLendRateString,
+            annualBorrowRateString,
+            valueLentString,
+            valueBorrowedString
+        };
+    }
+
+    function updateBasicInfo() {
+        const signer = ethersProvider == null ? null : ethersProvider.getSigner();
+        let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
+        let BaseAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
+
+        if (BaseAgg && CMM != null) {
+            BaseAgg.latestAnswer().then(answer => {
+                CMM.getSupplyLent().then(supplyLent => {
+                    let valueBN = answer.mul(supplyLent).div(TOTAL_SBPS);
+                    setValueLentString(getDecimalString(valueBN.toString(), 18, 0));
+                });
+                CMM.getSupplyBorrowed().then(supplyBorrowed => {
+                    let valueBN = answer.mul(supplyBorrowed).div(TOTAL_SBPS);
+                    setValueBorrowedString(getDecimalString(valueBN.toString(), 18, 0));
+                });
+            });
+
+            CMM.getPrevSILOR().then(silor => {
+                let annualized = getAnnualizedRate(silor);
+                let pct = annualized.sub(TOTAL_SBPS);
+                let rateString = getDecimalString(pct.toString(), 16, 3);
+                setAnnualLendRateString(rateString);
+            });
+
+            CMM.getPrevSIBOR().then(sibor => {
+                let annualized = getAnnualizedRate(sibor);
+                let pct = annualized.sub(TOTAL_SBPS);
+                let rateString = getDecimalString(pct.toString(), 16, 3);
+                setAnnualBorrowRateString(rateString);
+            });
+        }
+    }
+
     return (
-        <EthersContext.Provider value={[getWalletInfo]}>
+        <EthersContext.Provider value={[getWalletInfo, getBasicInfo, updateBasicInfo]}>
             {children}
         </EthersContext.Provider>
     )
