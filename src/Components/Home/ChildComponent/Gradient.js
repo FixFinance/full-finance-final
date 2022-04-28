@@ -189,7 +189,7 @@ class MiniGl {
                     (name_no_prefix =
                       name_no_prefix.charAt(0).toUpperCase() +
                       name_no_prefix.slice(1)),
-                    `uniform struct ${name_no_prefix} 
+                    `uniform struct ${name_no_prefix}
                                 {\n` +
                       Object.entries(uniform.value)
                         .map(([name, uniform]) =>

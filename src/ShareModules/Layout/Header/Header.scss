@@ -9,10 +9,24 @@
   bottom: 0%;
   height: 180px;
   z-index: 2;
-  @media (max-width: 992px) {
-    padding-top: 0px;
+  @media (max-width: 1440px) {
+    left: 0%;
+    right: 0%;
   }
   .navbar {
+    .navbar-toggler:focus{
+      border: none;
+      box-shadow: none;
+    }
+    .navbar-toggler.collapsed {
+      background-color: none;
+      border: none;
+    }
+    .navbar-toggler-icon {
+      width: 48px;
+      height: 48px;
+      background-image: url("../../../assets/image/burger.svg");
+    }
     position: relative;
     display: flex;
     flex-wrap: wrap;
@@ -20,8 +34,14 @@
     justify-content: space-between;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
-    @media (max-width: 992px) {
-      background-color: #2527276b;
+    .container {
+      justify-content: flex-start;
+    }
+    @media (max-width: 765) {
+      align-items: flex-start;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
     }
   }
 }
@@ -55,7 +75,6 @@
 
   color: #edf0eb;
   padding: 0 45px 0 30px;
-  
 }
 
 .ellip_img{
@@ -95,6 +114,9 @@
   @media (max-width: 810px) {
     padding: 15px 25px;
   }
+  @media (max-width: 765) {
+    margin-left: auto;
+  }
 }
 
 .navbar-nav {
@@ -104,12 +126,15 @@
     font-size: 15px;
     line-height: 20px;
     text-decoration: none;
-    @media (max-width: 992px) {
+    @media (max-width: 767) {
       text-align: center;
       padding: 10px 0;
     }
 
     a {
+      @media (max-width: 960) {
+        font-size: 13px;
+      }
       color: #edf0eb;
       text-decoration: none;
 
@@ -129,4 +154,30 @@
 .navbar-brand img {
   width: 176px;
   height: 24px;
+  @media (max-width: 375px) {
+    width: 128px;
+    height: 32px;
+  }
+}
+
+.button-container {
+  width: 176px;
+  button {
+    @media (max-width: 765px) {
+      width: 163px;
+      height: 44px;
+      padding-top: 10px;
+    }
+    @media (max-width: 375px) {
+    width: 139px;
+    height: 48px;
+    font-size: 12px;
+    font-weight: 600;
+    padding-top: 13px;
+    }
+  }
+}
+
+.right-side-container {
+  margin-left: auto;
 }

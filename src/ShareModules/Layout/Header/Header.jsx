@@ -45,18 +45,17 @@ const Header = ({ z }) => {
     <div class="header-container position-relative mx-auto">
       <div className={zData ? "header2 header-top" : "header header-top"}>
         <Navbar
-          expand="lg"
+          expand="md"
           collapseOnSelect
           // expanded={expanded}
           // onToggle={expanded}
           className="navbar navbar-expand-lg navbar-dark home-nav"
         >
           <div className="container">
-            <Link className="navbar-brand" to="/">
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <div className="navbar-brand" to="/">
               <img src="assets/images/logo.svg" alt="" />
-            </Link>
-
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            </div>
             <Navbar.Collapse id="basic-navbar-nav">
               <ul className="navbar-nav mx-auto mb-2 mb-lg-0 justify-content-around">
                 <li>
@@ -93,7 +92,8 @@ const Header = ({ z }) => {
                   </NavLink>
                 </li>
               </ul>
-              <div className="d-lg-flex text-center  ">
+            </Navbar.Collapse>
+            <div className="right-side-container text-center">
                 {userAddress !== ADDRESS0 ? (
                   <div className="d-flex justify-content-center mt-lg-0 mt-3" onClick={() => handleShow2()}>
                     <button className="btn eth_btn">{userETH} ETH</button>
@@ -107,14 +107,13 @@ const Header = ({ z }) => {
                     </button>
                   </div>
                 ) : (
-                  <Link className="" to="">
+                  <div className="button-container">
                     <button className="btn connect-wallet" onClick={handleShow}>
                       Connect Wallet
                     </button>
-                  </Link>
+                  </div>
                 )}
               </div>
-            </Navbar.Collapse>
           </div>
         </Navbar>
         {/* ************ connect wallet pop up ***************/}
