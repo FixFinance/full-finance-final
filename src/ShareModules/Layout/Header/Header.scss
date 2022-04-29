@@ -21,11 +21,14 @@
     .navbar-toggler.collapsed {
       background-color: none;
       border: none;
+      .navbar-toggler-icon {
+        background-image: url("../../../assets/image/burger.svg");
+      }
     }
     .navbar-toggler-icon {
       width: 48px;
       height: 48px;
-      background-image: url("../../../assets/image/burger.svg");
+      background-image: url("../../../assets/image/close.svg");
     }
     position: relative;
     display: flex;
@@ -62,11 +65,14 @@
     .navbar-toggler.collapsed {
       background-color: none;
       border: none;
+      .navbar-toggler-icon {
+        background-image: url("../../../assets/image/burger.svg");
+      }
     }
     .navbar-toggler-icon {
       width: 48px;
       height: 48px;
-      background-image: url("../../../assets/image/burger.svg");
+      background-image: url("../../../assets/image/close.svg");
     }
   }
 }
@@ -139,6 +145,10 @@
 }
 
 .navbar-nav {
+  @media (max-width: 400px) {
+    height: 100vh;
+    background-color: #7e3ac3;
+  }
   li {
     padding: 0 20px;
     color: #fff;
