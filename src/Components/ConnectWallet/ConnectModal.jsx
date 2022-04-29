@@ -53,7 +53,7 @@ const ConnectModal = ({ handleClose }) => {
                 <div className="field-text align-self-center">
                   Metamask
                 </div>
-                <div>
+                <div className="icon_container">
                   <img src={icon1} alt="img" className="icon_img" />
                 </div>
               </div>
@@ -66,7 +66,9 @@ const ConnectModal = ({ handleClose }) => {
                 <div className="field-text align-self-center">
                   WalletConnect
                 </div>
-                <img src={icon2} alt="img" className="icon_img" />
+                <div className="icon_container">
+                  <img src={icon2} alt="img" className="icon_img" />
+                </div>
               </div>
             </div>
             <div className="form-group">
@@ -74,13 +76,17 @@ const ConnectModal = ({ handleClose }) => {
                 <div className="field-text align-self-center">
                   Coinbase Wallet
                 </div>
-                <img src={icon3} alt="img" className="icon_img" />
+                <div className="icon_container">
+                  <img src={icon3} alt="img" className="icon_img" />
+                </div>
               </div>
             </div>
             <div className="form-group">
               <div className="d-flex form-field justify-content-between">
                 <div className="field-text align-self-center">Portis</div>
-                <img src={icon4} alt="img" className="icon_img" />
+                <div className="icon_container">
+                  <img src={icon4} alt="img" className="icon_img" />
+                </div>
               </div>
             </div>
             <div className="">
@@ -91,7 +97,7 @@ const ConnectModal = ({ handleClose }) => {
           </>
         )}
 
-        {selectedModal !== "error" && selectedModal !== "basic" && !showWrongNetwork && 
+        {selectedModal !== "error" && selectedModal !== "basic" && !showWrongNetwork &&
           <AccountModal2 walletType={selectedModal} address={userAddress} ens={userENS}/>
         }
       </Modal.Body>

@@ -50,6 +50,25 @@
   position: static;
   margin-left: 60px;
   margin-right: 60px;
+  @media (max-width: 1440px) {
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+  .navbar {
+    .navbar-toggler:focus{
+      border: none;
+      box-shadow: none;
+    }
+    .navbar-toggler.collapsed {
+      background-color: none;
+      border: none;
+    }
+    .navbar-toggler-icon {
+      width: 48px;
+      height: 48px;
+      background-image: url("../../../assets/image/burger.svg");
+    }
+  }
 }
 
 .header-top {

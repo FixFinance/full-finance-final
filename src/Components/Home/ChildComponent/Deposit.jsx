@@ -43,7 +43,6 @@ const Deposit=()=> {
 
   const loop = [
       {
-        
           title:"Total Deposits",
           price:valueLentString,
           ButtonText:"Lend Now",
@@ -71,7 +70,7 @@ const Deposit=()=> {
 
             {loop.map((item,index)=>{
                 return(
-                    <div className='col-sm-6 m-auto mt-sm-0 mt-3'>
+                    <div className='col-md-6 m-auto mt-md-0 mt-3'>
                     <Card key={index} className="bg-dark text-center">
                     {/* <Card.Img variant="top" src={item.img} /> */}
                     <Card.Body>
@@ -83,11 +82,10 @@ const Deposit=()=> {
                       <Link to={item.link}>
                         <button  className='button-text-one' onClick={item.click}>{item.ButtonText}</button>
                       </Link>
-                      <Card.Text className='p1'>
-                        {item.CurrentDeposit}
+                      <Card.Text style={{ 'color': '#7d8282' }} className='p1'>
+                        {item.CurrentDeposit} {item.price1}
                       </Card.Text>
                       <Card.Text className='item-price-one'>
-                        {item.price1}
                       </Card.Text>
                     </Card.Body>
                   </Card>

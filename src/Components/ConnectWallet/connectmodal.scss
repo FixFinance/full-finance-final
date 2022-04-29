@@ -36,9 +36,15 @@ color: #EDF0EB;
       margin-top: 12px;
       cursor: pointer;
     }
-    .icon_img {
+    .icon_container {
       width: 48px;
       height: 48px;
+      padding-top: 10px;
+    }
+    .icon_img {
+      width: 80%;
+      height: 80%;
+      margin: auto;
     }
     p {
       font-weight: 400;
