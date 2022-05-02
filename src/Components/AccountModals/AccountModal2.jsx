@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import ellips2 from "../../assets/image/ellips2.svg";
+import ellipse2 from "../../assets/image/ellipse2.svg"
 import "./accountmodal.scss";
 import AccountModal1 from "./AccountModal1";
 
@@ -19,8 +19,8 @@ const AccountModal2 = ({ handleClose, walletType, address, ens }) => {
               <h5>Your wallet</h5>
             </Modal.Header>
             <Modal.Body>
-              <img src={ellips2} alt="img" className="ellips" />
-              {ens !== null && 
+              <img src={ellipse2} alt="img" className="ellipse" />
+              {ens !== null &&
                 <>
                   <h5>{ens}</h5>
                   <h6>{abbreviatedAddress}</h6>

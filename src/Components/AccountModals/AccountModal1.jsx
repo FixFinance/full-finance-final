@@ -1,7 +1,7 @@
 import React from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import ellips1 from "../../assets/image/ellips1.svg";
+import ellipse1 from "../../assets/image/ellipse1.svg";
 import "./accountmodal.scss";
 const AccountModal1 = ({ handleClose, address }) => {
   let abbreviatedAddress = address.substring(0, 9)+'...'+address.substring(address.length-4)
@@ -11,7 +11,7 @@ const AccountModal1 = ({ handleClose, address }) => {
         <h5>Your wallet</h5>
       </Modal.Header>
       <Modal.Body>
-        <img src={ellips1} alt="img" className="ellips" />
+        <img src={ellipse1} alt="img" className="ellipse" />
         <h5>{abbreviatedAddress}</h5>
         <div className="mb-4 mt-5">
           <div className="text-center">

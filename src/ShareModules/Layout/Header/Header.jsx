@@ -7,7 +7,7 @@ import Modal from "react-bootstrap/Modal";
 import ConnectModal from "../../../Components/ConnectWallet/ConnectModal";
 import AccountModal2 from "../../../Components/AccountModals/AccountModal2";
 import WrongNetworkModal from "../../../Components/ConnectWallet/WrongNetworkModal";
-import ellips_icon from "../../../assets/image/ellips2.svg";
+import ellipse_icon from "../../../assets/image/ellipse2.svg";
 import { EthersContext } from '../../../Components/EthersProvider/EthersProvider';
 import { ADDRESS0 } from '../../../Utils/Consts.js';
 
@@ -99,7 +99,7 @@ const Header = ({ z }) => {
                     <button className="btn eth_btn">{userETH} ETH</button>
                     <button className="btn num_btn d-flex">
                       <img
-                        src={ellips_icon}
+                        src={ellipse_icon}
                         alt="img"
                         className="ellip_img align-self-center"
                       />

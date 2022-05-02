@@ -13,6 +13,10 @@
     left: 0%;
     right: 0%;
   }
+  @media (max-width: 500px) {
+    left: -2%;
+    right: -2%;
+  }
   .navbar {
     .navbar-toggler:focus{
       border: none;
@@ -82,6 +86,9 @@
   padding-bottom: 50px;
   .container {
     max-width: 98%;
+    @media (max-width: 400px) {
+      max-width: 100%;
+    }
   }
 }
 
@@ -183,22 +190,23 @@
 .navbar-brand img {
   width: 176px;
   height: 24px;
-  @media (max-width: 375px) {
-    width: 128px;
-    height: 32px;
+  @media (max-width: 500px) {
+    width: 96px;
+    height: 24px;
   }
 }
 
 .button-container {
   width: 176px;
+  margin-top: 5px;
   button {
     @media (max-width: 765px) {
       width: 163px;
       height: 44px;
       padding-top: 10px;
     }
-    @media (max-width: 375px) {
-    width: 139px;
+    @media (max-width: 500px) {
+    max-width: 139px;
     height: 48px;
     font-size: 12px;
     font-weight: 600;
