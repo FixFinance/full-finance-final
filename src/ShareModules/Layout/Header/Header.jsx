@@ -14,6 +14,7 @@ import { ADDRESS0 } from '../../../Utils/Consts.js';
 const Header = ({ z }) => {
   const [show, setShow] = useState(false);
   const [show2, setShow2] = useState(false);
+  const [show3, setShow3] = useState(false);
 
   const handleClose = () => {
     setShow(false);
@@ -25,6 +26,11 @@ const Header = ({ z }) => {
     // setXData('/');
   }
   const handleShow2 = () => setShow2(true);
+
+  const handleClose3 = () => {
+    setShow3(false);
+  }
+  const handleShow3 = () => setShow3(true);
   const [zData, setZData] = useState(z);
   const [getWalletInfo] = useContext(EthersContext);
   const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo();
@@ -43,7 +49,8 @@ const Header = ({ z }) => {
   return (
     <>
     <div class="header-container position-relative mx-auto">
-      <div className={zData ? "header2 header-top" : "header header-top"}>
+      <div className={zData ? "header2 " : "header"}>
+      <div className={show3 ? "header-top-overlay" : "header-top"}>
         <Navbar
           expand="md"
           collapseOnSelect
@@ -52,7 +59,7 @@ const Header = ({ z }) => {
           className="navbar navbar-expand-lg navbar-dark home-nav"
         >
           <div className="container">
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setShow3(!show3)}/>
             <div className="navbar-brand" to="/">
               <img src="assets/images/logo.svg" alt="" />
             </div>
@@ -136,7 +143,8 @@ const Header = ({ z }) => {
         >
           <AccountModal2 handleClose={handleClose2} />
         </Modal>
-      </div>
+        </div>
+        </div>
     </div>
   </>
   );
