@@ -100,7 +100,7 @@
   align-items: center;
   justify-content: left;
   .navbar {
-    
+
   }
   .container {
     width: 100%;
@@ -236,6 +236,9 @@
     font-weight: 600;
     padding-top: 13px;
     }
+    @media (max-width: 400px) {
+      font-size: 11px;
+      }
   }
 }
 
