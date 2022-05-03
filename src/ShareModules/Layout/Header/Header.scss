@@ -62,6 +62,9 @@
     margin-right: 0px;
   }
   .navbar {
+    .navbar-dark .navbar-toggler {
+      border: none;
+    }
     .navbar-toggler:focus{
       border: none;
       box-shadow: none;
@@ -99,9 +102,6 @@
   height: 100vh;
   align-items: center;
   justify-content: left;
-  .navbar {
-
-  }
   .container {
     width: 100%;
     height: 100%;
@@ -114,6 +114,27 @@
   .button-container {
     margin: auto;
   }
+}
+
+.overlay-nav {
+  li {
+    font-size: 36px !important;
+    line-height: normal !important;
+    margin-top: 30px;
+    font-family: 'Nib Pro SemiBold'
+  }
+}
+
+.overlay-button {
+    width: 100%;
+    height: 66px;
+    background: #252727;
+    color: #edf0eb;
+    border-radius: 50px;
+    margin-top: 50px;
+    @media (max-width: 400px) {
+      font-weight: 300;
+    }
 }
 
 .eth_btn {
@@ -151,7 +172,7 @@
   border-radius: 50px;
   color: #edf0eb;
   padding: 0 30px 0 14px;
- margin-left: -30px;
+  margin-left: -30px;
 }
 
 .connect-wallet {
@@ -176,21 +197,12 @@
 }
 
 .navbar-nav {
-  @media (max-width: 400px) {
-    height: 100vh;
-    background-color: #7e3ac3;
-  }
   li {
     padding: 0 20px;
     color: #fff;
     font-size: 15px;
     line-height: 20px;
     text-decoration: none;
-    @media (max-width: 767) {
-      text-align: center;
-      padding: 10px 0;
-    }
-
     a {
       @media (max-width: 960) {
         font-size: 13px;
@@ -223,23 +235,6 @@
 .button-container {
   width: 176px;
   margin-top: 5px;
-  button {
-    @media (max-width: 765px) {
-      width: 163px;
-      height: 44px;
-      padding-top: 10px;
-    }
-    @media (max-width: 500px) {
-    max-width: 139px;
-    height: 48px;
-    font-size: 12px;
-    font-weight: 600;
-    padding-top: 13px;
-    }
-    @media (max-width: 400px) {
-      font-weight: 300;
-      }
-  }
 }
 
 .right-side-container {

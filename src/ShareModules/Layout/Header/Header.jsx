@@ -64,7 +64,7 @@ const Header = ({ z }) => {
               <img src="assets/images/logo.svg" alt="" />
             </div>
             <Navbar.Collapse id="basic-navbar-nav">
-              <ul className="navbar-nav mx-auto mb-2 mb-lg-0 justify-content-around">
+              <ul className={show3 ? "navbar-nav overlay-nav" : "navbar-nav mx-auto mb-2 mb-lg-0 justify-content-around"}>
                 <li>
                   <NavLink
                     to="/"
@@ -98,9 +98,28 @@ const Header = ({ z }) => {
                     Borrow{" "}
                   </NavLink>
                 </li>
+                {/* {show3 ? (
+                  <>
+                    <li>
+                      <NavLink
+                      activeClassName="active">
+                      Discord
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink
+                      activeClassName="active">
+                      Twitter
+                      </NavLink>
+                    </li>
+                  </>
+                ) : (
+                  <>
+                  </>
+                )} */}
               </ul>
             </Navbar.Collapse>
-            <div className="right-side-container text-center">
+            <div className={show3 ? "text-center mx-auto w-100" : "right-side-container text-center"}>
                 {userAddress !== ADDRESS0 ? (
                   <div className="d-flex justify-content-center mt-lg-0 mt-3" onClick={() => handleShow2()}>
                     <button className="btn eth_btn">{userETH} ETH</button>
@@ -113,6 +132,12 @@ const Header = ({ z }) => {
                       <div>{abbreviatedAddress}</div>
                     </button>
                   </div>
+                ) : show3 === true ? (
+                  <>
+                    <button className="btn overlay-button">
+                      Connect Wallet
+                    </button>
+                  </>
                 ) : (
                   <div className="button-container">
                     <button className="btn connect-wallet" onClick={handleShow}>
