@@ -16,8 +16,6 @@ const BorrowMore=({
 
   const [input, setInput] = useState('');
   const [balanceDASSET, setBalanceDASSET] = useState(null);
-  const [collatRatioCheck, setCollatRatioCheck] = useState(false); // This variable controls the color of the Implied Collateralization Ratio
-
 
   useEffect(() => {
     if (balanceDASSET == null) {
@@ -36,6 +34,9 @@ const BorrowMore=({
   const balanceDASSETString = balanceDASSET == null ? '0' : getDecimalString(balanceDASSET.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 3);
   const currentCollRatioString = getDecimalString(vault.collateralizationRatio.toString(), 16, 2);
   const resultantCollRatioString = getDecimalString(resultantCollateralizationRatio.toString(), 16, 2);
+
+  const MIN_SAFE_COLLAT_RATIO = BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)).mul(BN.from(10).pow(BN.from(16)));
+  let resultantCollatRatioSafe = resultantCollateralizationRatio.gte(MIN_SAFE_COLLAT_RATIO);
 
   const handleInput = (param) => {
     let value = param.target.value;
@@ -85,11 +86,11 @@ const BorrowMore=({
               {/* <p style={{ color: "#7D8282" }}>→ 500.00 DAI</p> */}
             </div>
           </div>
-          <div className={!collatRatioCheck ? "d-flex justify-content-between text-part mt-2 border_bottom red_collat_ratio" : "d-flex justify-content-between text-part mt-2 border_bottom"}>
+          <div className={"d-flex justify-content-between text-part mt-2 border_bottom"} style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>
             <p>Current Coll. Ratio</p>
             <p>{currentCollRatioString}%</p>
           </div>
-          <div className={!collatRatioCheck ? "d-flex justify-content-between text-part mt-2 border_bottom red_collat_ratio" : "d-flex justify-content-between text-part mt-2 border_bottom"}>
+          <div className={"d-flex justify-content-between text-part mt-2 border_bottom"} style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>
             <p>Resultant Coll. Ratio</p>
             <p>{resultantCollRatioString}%</p>
           </div>

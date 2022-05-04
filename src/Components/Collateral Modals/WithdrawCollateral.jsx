@@ -26,7 +26,8 @@ const WithdrawCollateral = ({
   const currentCollRatioString = vault.collateralizationRatio == null ? '0' : getDecimalString(vault.collateralizationRatio.toString(), 16, 2);
   const impliedCollRatioString = getDecimalString(impliedCollateralizationRatio.toString(), 16, 2);
 
-  const [collatRatioCheck, setCollatRatioCheck] = useState(false); // This variable controls the color of the Implied Collateralization Ratio
+  const MIN_SAFE_COLLAT_RATIO = BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)).mul(BN.from(10).pow(BN.from(16)));
+  let resultantCollatRatioSafe = impliedCollateralizationRatio.gte(MIN_SAFE_COLLAT_RATIO);
 
   const handleInput = (param) => {
     let value = param.target.value;
@@ -69,12 +70,12 @@ const WithdrawCollateral = ({
               <p style={{ color: "#7D8282" }}>{amtSuppliedStringAbbreviated} WETH</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
-              <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>Implied Coll. Ratio</p>
-              <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>{impliedCollRatioString}%</p>
+              <p style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>Implied Coll. Ratio</p>
+              <p style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>{impliedCollRatioString}%</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
-              <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>Current Coll. Ratio</p>
-              <p style={!collatRatioCheck ? { color: "#EF767A" } : { color: "#7D8282" }}>{currentCollRatioString}%</p>
+              <p style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>Current Coll. Ratio</p>
+              <p style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>{currentCollRatioString}%</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
               <p style={{ color: "#7D8282" }}>Min. Coll. Ratio</p>
