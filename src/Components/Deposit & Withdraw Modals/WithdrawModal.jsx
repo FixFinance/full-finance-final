@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from "react";
 import Modal from "react-bootstrap/Modal";
 import { ethers, BigNumber as BN } from 'ethers';
 import "./depositmodal.scss";
-import SuccessModal from "./SuccessModal";
+import SuccessModal from "../Success/SuccessModal";
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
 import { SendTx } from '../../Utils/SendTx';

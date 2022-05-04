@@ -1,6 +1,6 @@
 import React from "react";
 import Modal from "react-bootstrap/Modal";
-import "./depositmodal.scss";
+import "./success.scss";
 import tick from "../../assets/image/tick.svg";
 const SuccessModal = ({ handleClosesuccess }) => {
   return (
