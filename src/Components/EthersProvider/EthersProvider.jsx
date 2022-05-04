@@ -35,6 +35,7 @@ export default function EthersProvider({children}) {
     const [annualBorrowRateString, setAnnualBorrowRateString] = useState('0');
     const [valueLentString, setValueLentString] = useState('0');
     const [valueBorrowedString, setValueBorrowedString] = useState('0');
+    const [infuraUp, setInfuraUp] = useState(true);
 
     function setWrongChainState() {
         setWalletType('basic');
@@ -102,11 +103,13 @@ export default function EthersProvider({children}) {
     }
 
     function updateBasicInfo() {
-        const provider = new ethers.providers.InfuraProvider('kovan', process.env.REACT_APP_INFURA_API_KEY);
-        let CMM = new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, provider);
-        let BaseAgg = new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, provider);
+        const provider = infuraUp ? new ethers.providers.InfuraProvider('kovan', process.env.REACT_APP_INFURA_API_KEY) : ethersProvider;
+        let CMM = provider == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, provider);
+        let BaseAgg = provider == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, provider);
 
-        if (BaseAgg && CMM != null) {
+        let catchFunc = () => setInfuraUp(false);
+
+        if (BaseAgg != null && CMM != null) {
             BaseAgg.latestAnswer().then(answer => {
                 CMM.getSupplyLent().then(supplyLent => {
                     let valueBN = answer.mul(supplyLent).div(TOTAL_SBPS);
@@ -116,21 +119,21 @@ export default function EthersProvider({children}) {
                     let valueBN = answer.mul(supplyBorrowed).div(TOTAL_SBPS);
                     setValueBorrowedString(getDecimalString(valueBN.toString(), 18, 0));
                 });
-            });
+            }).catch(catchFunc);
 
             CMM.getPrevSILOR().then(silor => {
                 let annualized = getAnnualizedRate(silor);
                 let pct = annualized.sub(TOTAL_SBPS);
                 let rateString = getDecimalString(pct.toString(), 16, 3);
                 setAnnualLendRateString(rateString);
-            });
+            }).catch(catchFunc);
 
             CMM.getPrevSIBOR().then(sibor => {
                 let annualized = getAnnualizedRate(sibor);
                 let pct = annualized.sub(TOTAL_SBPS);
                 let rateString = getDecimalString(pct.toString(), 16, 3);
                 setAnnualBorrowRateString(rateString);
-            });
+            }).catch(catchFunc);
         }
     }
 

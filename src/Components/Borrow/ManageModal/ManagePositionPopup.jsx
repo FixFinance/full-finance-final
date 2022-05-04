@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Modal from "react-bootstrap/Modal";
 import "./managepopup.scss";
+import SuccessModal from "../../Success/SuccessModal";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../../Utils/StringAlteration.js';
 import { TOTAL_SBPS, _0, INF } from '../../../Utils/Consts.js';
 import { ethers, BigNumber as BN } from 'ethers';
@@ -22,6 +23,13 @@ const ManagePositionPopup = ({
     collateralAggDecimals
 }) => {
 
+    const SUCCESS_STATUS = {
+        BASE: 0,
+        APPROVAL_SUCCESS: 1,
+        OPEN_SUCCESS: 2
+    }
+    const [success, setSuccess] = useState(SUCCESS_STATUS.BASE);
+
     const [cInput, setCInput] = useState(null);
     const [dInput, setDInput] = useState(null);
 
@@ -36,6 +44,15 @@ const ManagePositionPopup = ({
     const collateralAmountInput = cInput == null ? _0 : BN.from(getAbsoluteString(cInput, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
     const debtAmountInput = dInput == null ? _0 : BN.from(getAbsoluteString(dInput, parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
 
+    const handleClosesuccess = () => {
+        if (success == SUCCESS_STATUS.APPROVAL_SUCCESS) {
+            setApprovedCollateral(null);
+            setSuccess(SUCCESS_STATUS.BASE);
+        }
+        else {
+            handleClose();
+        }
+    }
 
     function getEffCollatRatioBN() {
         let canFind = ![balanceCollateral, baseAggAnswer, baseAggDecimals, collateralAggAnswer, collateralAggDecimals].includes(null);
@@ -73,9 +90,13 @@ const ManagePositionPopup = ({
         return getDecimalString(absCRatioString, 16, 2);
     }
 
+    const MIN_SAFE_COLLAT_RATIO = BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)).mul(BN.from(10).pow(BN.from(16)));
+    let resultantCollatRatioSafe = getEffCollatRatioBN().gte(MIN_SAFE_COLLAT_RATIO);
+
     async function approveOnClick() {
         if (CASSET !== null && CMM !== null) {
             await SendTx(userAddress, CASSET, 'approve', [CMM.address, INF.toString()]);
+            setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
             setBalanceCollateral(null);
             setApprovedCollateral(null);
         }
@@ -87,6 +108,7 @@ const ManagePositionPopup = ({
             getEffCollatRatioBN().div(BN.from(10).pow(BN.from(16))).gte(BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)))
         ) {
             await SendTx(userAddress, CMM, 'openCVault', [process.env.REACT_APP_COLLATERAL_ADDRESS, collateralAmountInput.toString(), debtAmountInput.toString()]);
+            await setSuccess(SUCCESS_STATUS.OPEN_SUCCESS);
         }
     }
 
@@ -170,12 +192,13 @@ const ManagePositionPopup = ({
             <h3>Max Available to borrow <span>{maxBorrowString} DAI</span></h3>
 
             <div className="amount_section_text">
-                <h3 className={!collatRatioCheck ? "unhealthy_collat_ratio" : "healthy_collat_ratio"}>Implied Collateralization Ratio <span>{getEffCollatRatioString()} %</span></h3>
+                <h3 className={!resultantCollatRatioSafe ? "unhealthy_collat_ratio" : "healthy_collat_ratio"}>Implied Collateralization Ratio <span>{getEffCollatRatioString()} %</span></h3>
                 <h3>Minimum Collateralization Ratio <span>{parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5} %</span></h3> 
             </div>
 
         </div>
     );
+
 
     let sufficientWETHApproval = approvedCollateral == null || balanceCollateral == null || approvedCollateral.eq(_0) || approvedCollateral.gte(balanceCollateral);
     let buttons = (
@@ -185,25 +208,43 @@ const ManagePositionPopup = ({
         </>
     );
 
+    let inputs = (
+        success == SUCCESS_STATUS.BASE &&
+        <div className="manage_popup">
+            <Modal.Header closeButton>
+            <h5>Open Borrowing Position</h5>
+            </Modal.Header>
+            <Modal.Body>
+               <div className="managepopup_details">
+
+                    {selectCollateralAmount}
+
+                    {selectBorrowAmount}
+
+                    {buttons}
+
+               </div> 
+            </Modal.Body>
+        </div>
+    );
+
+    let successmodal = (
+        <Modal
+            show={success != SUCCESS_STATUS.BASE}
+            onHide={handleClosesuccess}
+            centered
+            animation={false}
+            className="deposit-modal"
+        >
+            <SuccessModal handleClosesuccess={handleClosesuccess} />
+        </Modal>
+    );
+
     return (
         <div>
-            <div className="manage_popup">
-                <Modal.Header closeButton>
-                <h5>Open Borrowing Position</h5>
-                </Modal.Header>
-                <Modal.Body>
-                   <div className="managepopup_details">
-
-                        {selectCollateralAmount}
-
-                        {selectBorrowAmount}
-
-                        {buttons}
-
-                   </div> 
-                </Modal.Body>
-            </div>
+            {inputs}
+            {successmodal}
         </div>
     )
 }
-export default ManagePositionPopup
+export default ManagePositionPopup;
