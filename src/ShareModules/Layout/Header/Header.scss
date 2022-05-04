@@ -62,9 +62,16 @@
     margin-right: 0px;
   }
   .navbar {
+    .navbar-toggler {
+      border: none;
+    }
     .navbar-dark .navbar-toggler {
       border: none;
-      border-color: none;
+      border-color: #7e3ac3;
+    }
+    .navbar-light .navbar-toggler {
+      border: none;
+      border-color: #7e3ac3;
     }
     .navbar-toggler:focus{
       border: none;
@@ -73,6 +80,7 @@
     .navbar-toggler.collapsed {
       background-color: none;
       border: none;
+      border-color: #7e3ac3;
       .navbar-toggler-icon {
         background-image: url("../../../assets/image/burger.svg");
       }
