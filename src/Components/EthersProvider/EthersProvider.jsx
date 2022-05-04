@@ -102,9 +102,9 @@ export default function EthersProvider({children}) {
     }
 
     function updateBasicInfo() {
-        const signer = ethersProvider == null ? null : ethersProvider.getSigner();
-        let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
-        let BaseAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
+        const provider = new ethers.providers.InfuraProvider('kovan', process.env.REACT_APP_INFURA_API_KEY);
+        let CMM = new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, provider);
+        let BaseAgg = new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, provider);
 
         if (BaseAgg && CMM != null) {
             BaseAgg.latestAnswer().then(answer => {
