@@ -13,10 +13,7 @@
     left: 0%;
     right: 0%;
   }
-  @media (max-width: 500px) {
-    left: -2%;
-    right: -2%;
-  }
+
   .navbar {
     .navbar-toggler:focus{
       border: none;
@@ -27,6 +24,9 @@
       border: none;
       .navbar-toggler-icon {
         background-image: url("../../../assets/image/burger.svg");
+        @media (max-width: 400px) {
+          margin-left: -10px;
+        }
       }
     }
     .navbar-toggler-icon {
@@ -64,6 +64,7 @@
   .navbar {
     .navbar-dark .navbar-toggler {
       border: none;
+      border-color: none;
     }
     .navbar-toggler:focus{
       border: none;
@@ -100,16 +101,9 @@
   background: #7e3ac3;
   width: 100vw;
   height: 100vh;
-  align-items: center;
-  justify-content: left;
   .container {
     width: 100%;
     height: 100%;
-    margin-right: auto;
-  }
-  .connect-wallet {
-    background-color: #252727;
-    width: 95%;
   }
   .button-container {
     margin: auto;
@@ -191,8 +185,11 @@
   @media (max-width: 810px) {
     padding: 15px 25px;
   }
-  @media (max-width: 765) {
+  @media (max-width: 765px) {
     margin-left: auto;
+  }
+  @media (max-width: 400px) {
+    margin-right: -20px;
   }
 }
 

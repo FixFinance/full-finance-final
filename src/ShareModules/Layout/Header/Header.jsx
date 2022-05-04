@@ -132,15 +132,9 @@ const Header = ({ z }) => {
                       <div>{abbreviatedAddress}</div>
                     </button>
                   </div>
-                ) : show3 === true ? (
-                  <>
-                    <button className="btn overlay-button">
-                      Connect Wallet
-                    </button>
-                  </>
                 ) : (
-                  <div className="button-container">
-                    <button className="btn connect-wallet" onClick={handleShow}>
+                  <div className={show3 ? "" : "button-container"}>
+                    <button className={show3 ? "btn overlay-button" : "btn connect-wallet"} onClick={handleShow}>
                       Connect Wallet
                     </button>
                   </div>
