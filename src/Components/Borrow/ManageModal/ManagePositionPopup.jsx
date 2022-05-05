@@ -41,9 +41,10 @@ const ManagePositionPopup = ({
     const [maxBorrowAmount, setMaxBorrowAmount] = useState(null);
     const [collatRatioCheck, setCollatRatioCheck] = useState(false); // This variable controls the color of the Implied Collateralization Ratio
 
+    //Borrow-Lend Supply Difference
     const BLSdiff = supplyBorrowedBN != null && supplyLentBN != null ? supplyLentBN.sub(supplyBorrowedBN) : _0;
     const collateralBalanceString = balanceCollateral == null ? '0' : getDecimalString(balanceCollateral.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
-    const maxBorrowString = maxBorrowAmount == null ? '0' : getDecimalString(BNmin(BLSdiff, maxBorrowAmount).toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
+    const maxBorrowString = maxBorrowAmount == null ? '0' : getDecimalString(maxBorrowAmount.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
 
     const collateralAmountInput = cInput == null ? _0 : BN.from(getAbsoluteString(cInput, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
     const debtAmountInput = dInput == null ? _0 : BN.from(getAbsoluteString(dInput, parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
@@ -108,8 +109,9 @@ const ManagePositionPopup = ({
 
     async function openVaultOnClick() {
         if (
-            approvedCollateral != null && balanceCollateral != null && !collateralAmountInput.eq(_0) && !debtAmountInput.eq(_0) &&
-            getEffCollatRatioBN().div(BN.from(10).pow(BN.from(16))).gte(BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)))
+            approvedCollateral != null && balanceCollateral != null && maxBorrowAmount != null &&
+            !collateralAmountInput.eq(_0) && !debtAmountInput.eq(_0) &&
+            debtAmountInput.lte(maxBorrowAmount)
         ) {
             await SendTx(userAddress, CMM, 'openCVault', [process.env.REACT_APP_COLLATERAL_ADDRESS, collateralAmountInput.toString(), debtAmountInput.toString()]);
             await setSuccess(SUCCESS_STATUS.OPEN_SUCCESS);
@@ -131,7 +133,7 @@ const ManagePositionPopup = ({
         let _maxBorrowAmount = collateralInBN.mul(collateralAggAnswer).mul(baseAggInflator).div(collateralAggInflator).div(baseAggInflator)
             .mul(baseAssetInflator).div(collateralAssetInflator)
             .mul(BN.from(100)).div(BN.from(cFactor).add(BN.from(5)));
-        setMaxBorrowAmount(_maxBorrowAmount);
+        setMaxBorrowAmount(BNmin(_maxBorrowAmount, BLSdiff));
     }
 
     const handleDInput = (param) => {

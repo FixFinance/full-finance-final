@@ -287,6 +287,8 @@ function Index() {
             supplyBorrowed={supplyBorrowed}
             supplyBorrowShares={supplyBorrowShares}
             forceUpdateVault={forceUpdateVault}
+            supplyLentBN={supplyLentBN}
+            supplyBorrowedBN={supplyBorrowedBN}
           />
         </Modal>
 
@@ -311,7 +313,7 @@ function Index() {
             baseAggDecimals={baseAggDecimals}
             collateralAggAnswer={collateralAggAnswer}
             collateralAggDecimals={collateralAggDecimals}
-            supplyLentBN = {supplyLentBN}
+            supplyLentBN={supplyLentBN}
             supplyBorrowedBN={supplyBorrowedBN}
           />
         </Modal>

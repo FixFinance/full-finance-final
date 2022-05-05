@@ -5,13 +5,16 @@ import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
 import { SendTx } from '../../Utils/SendTx';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
 import './collateral-ratio.scss';
+import { BNmin, BNmax } from '../../Utils/BNtools';
 
 const BorrowMore=({
   userAddress,
   CMM,
   DAI,
   vault,
-  forceUpdateVault
+  forceUpdateVault,
+  supplyBorrowedBN,
+  supplyLentBN
 })=> {
 
   const [input, setInput] = useState('');
@@ -25,8 +28,11 @@ const BorrowMore=({
 
   const absInputAmt = BN.from(getAbsoluteString(input, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
 
+  //Borrow-Lend Supply Difference
+  const BLSdiff = supplyBorrowedBN != null && supplyLentBN != null ? supplyLentBN.sub(supplyBorrowedBN) : _0;
+
   const minCollatRatioBN = BN.from(parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5).mul(BN.from(10).pow(BN.from(16)));
-  const maxBorrowObligation = vault.borrowObligation.mul(vault.collateralizationRatio).div(minCollatRatioBN);
+  const maxBorrowObligation = BNmin(vault.borrowObligation.mul(vault.collateralizationRatio).div(minCollatRatioBN), BLSdiff);
   const resultantBorrowObligation = vault.borrowObligation.add(absInputAmt);
   const resultantCollateralizationRatio = vault.collateralizationRatio.mul(vault.borrowObligation).div(resultantBorrowObligation);
 
