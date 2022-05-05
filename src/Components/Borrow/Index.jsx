@@ -7,6 +7,7 @@ import t_icon from "../../assets/image/t_icon.png";
 import Modal from "react-bootstrap/Modal";
 import ManagePopup from './ManageModal/ManagePopup';
 import ManagePositionPopup from './ManageModal/ManagePositionPopup';
+import ConnectModal from "../ConnectWallet/ConnectModal";
 import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { getDecimalString } from '../../Utils/StringAlteration';
@@ -21,6 +22,7 @@ const IChainlinkAggregatorABI = require('../../abi/IChainlinkAggregator.json');
 function Index() {
   const [modal1, setModal1] = useState(false);
   const [modal2, setModal2] = useState(false);
+  const [modal3, setModal3] = useState(false);
 
   const [selectedVaultIndex, setSelectedVaultIndex] = useState(null);
   const [selectedVault, setSelectedVault] = useState(null);
@@ -81,6 +83,12 @@ function Index() {
       setModal2(true);
     }
   }
+
+  const handleClose3 = () => {
+    setModal3(false);
+    // setXData('/');
+  }
+  const handleShow3 = () => setModal3(true);
 
   const signer = provider == null ? null : provider.getSigner();
 
@@ -249,7 +257,7 @@ function Index() {
           <div>
             <div className="col text-center">
               <h4 className="vault-header">Connect Wallet to See Your Borrow Positions</h4>
-              <button className="btn connect-wallet-borrow"> Connect Wallet</button>
+              <button className="btn connect-wallet-borrow" onClick={handleShow3}>Connect Wallet</button>
             </div>
           </div>
           }
@@ -302,7 +310,16 @@ function Index() {
           />
         </Modal>
 
-       
+        <Modal
+          show={modal3}
+          onHide={handleClose3}
+          centered
+          animation={false}
+          className="connect-wallet-modal"
+        >
+          <ConnectModal handleClose={handleClose3}/>
+        </Modal>
+
     </div>
   )
 }

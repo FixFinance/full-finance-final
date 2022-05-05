@@ -31,7 +31,6 @@ const Header = ({ z }) => {
   const [zData, setZData] = useState(z);
   const [getWalletInfo] = useContext(EthersContext);
   const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo();
-  const [userAvatar, setUserAvatar] = useState();
 
   const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
 
