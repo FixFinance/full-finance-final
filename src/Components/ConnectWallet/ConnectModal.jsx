@@ -98,7 +98,7 @@ const ConnectModal = ({ handleClose }) => {
         )}
 
         {selectedModal !== "error" && selectedModal !== "basic" && !showWrongNetwork &&
-          <AccountModal2 walletType={selectedModal} address={userAddress} ens={userENS}/>
+          <AccountModal2 address={userAddress} ens={userENS}/>
         }
       </Modal.Body>
     </div>

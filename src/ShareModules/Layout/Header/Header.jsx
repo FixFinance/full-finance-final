@@ -21,19 +21,17 @@ const Header = ({ z }) => {
     // setXData('/');
   }
   const handleShow = () => setShow(true);
+
   const handleClose2 = () => {
     setShow2(false);
     // setXData('/');
   }
   const handleShow2 = () => setShow2(true);
 
-  const handleClose3 = () => {
-    setShow3(false);
-  }
-  const handleShow3 = () => setShow3(true);
   const [zData, setZData] = useState(z);
   const [getWalletInfo] = useContext(EthersContext);
   const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo();
+  const [userAvatar, setUserAvatar] = useState();
 
   const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
 
@@ -121,7 +119,7 @@ const Header = ({ z }) => {
             </Navbar.Collapse>
             <div className={show3 ? "text-center mx-auto w-100" : "right-side-container text-center"}>
                 {userAddress !== ADDRESS0 ? (
-                  <div className="d-flex justify-content-center mt-lg-0 mt-3" onClick={() => handleShow2()}>
+                  <div className="d-flex justify-content-center mt-lg-0 mt-3" onClick={handleShow2}>
                     <button className="btn eth_btn">{userETH} ETH</button>
                     <button className="btn num_btn d-flex">
                       <img
@@ -158,9 +156,9 @@ const Header = ({ z }) => {
           onHide={handleClose2}
           centered
           animation={false}
-          className="connect-wallet-modal"
+          className=""
         >
-          <AccountModal2 handleClose={handleClose2} />
+          <AccountModal2 handleClose={handleClose2} address={userAddress} ens={userENS} />
         </Modal>
         </div>
         </div>

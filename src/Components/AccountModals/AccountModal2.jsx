@@ -5,7 +5,7 @@ import ellipse2 from "../../assets/image/ellipse2.svg"
 import "./accountmodal.scss";
 import AccountModal1 from "./AccountModal1";
 
-const AccountModal2 = ({ handleClose, walletType, address, ens }) => {
+const AccountModal2 = ({ handleClose, address, ens }) => {
   const [modalType, setModalType] = useState("basicColor");
 
   let abbreviatedAddress = address.substring(0, 10)+'...'+address.substring(address.length-9);
