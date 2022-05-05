@@ -6,6 +6,7 @@ import { filterInput, getDecimalString, getAbsoluteString } from '../../../Utils
 import { TOTAL_SBPS, _0, INF } from '../../../Utils/Consts.js';
 import { ethers, BigNumber as BN } from 'ethers';
 import { SendTx } from '../../../Utils/SendTx';
+import { BNmin, BNmax } from '../../../Utils/BNtools';
 
 const ManagePositionPopup = ({
     handleClose,
@@ -20,7 +21,9 @@ const ManagePositionPopup = ({
     baseAggAnswer,
     baseAggDecimals,
     collateralAggAnswer,
-    collateralAggDecimals
+    collateralAggDecimals,
+    supplyBorrowedBN,
+    supplyLentBN
 }) => {
 
     const SUCCESS_STATUS = {
@@ -38,8 +41,9 @@ const ManagePositionPopup = ({
     const [maxBorrowAmount, setMaxBorrowAmount] = useState(null);
     const [collatRatioCheck, setCollatRatioCheck] = useState(false); // This variable controls the color of the Implied Collateralization Ratio
 
+    const BLSdiff = supplyBorrowedBN != null && supplyLentBN != null ? supplyLentBN.sub(supplyBorrowedBN) : _0;
     const collateralBalanceString = balanceCollateral == null ? '0' : getDecimalString(balanceCollateral.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
-    const maxBorrowString = maxBorrowAmount == null ? '0' : getDecimalString(maxBorrowAmount.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
+    const maxBorrowString = maxBorrowAmount == null ? '0' : getDecimalString(BNmin(BLSdiff, maxBorrowAmount).toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 2);
 
     const collateralAmountInput = cInput == null ? _0 : BN.from(getAbsoluteString(cInput, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
     const debtAmountInput = dInput == null ? _0 : BN.from(getAbsoluteString(dInput, parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
@@ -200,7 +204,8 @@ const ManagePositionPopup = ({
     );
 
 
-    let sufficientWETHApproval = approvedCollateral == null || balanceCollateral == null || approvedCollateral.eq(_0) || approvedCollateral.gte(balanceCollateral);
+    let sufficientWETHApproval = approvedCollateral == null || balanceCollateral == null || approvedCollateral.gte(balanceCollateral);
+
     let buttons = (
         <>
             {!sufficientWETHApproval && <button className="btn activate" onClick={approveOnClick}>Approve WETH</button>}

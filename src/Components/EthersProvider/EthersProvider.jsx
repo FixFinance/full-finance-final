@@ -31,6 +31,8 @@ export default function EthersProvider({children}) {
     const [userENS, setUserENS] = useState(null);
     const [chainId, setChainId] = useState(-1);
 
+    const [supplyLentBN, setSupplyLentBN] = useState(null);
+    const [supplyBorrowedBN, setSupplyBorrowedBN] = useState(null);
     const [annualLendRateString, setAnnualLendRateString] = useState('0');
     const [annualBorrowRateString, setAnnualBorrowRateString] = useState('0');
     const [valueLentString, setValueLentString] = useState('0');
@@ -98,7 +100,9 @@ export default function EthersProvider({children}) {
             annualLendRateString,
             annualBorrowRateString,
             valueLentString,
-            valueBorrowedString
+            valueBorrowedString,
+            supplyLentBN,
+            supplyBorrowedBN
         };
     }
 
@@ -112,10 +116,12 @@ export default function EthersProvider({children}) {
         if (BaseAgg != null && CMM != null) {
             BaseAgg.latestAnswer().then(answer => {
                 CMM.getSupplyLent().then(supplyLent => {
+                    setSupplyLentBN(supplyLent);
                     let valueBN = answer.mul(supplyLent).div(TOTAL_SBPS);
                     setValueLentString(getDecimalString(valueBN.toString(), 18, 0));
                 });
                 CMM.getSupplyBorrowed().then(supplyBorrowed => {
+                    setSupplyBorrowedBN(supplyBorrowed);
                     let valueBN = answer.mul(supplyBorrowed).div(TOTAL_SBPS);
                     setValueBorrowedString(getDecimalString(valueBN.toString(), 18, 0));
                 });

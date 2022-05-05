@@ -34,7 +34,12 @@ function Index() {
   const [collateralAggDecimals, setCollateralAggDecimals] = useState(null);
 
   const [getWalletInfo, getBasicInfo, updateBasicInfo] = useContext(EthersContext);
-  const { annualLendRateString, annualBorrowRateString } = getBasicInfo();
+  const {
+    annualLendRateString,
+    annualBorrowRateString,
+    supplyLentBN,
+    supplyBorrowedBN
+  } = getBasicInfo();
   const [provider, userAddress] = getWalletInfo();
 
   if (
@@ -57,6 +62,7 @@ function Index() {
     setSupplyBorrowed(null);
     setSupplyBorrowShares(null);
     setSelectedVault(null);
+    updateBasicInfo();
   }
   const clickManagePositionFactory = (vault) => {
     const clickManagePosition = () => {
@@ -70,6 +76,7 @@ function Index() {
     setUserVaults(null);
     setSupplyBorrowed(null);
     setSupplyBorrowShares(null);
+    updateBasicInfo();
   }
   const handleShow2 = () => {
     if (
@@ -304,6 +311,8 @@ function Index() {
             baseAggDecimals={baseAggDecimals}
             collateralAggAnswer={collateralAggAnswer}
             collateralAggDecimals={collateralAggDecimals}
+            supplyLentBN = {supplyLentBN}
+            supplyBorrowedBN={supplyBorrowedBN}
           />
         </Modal>
 
