@@ -141,6 +141,13 @@ const DepositPopup = ({ handleClose }) => {
 
             </div>
             <div className="text-center mb-4">
+            {DAIbalance === 0 ?
+              <button
+                className="btn btn-deactive btn-active "
+              >
+              Insufficient Balance For Transaction
+              </button>
+            :
               <button
                 className="btn btn-deactive btn-active "
                 onClick={depositOnClick}
@@ -148,6 +155,7 @@ const DepositPopup = ({ handleClose }) => {
                 {" "}
                 {ButtonContents}
               </button>
+            }
             </div>
           </Modal.Body>
         </div>

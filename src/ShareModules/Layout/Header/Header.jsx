@@ -68,7 +68,7 @@ const Header = ({ z }) => {
                 <li>
                   <NavLink
                     to="/"
-                    activeClassName="active"
+                    activeClassName={show3 ? "" : "active"}
                     // onClick={() => {
                     //   setXData("");
                     // }}
@@ -79,7 +79,7 @@ const Header = ({ z }) => {
                 <li>
                   <NavLink
                     to="/lend"
-                    activeClassName="active"
+                    activeClassName={show3 ? "" : "active"}
                   //   onClick={() => {
                   //     setXData("/lend");
                   //   }}
@@ -90,7 +90,7 @@ const Header = ({ z }) => {
                 <li>
                   <NavLink
                     to="/borrow"
-                    activeClassName="active"
+                    activeClassName={show3 ? "" : "active"}
                     // onClick={() => {
                     //   setXData("/borrow");
                     // }}

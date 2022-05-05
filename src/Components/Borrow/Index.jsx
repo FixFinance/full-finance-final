@@ -237,27 +237,22 @@ function Index() {
         </div>
       </section>
 
-      <section className="borrow_section" style={{ 'margin-bottom': '20px'}}>
-        <div className="container">
-          <div className="row borrow_position">
-              <div className="borrow_stablecoins">
-                <h5>Borrow DAI against wETH at {annualBorrowRateString}% annually</h5>
-                <ul>
-                  <li><img src={debt_icon} alt=""/></li>
-                  <li><img src={collateral_value} alt=""/></li>
-                  <li><img src={t_icon} alt=""/></li>
-                  <li><button>+</button></li>
-                </ul>
-              </div>
-          </div>
-        </div>
-      </section>
-
       <section className="borrow_section">
         <div className="container">
           <div className="row borrow_position">
-              <h4>{borrowMessage}</h4>
-              {vaultComponents}
+          {signer !== null ?
+            <>
+              <h4 className="vault-header">{borrowMessage}</h4>
+                {vaultComponents}
+            </>
+          :
+          <div>
+            <div className="col text-center">
+              <h4 className="vault-header">Connect Wallet to See Your Borrow Positions</h4>
+              <button className="btn connect-wallet-borrow"> Connect Wallet</button>
+            </div>
+          </div>
+          }
           </div>
         </div>
       </section>
