@@ -50,7 +50,7 @@
   }
   .button-text-one:hover{ border: 2px solid #7e3ac3; background: none; transition: all 0.3s ease-in; }
   .item-price-one{ font-size:36px; line-height: 40px;}
-  .main-con{ max-width: 500px; margin: 0px auto;
+  .main-con{ max-width: 650px; margin: 0px auto;
   .accordion-button{ background: transparent; color:#fff;font-family: 'Nib Pro SemiBold';font-size: 20px ; 
     padding-top:30px; padding-bottom:30px; padding-left: 0px; padding-right: 0px;
     @media(max-width:767px){
@@ -143,6 +143,12 @@
 .accordion-item.border_none{
   border-bottom: none!important;
 }
+.accordion-button.collapsed {
+  #text {
+    max-width: 438px;
+  }
+}
+
 .accordion-button.collapsed::after {
   flex-shrink: 0;
   width: 1.25rem;

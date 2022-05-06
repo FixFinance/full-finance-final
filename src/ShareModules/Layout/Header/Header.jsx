@@ -21,19 +21,22 @@ const Header = ({ z }) => {
     // setXData('/');
   }
   const handleShow = () => setShow(true);
+
   const handleClose2 = () => {
     setShow2(false);
     // setXData('/');
   }
   const handleShow2 = () => setShow2(true);
 
-  const handleClose3 = () => {
-    setShow3(false);
-  }
-  const handleShow3 = () => setShow3(true);
   const [zData, setZData] = useState(z);
+  const [userAvatar, setUserAvatar] = useState(null);
   const [getWalletInfo] = useContext(EthersContext);
   const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo();
+
+  const getAvatar = async () => {
+    const userAvatar = await provider.getAvatar(userENS.toString());
+    setUserAvatar(userAvatar);
+  }
 
   const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
 
@@ -44,6 +47,7 @@ const Header = ({ z }) => {
   // let z = y.includes(xData);
   useEffect(() => {
     setZData(z);
+    getAvatar()
   }, [z]);
 
   return (
@@ -68,7 +72,7 @@ const Header = ({ z }) => {
                 <li>
                   <NavLink
                     to="/"
-                    activeClassName="active"
+                    activeClassName={show3 ? "" : "active"}
                     // onClick={() => {
                     //   setXData("");
                     // }}
@@ -79,7 +83,7 @@ const Header = ({ z }) => {
                 <li>
                   <NavLink
                     to="/lend"
-                    activeClassName="active"
+                    activeClassName={show3 ? "" : "active"}
                   //   onClick={() => {
                   //     setXData("/lend");
                   //   }}
@@ -90,7 +94,7 @@ const Header = ({ z }) => {
                 <li>
                   <NavLink
                     to="/borrow"
-                    activeClassName="active"
+                    activeClassName={show3 ? "" : "active"}
                     // onClick={() => {
                     //   setXData("/borrow");
                     // }}
@@ -121,11 +125,11 @@ const Header = ({ z }) => {
             </Navbar.Collapse>
             <div className={show3 ? "text-center mx-auto w-100" : "right-side-container text-center"}>
                 {userAddress !== ADDRESS0 ? (
-                  <div className="d-flex justify-content-center mt-lg-0 mt-3" onClick={() => handleShow2()}>
+                  <div className="d-flex justify-content-center mt-lg-0 mt-3" onClick={handleShow2}>
                     <button className="btn eth_btn">{userETH} ETH</button>
                     <button className="btn num_btn d-flex">
                       <img
-                        src={ellipse_icon}
+                        src={userAvatar ? userAvatar : ellipse_icon}
                         alt="img"
                         className="ellip_img align-self-center"
                       />
@@ -158,9 +162,9 @@ const Header = ({ z }) => {
           onHide={handleClose2}
           centered
           animation={false}
-          className="connect-wallet-modal"
+          className=""
         >
-          <AccountModal2 handleClose={handleClose2} />
+          <AccountModal2 handleClose={handleClose2} address={userAddress} ens={userENS} />
         </Modal>
         </div>
         </div>
