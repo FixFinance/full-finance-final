@@ -98,7 +98,7 @@ const DepositPopup = ({ handleClose }) => {
       }
     }
     asyncUseEffect();
-  }, [DAIbalance]);
+  }, [DAIbalance, provider]);
 
   const ButtonContents = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? 'Approve DAI' : 'Deposit DAI'
 

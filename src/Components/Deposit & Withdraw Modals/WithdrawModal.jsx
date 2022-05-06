@@ -76,7 +76,7 @@ const WithdrawModal=({ handleClose2 })=> {
       }
     }
     asyncUseEffect();
-  }, [balanceLendShares]);
+  }, [balanceLendShares, provider]);
 
   return (
     <div> 

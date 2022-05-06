@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
+import SuccessModal from "../Success/SuccessModal";
 import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
 import { SendTx } from '../../Utils/SendTx';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
@@ -8,6 +9,7 @@ import './collateral-ratio.scss';
 import { BNmin, BNmax } from '../../Utils/BNtools';
 
 const BorrowMore=({
+  handleClose,
   userAddress,
   CMM,
   DAI,
@@ -17,6 +19,7 @@ const BorrowMore=({
   supplyLentBN
 })=> {
 
+  const [success, setSuccess] = useState(false);
   const [input, setInput] = useState('');
   const [balanceDASSET, setBalanceDASSET] = useState(null);
 
@@ -32,7 +35,7 @@ const BorrowMore=({
   const BLSdiff = supplyBorrowedBN != null && supplyLentBN != null ? supplyLentBN.sub(supplyBorrowedBN) : _0;
 
   const minCollatRatioBN = BN.from(parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5).mul(BN.from(10).pow(BN.from(16)));
-  const maxBorrowObligation = BNmin(vault.borrowObligation.mul(vault.collateralizationRatio).div(minCollatRatioBN), BLSdiff);
+  const maxBorrowObligation = BNmin(vault.borrowObligation.mul(vault.collateralizationRatio).div(minCollatRatioBN), BLSdiff.add(vault.borrowObligation));
   const resultantBorrowObligation = vault.borrowObligation.add(absInputAmt);
   const resultantCollateralizationRatio = vault.collateralizationRatio.mul(vault.borrowObligation).div(resultantBorrowObligation);
 
@@ -53,13 +56,12 @@ const BorrowMore=({
   const handleClickBorrow = async () => {
     if (resultantBorrowObligation.lte(maxBorrowObligation)) {
       await SendTx(userAddress, CMM, 'borrowFromCVault', [vault.index, absInputAmt.toString(), true]);
-      forceUpdateVault();
-      setBalanceDASSET(null);
-      setInput('');
+      setSuccess(true);
     }
   }
 
-  return (
+  const BaseContents = (
+    !success &&
     <div className="deposite-withdraw">
     <div>
       <Modal.Header closeButton>
@@ -116,7 +118,26 @@ const BorrowMore=({
       </Modal.Body>
     </div>
   </div>
-  )
+  );
+
+  const successmodal = (
+    <Modal
+        show={success}
+        onHide={handleClose}
+        centered
+        animation={false}
+        className="deposit-modal"
+    >
+        <SuccessModal handleClosesuccess={handleClose} />
+    </Modal>
+  );
+
+  return(
+    <>
+      {BaseContents}
+      {successmodal}
+    </>
+  );
 }
 
 export default BorrowMore;

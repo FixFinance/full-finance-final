@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
+import SuccessModal from "../Success/SuccessModal";
 import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
 import { SendTx } from '../../Utils/SendTx';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
 
 
 const WithdrawCollateral = ({
+  handleClose,
   userAddress,
   CMM,
   CASSET,
   vault,
   forceUpdateVault
 }) => {
-
+  const [success, setSuccess] = useState(false);
   const [input, setInput] = useState('');
 
   const minCollatRatioBN = BN.from(parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5).mul(BN.from(10).pow(BN.from(16)));
@@ -38,12 +40,12 @@ const WithdrawCollateral = ({
   const handleClickWithdraw = async () => {
     if (absInputAmt.gt(_0) && impliedAmountSupplied.gte(minimumCollateral)) {
       await SendTx(userAddress, CMM, 'withdrawFromCVault', [vault.index, absInputAmt.toString()]);
-      forceUpdateVault();
-      setInput('');
+      setSuccess(true);
     }
   }
 
-  return (
+  const BaseContents = (
+    !success &&
     <div className="deposite-withdraw">
       <div>
         <Modal.Header closeButton>
@@ -96,6 +98,25 @@ const WithdrawCollateral = ({
         </Modal.Body>
       </div>
     </div>
+  );
+
+  const successmodal = (
+    <Modal
+        show={success}
+        onHide={handleClose}
+        centered
+        animation={false}
+        className="deposit-modal"
+    >
+        <SuccessModal handleClosesuccess={handleClose} />
+    </Modal>
+  );
+
+  return (
+    <>
+      {BaseContents}
+      {successmodal}
+    </>
   );
 };
 

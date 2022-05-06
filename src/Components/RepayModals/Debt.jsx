@@ -1,17 +1,25 @@
 import React, {useState, useEffect} from "react";
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
+import SuccessModal from "../Success/SuccessModal";
 import { TOTAL_SBPS, INF, _0, INF_CHAR } from '../../Utils/Consts';
 import { SendTx } from '../../Utils/SendTx';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
 
 const Debt = ({
+  handleClose,
   userAddress,
   CMM,
   DAI,
   vault,
   forceUpdateVault
 }) => {
+  const SUCCESS_STATUS = {
+    BASE: 0,
+    APPROVAL_SUCCESS: 1,
+    REPAY_SUCCESS: 2
+  }
+  const [success, setSuccess] = useState(SUCCESS_STATUS.BASE);
 
   const [input, setInput] = useState('');
   const [balanceDASSET, setBalanceDASSET] = useState(null);
@@ -58,27 +66,36 @@ const Debt = ({
       else {
         await SendTx(userAddress, CMM, 'repayCVault', [vault.index, absInputAmt.toString(), true]);
       }
-      forceUpdateVault();
-      setBalanceDASSET(null);
-      setAllowanceDASSET(null);
-      setMaxClicked(false);
-      setInput('');
+      setSuccess(SUCCESS_STATUS.REPAY_SUCCESS);
     }
   }
 
   const handleClickApprove = async () => {
     if (balanceDASSET != null && approvalDASSET != null) {
       await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
-      setAllowanceDASSET(null);
+      setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
+      setMaxClicked(false);
+      setInput('');
     }
   }
 
-  const sufficientApproval = balanceDASSET != null && approvalDASSET != null && approvalDASSET.gte(absInputAmt);
+  const handleClosesuccess = () => {
+    if (success == SUCCESS_STATUS.APPROVAL_SUCCESS) {
+      setAllowanceDASSET(null);
+      setSuccess(SUCCESS_STATUS.BASE);
+    }
+    else {
+      handleClose();
+    }
+  }
+
+  const sufficientApproval = balanceDASSET == null || approvalDASSET == null || (approvalDASSET.gte(absInputAmt) && !approvalDASSET.eq(_0));
 
   const buttonMessage = sufficientApproval ? "Repay DAI" : "Approve DAI";
   const onClick = sufficientApproval ? handleClickRepay : handleClickApprove;
 
-  return (
+  const BaseContents = (
+    success === SUCCESS_STATUS.BASE &&
     <div className="deposite-withdraw">
       <div>
         <Modal.Header closeButton>
@@ -133,6 +150,25 @@ const Debt = ({
         </Modal.Body>
       </div>
     </div>
+  );
+
+  const successmodal = (
+    <Modal
+        show={success !== SUCCESS_STATUS.BASE}
+        onHide={handleClosesuccess}
+        centered
+        animation={false}
+        className="deposit-modal"
+    >
+        <SuccessModal handleClosesuccess={handleClosesuccess} />
+    </Modal>
+  );
+
+  return (
+    <>
+      {BaseContents}
+      {successmodal}
+    </>
   );
 };
 

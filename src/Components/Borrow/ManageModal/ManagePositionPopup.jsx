@@ -216,7 +216,7 @@ const ManagePositionPopup = ({
     );
 
     let inputs = (
-        success == SUCCESS_STATUS.BASE &&
+        success === SUCCESS_STATUS.BASE &&
         <div className="manage_popup">
             <Modal.Header closeButton>
             <h5>Open Borrowing Position</h5>
@@ -237,7 +237,7 @@ const ManagePositionPopup = ({
 
     let successmodal = (
         <Modal
-            show={success != SUCCESS_STATUS.BASE}
+            show={success !== SUCCESS_STATUS.BASE}
             onHide={handleClosesuccess}
             centered
             animation={false}

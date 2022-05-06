@@ -27,9 +27,7 @@ const ManagePopup = ({
   supplyLentBN
 }) => {
   const [modalType, setModalType] = useState("basic");
-  const handleModalType = (type) => {
-    setModalType(type);
-  };
+
   const [modal2, setModal2] = useState(false);
 
   const handleClose2 = () => setModal2(false);
@@ -59,30 +57,30 @@ const ManagePopup = ({
                 </p>}
                 <button
                   className="btn"
-                  onClick={() => handleModalType("repay")}
+                  onClick={() => setModalType("repay")}
                 >
                   Repay Debt
                 </button>
                 <button
                   className="btn"
-                  onClick={() => handleModalType("add")}
+                  onClick={() => setModalType("add")}
                 >
                   Add Collateral
                 </button>
                 <button
-                  onClick={() => hasGoodCollatRatio ? handleModalType("Withdraw") : ""}
+                  onClick={() => hasGoodCollatRatio ? setModalType("Withdraw") : ""}
                   className={hasGoodCollatRatio ? "btn" : "btn active"}
                 >
                   Withdraw Collateral
                 </button>
                 <button
-                  onClick={() => hasGoodCollatRatio ? handleModalType("borrowMore") : ""}
+                  onClick={() => hasGoodCollatRatio ? setModalType("borrowMore") : ""}
                   className={hasGoodCollatRatio ? "btn" : "btn active"}
                 >
                   Borrow More
                 </button>
                 <button
-                  onClick={() => handleModalType("closePosition")}
+                  onClick={() => setModalType("closePosition")}
                   className="btn close"
                 >
                   Close Position
@@ -98,11 +96,17 @@ const ManagePopup = ({
           </div>
         </div>
       )}
-      {modalType === "add" && <AddCollateral userAddress={userAddress} CMM={CMM} CASSET={CASSET} vault={vault} forceUpdateVault={forceUpdateVault}/>}
-      {modalType === "Withdraw" && hasGoodCollatRatio && <WithdrawCollateral userAddress={userAddress} CMM={CMM} CASSET={CASSET} vault={vault} forceUpdateVault={forceUpdateVault}/>}{" "}
-      {(modalType === "debt" || modalType === "repay") && <Debt userAddress={userAddress} CMM={CMM} DAI={DAI} vault={vault} forceUpdateVault={forceUpdateVault}/>}{" "}
+      {modalType === "add" && 
+        <AddCollateral handleClose={handleClose} userAddress={userAddress} CMM={CMM} CASSET={CASSET} vault={vault} forceUpdateVault={forceUpdateVault}/>
+      }
+      {modalType === "Withdraw" && hasGoodCollatRatio &&
+        <WithdrawCollateral handleClose={handleClose} userAddress={userAddress} CMM={CMM} CASSET={CASSET} vault={vault} forceUpdateVault={forceUpdateVault}/>
+      }{" "}
+      {(modalType === "debt" || modalType === "repay") &&
+        <Debt handleClose={handleClose} userAddress={userAddress} CMM={CMM} DAI={DAI} vault={vault} forceUpdateVault={forceUpdateVault}/>
+      }{" "}
       {modalType === "borrowMore" && hasGoodCollatRatio &&
-        <BorrowMore userAddress={userAddress} CMM={CMM} DAI={DAI}  vault={vault} forceUpdateVault={forceUpdateVault} supplyBorrowedBN={supplyBorrowedBN} supplyLentBN={supplyLentBN}/>
+        <BorrowMore handleClose={handleClose} userAddress={userAddress} CMM={CMM} DAI={DAI}  vault={vault} forceUpdateVault={forceUpdateVault} supplyBorrowedBN={supplyBorrowedBN} supplyLentBN={supplyLentBN}/>
       }
       {modalType === "closePosition" && <ClosePosition handleClose={handleClose} userAddress={userAddress} CMM={CMM} DAI={DAI} vault={vault}/>}
     </>

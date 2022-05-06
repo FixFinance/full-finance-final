@@ -1,18 +1,26 @@
 import React, {useState, useEffect} from "react";
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
+import SuccessModal from "../Success/SuccessModal";
 import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
 import { SendTx } from '../../Utils/SendTx';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
 
 
 const AddCollateral = ({
+  handleClose,
   userAddress,
   CMM,
   CASSET,
   vault,
   forceUpdateVault
 }) => {
+  const SUCCESS_STATUS = {
+    BASE: 0,
+    APPROVAL_SUCCESS: 1,
+    ADD_SUCCESS: 2
+  }
+  const [success, setSuccess] = useState(SUCCESS_STATUS.BASE);
 
   const [input, setInput] = useState('');
   const [walletBalance, setWalletBalance] = useState(null);
@@ -49,26 +57,34 @@ const AddCollateral = ({
     if (collApproval != null) {
       await SendTx(userAddress, CASSET, 'approve', [CMM.address, INF.toString()]);
       setCollApproval(null);
+      setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
     }
   }
 
   const addCollateral = async () => {
     if (collApproval != null && walletBalance != null && !absInputAmt.eq(_0) && absInputAmt.lte(walletBalance)) {
       await SendTx(userAddress, CMM, 'supplyToCVault', [vault.index, absInputAmt.toString()]);
-      forceUpdateVault();
-      setCollApproval(null);
-      setWalletBalance(null);
-      setInput('');
+      setSuccess(SUCCESS_STATUS.ADD_SUCCESS);
     }
   }
 
+  const handleClosesuccess = () => {
+      if (success == SUCCESS_STATUS.APPROVAL_SUCCESS) {
+          setCollApproval(null);
+          setSuccess(SUCCESS_STATUS.BASE);
+      }
+      else {
+          handleClose();
+      }
+  }
 
   const sufficientApproval = collApproval == null ? true : collApproval.gte(absInputAmt);
 
   const buttonMessage = sufficientApproval ? "Add WETH" : "Approve WETH";
   const handleActionClick = sufficientApproval ? addCollateral : approveCollateral;
 
-  return (
+  const BaseContents = (
+    success === SUCCESS_STATUS.BASE &&
     <div className="deposite-withdraw">
       <div>
         <Modal.Header closeButton>
@@ -120,6 +136,25 @@ const AddCollateral = ({
         </Modal.Body>
       </div>
     </div>
+  );
+
+  const successmodal = (
+      <Modal
+          show={success !== SUCCESS_STATUS.BASE}
+          onHide={handleClosesuccess}
+          centered
+          animation={false}
+          className="deposit-modal"
+      >
+          <SuccessModal handleClosesuccess={handleClosesuccess} />
+      </Modal>
+  );
+
+  return (
+    <>
+      {BaseContents}
+      {successmodal}
+    </>
   );
 };
 
