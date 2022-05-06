@@ -3,7 +3,7 @@ import './home.scss';
 export default function GetStarted() {
   return (
     <>
-      <div className="section-container mx-auto" >
+      <div className="section-container mx-auto">
         <div className=" marginclass getstarted">
             <div className="get-started text-center mb-5 px-3">
             <h4>Get started</h4>

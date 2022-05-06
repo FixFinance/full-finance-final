@@ -66,34 +66,13 @@
     }
 }
 
-.connect-wallet-borrow {
-    background-color: #7e3ac3;
-    border: 2px solid transparent;
-    font-size: 13px;
-    border-radius: 50rem !important;
-    color: #fff;
-    padding: 12.25px 15.375px;
-    text-decoration: none;
-    width: 371px;
-    height: 66px;
-    margin: auto;
-    &:hover {
-      background-color: transparent;
-      border: 2px solid #7e3ac3;
-      color: #7e3ac3;
-    }
-}
-
-
-
 .borrow_position {
     background: #191A1A;
     border-radius: 50px;
     padding: 30px 30px;
     overflow: hidden;
     margin: -30px 0;
-    height: 100vh;
-    .vault-header {
+    h4 {
         font-style: normal;
         font-weight: 600;
         font-size: 28px;
@@ -101,7 +80,6 @@
         color: #EDF0EB;
         text-align: center;
         margin: 0 0 20px;
-        padding-top: 50px;
     }
     .borrow_position_wrap {
         background: #252727;

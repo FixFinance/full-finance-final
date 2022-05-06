@@ -78,7 +78,6 @@ const DepositPopup = ({ handleClose }) => {
       if (provider != null && DAIbalance == null) {
         let promise0 = DAI.balanceOf(userAddress).then(res => {
           setDAIbalance(res);
-          console.log(DAIbalance);
           return res;
         });
         let promise1 = DAI.allowance(userAddress, CMM.address).then(res => {
@@ -142,13 +141,6 @@ const DepositPopup = ({ handleClose }) => {
 
             </div>
             <div className="text-center mb-4">
-            {DAIbalance === 0 ?
-              <button
-                className="btn btn-deactive"
-              >
-              Insufficient Balance For Transaction
-              </button>
-            :
               <button
                 className="btn btn-deactive btn-active "
                 onClick={depositOnClick}
@@ -156,7 +148,6 @@ const DepositPopup = ({ handleClose }) => {
                 {" "}
                 {ButtonContents}
               </button>
-            }
             </div>
           </Modal.Body>
         </div>
