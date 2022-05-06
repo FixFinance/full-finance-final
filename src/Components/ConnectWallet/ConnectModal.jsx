@@ -17,6 +17,7 @@ import { TargetChains } from '../../Utils/TargetChains.js';
 const ConnectModal = ({ handleClose }) => {
   const [selectedModal, setSelectedModal] = useState("basic");
   const [showWrongNetwork, setShowWrongNetwork] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleSetWrongNetwork = () => setShowWrongNetwork(true);
 
@@ -43,6 +44,9 @@ const ConnectModal = ({ handleClose }) => {
 
         {selectedModal === "basic" && (
           <>
+            {error === true &&
+            <p className="modal-error">Something went wrong with your wallet connection. Try again</p>
+            }
             <div className="form-group">
               <div
                   className="d-flex form-field justify-content-between"
