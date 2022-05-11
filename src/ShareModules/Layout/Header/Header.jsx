@@ -39,6 +39,7 @@ const Header = ({ z }) => {
   }
 
   const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
+  const menuAbbreviatedAddress = userAddress.substring(0, 11)+'...'+userAddress.substring(userAddress.length-4);
 
   // let y = ["/lend", "/borrow"];
   // let currentPath = window.location.pathname.split('/');
@@ -125,17 +126,31 @@ const Header = ({ z }) => {
             </Navbar.Collapse>
             <div className={show3 ? "text-center mx-auto w-100" : "right-side-container text-center"}>
                 {userAddress !== ADDRESS0 ? (
-                  <div className="d-flex justify-content-center mt-lg-0 mt-3" onClick={handleShow2}>
-                    <button className="btn eth_btn">{userETH} ETH</button>
-                    <button className="btn num_btn d-flex">
-                      <img
-                        src={userAvatar ? userAvatar : ellipse_icon}
-                        alt="img"
-                        className="ellip_img align-self-center"
-                      />
-                      <div>{abbreviatedAddress}</div>
-                    </button>
+                  <>
+                  {show3 === true ? (
+                    <>
+                      <div className="row">
+                          <img className="ellip_img" src={userAvatar ? userAvatar : ellipse_icon} alt="img" />
+                          <p className="address">{menuAbbreviatedAddress}</p>
+                      </div>
+                      <button className={"btn overlay-button"} onClick={handleShow} style={{ background: "#EDF0EB", color: "#252727" }}>
+                        Disconnect Wallet
+                      </button>
+                    </>
+                  ) : (
+                    <div className="d-flex justify-content-center mt-lg-0 mt-3" onClick={handleShow2}>
+                      <button className="btn eth_btn">{userETH} ETH</button>
+                      <button className="btn num_btn d-flex">
+                        <img
+                          src={userAvatar ? userAvatar : ellipse_icon}
+                          alt="img"
+                          className="ellip_img align-self-center"
+                        />
+                        <div>{abbreviatedAddress}</div>
+                      </button>
                   </div>
+                  )}
+                </>
                 ) : (
                   <div className={show3 ? "" : "button-container"}>
                     <button className={show3 ? "btn overlay-button" : "btn connect-wallet"} onClick={handleShow}>

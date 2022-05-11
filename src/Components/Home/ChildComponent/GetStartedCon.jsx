@@ -51,7 +51,9 @@ const GetStartedCon = () => {
                   <Accordion.Header className="bg-transparent">
                     {item?.heading}
                   </Accordion.Header>
-                  <Accordion.Body>{item?.description}</Accordion.Body>
+                  <Accordion.Body>
+                  <div>{item?.description}</div>
+                  </Accordion.Body>
                 </Accordion.Item>
               );
             })}
