@@ -107,11 +107,13 @@
   }
 }
 
-.row {
-  .address {
-    max-width: 300px;
-  }
+
+.address {
+  font-weight: 500;
+  font-size: 28px;
+  margin-right: auto;
 }
+
 
 .header-top-overlay {
   z-index: 99;
@@ -128,6 +130,7 @@
 }
 
 .overlay-nav {
+  margin-bottom: 50px;
   li {
     font-size: 36px !important;
     line-height: normal !important;
@@ -179,7 +182,13 @@
 .ellip_img{
   width: 24px;
   height: 24px;
-  margin-right:5px;
+  margin-right: 5px;
+}
+
+.ellip_img_overlay{
+  width: 32px;
+  height: 32px;
+  margin-top: 4px;
 }
 
 .num_btn {

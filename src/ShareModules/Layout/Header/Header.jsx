@@ -129,11 +129,15 @@ const Header = ({ z }) => {
                   <>
                   {show3 === true ? (
                     <>
-                      <div className="row">
-                          <img className="ellip_img" src={userAvatar ? userAvatar : ellipse_icon} alt="img" />
+                      <div className="row g-3">
+                        <div className="col-2">
+                          <img className="ellip_img_overlay" src={userAvatar ? userAvatar : ellipse_icon} alt="img" />
+                        </div>
+                        <div className="col-9">
                           <p className="address">{menuAbbreviatedAddress}</p>
+                        </div>
                       </div>
-                      <button className={"btn overlay-button"} onClick={handleShow} style={{ background: "#EDF0EB", color: "#252727" }}>
+                      <button className={"btn overlay-button"} onClick={handleShow} style={{ background: "#EDF0EB", color: "#252727", "margin-top": "20px" }}>
                         Disconnect Wallet
                       </button>
                     </>
