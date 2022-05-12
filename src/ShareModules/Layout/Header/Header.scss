@@ -272,6 +272,9 @@
     border-bottom: 1px solid #edf0eb;
     padding-bottom: 5px;
   }
+  li a.none {
+    border: none;
+  }
 }
 .navbar-brand img {
   width: 176px;
@@ -289,4 +292,8 @@
 
 .right-side-container {
   margin-left: auto;
+}
+
+.helper {
+  display: none;
 }

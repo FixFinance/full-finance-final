@@ -103,11 +103,43 @@ const Header = ({ z }) => {
                     Borrow{" "}
                   </NavLink>
                 </li>
-                <li>
-                  <NavLink to="/socials" activeClassName="">
-                    ...{" "}
-                  </NavLink>
-                </li>
+                {show3 === true ? (
+                <>
+                  <li>
+                    <NavLink
+                      to="/socials"
+                      activeClassName="none"
+                    >
+                      Discord{" "}
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/socials"
+                      activeClassName="none"
+                    >
+                      Twitter{" "}
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/socials"
+                      activeClassName="none"
+                      className="helper"
+                    >
+                      Twitter{" "}
+                    </NavLink>
+                  </li>
+                </>
+                ) : (
+                  <li>
+                    <NavLink
+                    to="/socials"
+                    activeClassName="none">
+                      ...{" "}
+                    </NavLink>
+                  </li>
+                )}
               </ul>
             </Navbar.Collapse>
             <div className={show3 ? "text-center mx-auto w-100" : "right-side-container text-center"}>
