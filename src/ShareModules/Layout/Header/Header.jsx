@@ -136,7 +136,7 @@ const Header = ({ z }) => {
                     <NavLink
                     to="/socials"
                     activeClassName="none">
-                      ...{" "}
+                      <div>...</div>
                     </NavLink>
                   </li>
                 )}
