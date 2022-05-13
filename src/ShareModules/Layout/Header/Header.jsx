@@ -132,10 +132,11 @@ const Header = ({ z }) => {
                   </li>
                 </>
                 ) : (
-                  <li>
+                  <li className="align-middle">
                     <NavLink
                     to="/socials"
-                    activeClassName="none">
+                    activeClassName="none"
+                    >
                       <div>...</div>
                     </NavLink>
                   </li>
