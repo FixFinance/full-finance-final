@@ -13,6 +13,18 @@
     left: 0%;
     right: 0%;
   }
+  li:last-child div {
+    background: #252727;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 24px;
+    letter-spacing: 2px;
+    border-bottom: none;
+    width: 48px;
+    height: 32px;
+    text-align: center;
+    margin-bottom: -10px;
+  }
 
   .navbar {
     .navbar-toggler:focus{
@@ -61,6 +73,9 @@
     margin-left: 0px;
     margin-right: 0px;
   }
+  .container {
+    justify-content: flex-start;
+  }
   .navbar {
     .navbar-toggler {
       border: none;
@@ -104,6 +119,17 @@
   }
 }
 
+
+.address {
+  font-weight: 500;
+  font-size: 28px;
+  margin-right: auto;
+}
+
+.button-overlay-container {
+  margin-top: -50px;
+}
+
 .header-top-overlay {
   z-index: 99;
   background: #7e3ac3;
@@ -119,6 +145,7 @@
 }
 
 .overlay-nav {
+  margin-bottom: 50px;
   li {
     font-size: 36px !important;
     line-height: normal !important;
@@ -134,6 +161,10 @@
     color: #edf0eb;
     border-radius: 50px;
     margin-top: 50px;
+    .white{
+      background: #edf0eb;
+
+    }
     @media (max-width: 400px) {
       font-weight: 300;
     }
@@ -154,12 +185,25 @@
 
   color: #edf0eb;
   padding: 0 45px 0 30px;
+
+  @media (max-width: 767px) {
+    display: none;
+  }
+  @media (max-width: 500px) {
+    display: none;
+  }
 }
 
 .ellip_img{
   width: 24px;
   height: 24px;
-  margin-right:5px;
+  margin-right: 5px;
+}
+
+.ellip_img_overlay{
+  width: 32px;
+  height: 32px;
+  margin-top: 4px;
 }
 
 .num_btn {
@@ -175,6 +219,12 @@
   color: #edf0eb;
   padding: 0 30px 0 14px;
   margin-left: -30px;
+  @media (max-width: 767px) {
+    margin-top: -5px;
+  }
+  @media (max-width: 500px) {
+    margin-top: -10px;
+  }
 }
 
 .connect-wallet {
@@ -208,6 +258,9 @@
     font-size: 15px;
     line-height: 20px;
     text-decoration: none;
+    margin-top: 15px;
+    height: 42px;
+    align-items: center;
     a {
       @media (max-width: 960) {
         font-size: 13px;
@@ -227,6 +280,9 @@
     border-bottom: 1px solid #edf0eb;
     padding-bottom: 5px;
   }
+  li a.none {
+    border: none;
+  }
 }
 .navbar-brand img {
   width: 176px;
@@ -244,4 +300,8 @@
 
 .right-side-container {
   margin-left: auto;
+}
+
+.helper {
+  display: none;
 }

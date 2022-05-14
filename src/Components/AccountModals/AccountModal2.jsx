@@ -7,8 +7,18 @@ import AccountModal1 from "./AccountModal1";
 
 const AccountModal2 = ({ handleClose, address, ens }) => {
   const [modalType, setModalType] = useState("basicColor");
+  const [userAvatar, setUserAvatar] = useState(null);
 
   let abbreviatedAddress = address.substring(0, 10)+'...'+address.substring(address.length-9);
+
+  // const getAvatar = async () => {
+  //   const userAvatar = await provider.getAvatar(userENS.toString());
+  //   setUserAvatar(userAvatar);
+  // }
+
+  // useEffect(() => {
+  //   getAvatar()
+  // });
 
   return (
     <div>
@@ -19,7 +29,7 @@ const AccountModal2 = ({ handleClose, address, ens }) => {
               <h5>Your wallet</h5>
             </Modal.Header>
             <Modal.Body>
-              <img src={ellipse2} alt="img" className="ellipse" />
+              <img src={userAvatar ? userAvatar : ellipse2} alt="img" className="ellipse" />
               {ens !== null &&
                 <>
                   <h5>{ens}</h5>

@@ -132,13 +132,18 @@
     }
   }
   .accordion{
+    #text {
+      max-width: 438px;
+      margin-right: 20px;
+    }
     .accordion-button:focus {
       z-index: 3;
       border-color: transparent;
       outline: 0;
        box-shadow:none;
   }
-   .accordion-item{    border: 0;
+   .accordion-item{
+    border: 0;
     border-bottom: 1px solid #575c5c;}
 .accordion-item.border_none{
   border-bottom: none!important;
@@ -146,6 +151,7 @@
 .accordion-button.collapsed {
   #text {
     max-width: 438px;
+    margin-right: 20px;
   }
 }
 
