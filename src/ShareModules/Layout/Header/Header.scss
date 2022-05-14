@@ -126,6 +126,9 @@
   margin-right: auto;
 }
 
+.button-overlay-container {
+  margin-top: -50px;
+}
 
 .header-top-overlay {
   z-index: 99;
@@ -256,7 +259,7 @@
     line-height: 20px;
     text-decoration: none;
     margin-top: 15px;
-    height: 32px;
+    height: 42px;
     align-items: center;
     a {
       @media (max-width: 960) {

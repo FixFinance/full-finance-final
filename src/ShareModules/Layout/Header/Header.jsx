@@ -121,15 +121,6 @@ const Header = ({ z }) => {
                       Twitter{" "}
                     </NavLink>
                   </li>
-                  <li>
-                    <NavLink
-                      to="/socials"
-                      activeClassName="none"
-                      className="helper"
-                    >
-                      Twitter{" "}
-                    </NavLink>
-                  </li>
                 </>
                 ) : (
                   <li className="align-middle">
@@ -143,7 +134,7 @@ const Header = ({ z }) => {
                 )}
               </ul>
             </Navbar.Collapse>
-            <div className={show3 ? "text-center mx-auto w-100" : "right-side-container text-center"}>
+            <div className={show3 ? "text-center mx-auto w-100 button-overlay-container" : "right-side-container text-center"}>
                 {userAddress !== ADDRESS0 ? (
                   <>
                   {show3 === true ? (
