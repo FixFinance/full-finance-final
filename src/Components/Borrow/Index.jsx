@@ -201,7 +201,7 @@ function Index() {
             <div className="borrow_position_box">
               <h5>Collateralization Ratio</h5>
               <h2>{collateralizationRatioString}%</h2>
-              <p>{process.env.REACT_APP_COLLATERALIZATION_FACTOR}% min. collateralization ratio</p>
+              <p>{process.env.REACT_APP_COLLATERALIZATION_FACTOR}% min. collat ratio</p>
             </div>
           </div>
           <div className="mx-auto">
