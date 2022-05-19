@@ -3,6 +3,7 @@ import Modal from "react-bootstrap/Modal";
 import { ethers, BigNumber as BN } from 'ethers';
 import "./depositmodal.scss";
 import SuccessModal from "../Success/SuccessModal";
+import ErrorModal from "../ErrorModal/Errormodal";
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
 import { SendTx } from '../../Utils/SendTx';
@@ -16,6 +17,8 @@ const getPureInput = (input) => input.substring(0, input.length-4);
 
 const DepositPopup = ({ handleClose }) => {
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
+  const [waitConfirmation, setWaitConfirmation] = useState(false);
 
   const [input, setInput] = useState('');
 
@@ -41,6 +44,10 @@ const DepositPopup = ({ handleClose }) => {
     setInput('');
   }
   const handleShow = () => setSuccess(true);
+  const handleError = () => setError(true);
+
+  const handleErrorClose = () => setError(false);
+
   const handleInput = (param) => {
     let value = param.target.value;
     let filteredValue = filterInput(value)+' DAI';
@@ -65,7 +72,10 @@ const DepositPopup = ({ handleClose }) => {
       await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
     }
     else {
+      setWaitConfirmation(true);
       await SendTx(userAddress, CMM, 'depositSpecificUnderlying', [userAddress, absoluteInput.toString()]);
+      // setWaitConfirmation(false);
+      // setTransaction(true);
     }
     setSuccess(true);
   };
@@ -105,7 +115,7 @@ const DepositPopup = ({ handleClose }) => {
 
   return (
     <div className="deposite-withdraw">
-      {success ? null : (
+      {success || error ? null : (
         <div>
           <Modal.Header closeButton>
             <h5>Deposit DAI</h5>
@@ -149,13 +159,34 @@ const DepositPopup = ({ handleClose }) => {
               Insufficient Balance For Transaction
               </button>
             :
-              <button
-                className="btn btn-deactive btn-active "
-                onClick={depositOnClick}
-              >
-                {" "}
-                {ButtonContents}
-              </button>
+              <>
+              {input === '' ?
+                <button
+                  className="btn btn-deactive"
+                >
+                Enter an amount
+                </button>
+              :
+                <>
+                {waitConfirmation ?
+                  <button
+                  className="btn btn-deactive"
+                  >
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span className="ms-3">Waiting For Confirmation</span>
+                  </button>
+                :
+                  <button
+                    className="btn btn-deactive btn-active "
+                    onClick={depositOnClick}
+                  >
+                    {" "}
+                    {ButtonContents}
+                  </button>
+                }
+                </>
+              }
+              </>
             }
             </div>
           </Modal.Body>
@@ -170,6 +201,16 @@ const DepositPopup = ({ handleClose }) => {
         className="deposit-modal"
       >
         <SuccessModal handleClosesuccess={handleClosesuccess} />
+      </Modal>
+
+      <Modal
+        show={error}
+        onHide={handleErrorClose}
+        centered
+        animation={false}
+        className="deposit-modal"
+      >
+        <ErrorModal  />
       </Modal>
     </div>
   );
