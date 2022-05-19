@@ -6,7 +6,7 @@ import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
-import { SendTx } from '../../Utils/SendTx';
+import { SendTx, sentState } from '../../Utils/SendTx';
 import { INF } from '../../Utils/Consts';
 import { ControlledInput } from '../ControlledInput/ControlledInput';
 
@@ -43,10 +43,16 @@ const DepositPopup = ({ handleClose }) => {
     setLendShareValue(null);
     setInput('');
   }
+  const handleErrorClose = () => {
+    setError(false);
+    // force reload everything
+    setDAIbalance(null);
+    setDAIapproval(null);
+    setBalanceLendShares(null);
+    setLendShareValue(null);
+    setInput('');
+  }
   const handleShow = () => setSuccess(true);
-  const handleError = () => setError(true);
-
-  const handleErrorClose = () => setError(false);
 
   const handleInput = (param) => {
     let value = param.target.value;
@@ -65,25 +71,30 @@ const DepositPopup = ({ handleClose }) => {
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
 
   const depositOnClick = async () => {
-    if (DAIbalance === null || DAIapproval === null || balanceLendShares === null) {
-      return;
+    try {
+      if (DAIbalance === null || DAIapproval === null || balanceLendShares === null) {
+        return;
+      }
+      if (absoluteInput.gt(DAIapproval) || DAIapproval.eq(BN.from(0))) {
+        await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
+      }
+      else {
+        setWaitConfirmation(true);
+        await SendTx(userAddress, CMM, 'depositSpecificUnderlying', [userAddress, absoluteInput.toString()]);
+      }
+      setSuccess(true);
+    } catch (err) {
+      setError(true);
+      setWaitConfirmation(false);
     }
-    if (absoluteInput.gt(DAIapproval) || DAIapproval.eq(BN.from(0))) {
-      await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
-    }
-    else {
-      setWaitConfirmation(true);
-      await SendTx(userAddress, CMM, 'depositSpecificUnderlying', [userAddress, absoluteInput.toString()]);
-      // setWaitConfirmation(false);
-      // setTransaction(true);
-    }
-    setSuccess(true);
   };
 
   const handleDeposit = async () => {};
   const handleApprove = async () => {};
 
   useEffect(() => {
+    console.log(sentState);
+    sentState ? setWaitConfirmation(false) : console.log(sentState);
     let asyncUseEffect = async () => {
       if (provider != null && DAIbalance == null) {
         let promise0 = DAI.balanceOf(userAddress).then(res => {
@@ -109,7 +120,7 @@ const DepositPopup = ({ handleClose }) => {
       }
     }
     asyncUseEffect();
-  }, [DAIbalance, provider]);
+  }, [DAIbalance, provider, sentState]);
 
   const ButtonContents = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? 'Approve DAI' : 'Deposit DAI'
 
@@ -176,13 +187,24 @@ const DepositPopup = ({ handleClose }) => {
                     <span className="ms-3">Waiting For Confirmation</span>
                   </button>
                 :
-                  <button
-                    className="btn btn-deactive btn-active "
-                    onClick={depositOnClick}
-                  >
-                    {" "}
-                    {ButtonContents}
-                  </button>
+                  <>
+                  {sentState ?
+                    <button
+                    className="btn btn-deactive"
+                    >
+                      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                      <span className="ms-3">Depositing</span>
+                    </button>
+                  :
+                    <button
+                      className="btn btn-deactive btn-active "
+                      onClick={depositOnClick}
+                    >
+                      {" "}
+                      {ButtonContents}
+                    </button>
+                  }
+                  </>
                 }
                 </>
               }
@@ -210,7 +232,7 @@ const DepositPopup = ({ handleClose }) => {
         animation={false}
         className="deposit-modal"
       >
-        <ErrorModal  />
+        <ErrorModal handleErrorClose={handleErrorClose}/>
       </Modal>
     </div>
   );

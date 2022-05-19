@@ -1,15 +1,20 @@
 import { hoodEncodeABI } from './HoodAbi.js';
 
+export let sentState = false;
+
 async function getNonce(provider, userAddress) {
 	return await provider.getTransactionCount(userAddress);
 }
 
 async function broadcastTx(signer, tx) {
+
 	console.log('Tx Initiated');
 	let rec = await signer.sendTransaction(tx);
 	console.log('Tx Sent', rec);
+	sentState = true;
 	let resolvedRec = await rec.wait();
 	console.log('Tx Resolved, resolvedRec');
+	sentState = false;
 	return { rec, resolvedRec };
 }
 

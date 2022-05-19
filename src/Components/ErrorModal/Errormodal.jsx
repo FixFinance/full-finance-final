@@ -1,7 +1,7 @@
 import Modal from "react-bootstrap/Modal";
 import "./errormodal.scss"
 
-const ErrorModal = ({ handleClose }) => {
+const ErrorModal = ({ handleErrorClose }) => {
 
 return (
     <div>
@@ -14,7 +14,7 @@ return (
               <p style={{ color: "#ef767a" }}>Transaction was rejected.</p>
             </div>
               <div className="text-center">
-                <button className="btn dismiss_btn" >Dismiss</button>
+                <button className="btn dismiss_btn" onClick={handleErrorClose}>Dismiss</button>
               </div>
             </>
         </Modal.Body>
