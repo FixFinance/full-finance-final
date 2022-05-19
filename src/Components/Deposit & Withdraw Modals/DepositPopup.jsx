@@ -123,6 +123,7 @@ const DepositPopup = ({ handleClose }) => {
   }, [DAIbalance, provider, sentState]);
 
   const ButtonContents = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? 'Approve DAI' : 'Deposit DAI'
+  const LoadingContents = sentState ? 'Depositing' : 'Waiting For Confirmation';
 
   return (
     <div className="deposite-withdraw">
@@ -179,32 +180,21 @@ const DepositPopup = ({ handleClose }) => {
                 </button>
               :
                 <>
-                {waitConfirmation ?
+                {waitConfirmation || sentState ?
                   <button
                   className="btn btn-deactive"
                   >
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span className="ms-3">Waiting For Confirmation</span>
+                    <span className="ms-3">{LoadingContents}</span>
                   </button>
                 :
-                  <>
-                  {sentState ?
-                    <button
-                    className="btn btn-deactive"
-                    >
-                      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                      <span className="ms-3">Depositing</span>
-                    </button>
-                  :
-                    <button
-                      className="btn btn-deactive btn-active "
-                      onClick={depositOnClick}
-                    >
-                      {" "}
-                      {ButtonContents}
-                    </button>
-                  }
-                  </>
+                  <button
+                    className="btn btn-deactive btn-active "
+                    onClick={depositOnClick}
+                  >
+                    {" "}
+                    {ButtonContents}
+                  </button>
                 }
                 </>
               }
