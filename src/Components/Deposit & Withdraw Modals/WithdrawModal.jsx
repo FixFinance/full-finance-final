@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import Modal from "react-bootstrap/Modal";
 import { ethers, BigNumber as BN } from 'ethers';
+import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import "./depositmodal.scss";
 import SuccessModal from "../Success/SuccessModal";
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
-import { SendTx } from '../../Utils/SendTx';
+import { getNonce } from '../../Utils/SendTx';
 import { ControlledInput } from '../ControlledInput/ControlledInput';
+import ErrorModal from "../ErrorModal/Errormodal";
+
 
 const IERC20ABI = require('../../abi/IERC20.json');
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
@@ -15,7 +18,12 @@ const getPureInput = (input) => input.substring(0, input.length-4);
 
 const WithdrawModal=({ handleClose2 })=> {
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
   const [input, setInput] = useState('');
+  const [sentState, setSentState] = useState(false);
+  const [waitConfirmation, setWaitConfirmation] = useState(false);
+
+
 
   const [balanceLendShares, setBalanceLendShares] = useState(null);
   const [lendShareValue, setLendShareValue] = useState(null);
@@ -29,6 +37,13 @@ const WithdrawModal=({ handleClose2 })=> {
 
   const handleClosesuccess = () => {
     setSuccess(false);
+    // force reload everything
+    setBalanceLendShares(null);
+    setLendShareValue(null);
+    setInput('');
+  }
+  const handleErrorClose = () => {
+    setError(false);
     // force reload everything
     setBalanceLendShares(null);
     setLendShareValue(null);
@@ -51,12 +66,53 @@ const WithdrawModal=({ handleClose2 })=> {
   let FLT = signer == null ? null : new ethers.Contract(process.env.REACT_APP_FLT_ADDRESS, IERC20ABI, signer);
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
 
-  const withdrawOnClick = async () => {
-    if (balanceLendShares === null || lendShareValue === null) {
-      return;
+  async function BroadcastTx(signer, tx, updateSentState) {
+    // const [sentState, setSentState] = useState(false);
+    console.log('Tx Initiated');
+    let rec = await signer.sendTransaction(tx);
+    console.log('Tx Sent', rec);
+    setSentState(true);
+    let resolvedRec = await rec.wait();
+    console.log('Tx Resolved, resolvedRec');
+    setSentState(false);
+    return { rec, resolvedRec };
+  }
+
+  async function SendTx(userAddress, contractInstance, functionName, argArray, updateSentState, overrides={}) {
+    if (contractInstance == null) {
+      throw "SendTx2 Attempted to Accept Null Contract";
     }
-    await SendTx(userAddress, CMM, 'withdrawSpecificShares', [userAddress, absoluteInput.toString()]);
-    setSuccess(true);
+
+    const signer = contractInstance.signer;
+
+    let tx = {
+      to: contractInstance.address,
+      from: userAddress,
+      data: hoodEncodeABI(contractInstance, functionName, argArray),
+      nonce: await getNonce(signer.provider, userAddress),
+      gasLimit: (await contractInstance.estimateGas[functionName](...argArray)).toNumber() * 2,
+      ...overrides
+    }
+
+    let { resolvedRec } = await BroadcastTx(signer, tx, updateSentState);
+
+    return resolvedRec;
+
+  }
+
+  const withdrawOnClick = async () => {
+    try {
+      if (balanceLendShares === null || lendShareValue === null) {
+        return;
+      }
+      setWaitConfirmation(true);
+      await SendTx(userAddress, CMM, 'withdrawSpecificShares', [userAddress, absoluteInput.toString()]);
+      setWaitConfirmation(false);
+      setSuccess(true);
+    } catch (err) {
+      setError(true);
+      setWaitConfirmation(false);
+    }
   }
 
   useEffect(() => {
@@ -78,10 +134,12 @@ const WithdrawModal=({ handleClose2 })=> {
     asyncUseEffect();
   }, [balanceLendShares, provider]);
 
+  const LoadingContents = sentState ? "Withdrawing" : 'Waiting For Confirmation';
+
   return (
     <div> 
         <div className="deposite-withdraw">
-    {success ? null : (
+    {success || error ? null : (
       <div>
         <Modal.Header closeButton>
           <h5>Redeem FLT for DAI</h5>
@@ -114,13 +172,42 @@ const WithdrawModal=({ handleClose2 })=> {
             </div>
           </div>
           <div className="text-center mb-4">
-            <button
-              className="btn btn-deactive btn-active "
-              onClick={withdrawOnClick}
-            >
-              {" "}
-              Withdraw DAI
-            </button>
+          {balanceLendShares === 0 ?
+              <button
+                className="btn btn-deactive"
+              >
+              Insufficient Balance For Transaction
+              </button>
+            :
+              <>
+              {input === '' ?
+                <button
+                  className="btn btn-deactive"
+                >
+                Enter an amount
+                </button>
+              :
+                <>
+                {waitConfirmation ?
+                  <button
+                  className="btn btn-deactive"
+                  >
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span className="ms-3">{LoadingContents}</span>
+                  </button>
+                :
+                <button
+                  className="btn btn-deactive btn-active "
+                  onClick={withdrawOnClick}
+                >
+                  {" "}
+                  Withdraw FLT
+                </button>
+                }
+                </>
+              }
+              </>
+            }
           </div>
         </Modal.Body>
       </div>
@@ -134,6 +221,16 @@ const WithdrawModal=({ handleClose2 })=> {
       className="deposit-modal"
     >
       <SuccessModal handleClosesuccess={handleClosesuccess} />
+    </Modal>
+
+    <Modal
+        show={error}
+        onHide={handleErrorClose}
+        centered
+        animation={false}
+        className="deposit-modal"
+      >
+        <ErrorModal handleErrorClose={handleErrorClose}/>
     </Modal>
   </div></div>
   )

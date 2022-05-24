@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useContext } from "react";
 import Modal from "react-bootstrap/Modal";
 import { ethers, BigNumber as BN } from 'ethers';
+import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import "./depositmodal.scss";
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
-import { SendTx, sentState } from '../../Utils/SendTx';
+import { getNonce } from '../../Utils/SendTx';
 import { INF } from '../../Utils/Consts';
 import { ControlledInput } from '../ControlledInput/ControlledInput';
+// import { TxComponent } from "../../ShareModules/TxComponent/TxComponent";
 
 const IERC20ABI = require('../../abi/IERC20.json');
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
@@ -19,6 +21,7 @@ const DepositPopup = ({ handleClose }) => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [waitConfirmation, setWaitConfirmation] = useState(false);
+  const [sentState, setSentState] = useState(false);
 
   const [input, setInput] = useState('');
 
@@ -70,6 +73,40 @@ const DepositPopup = ({ handleClose }) => {
   let FLT = signer == null ? null : new ethers.Contract(process.env.REACT_APP_FLT_ADDRESS, IERC20ABI, signer);
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
 
+  async function BroadcastTx(signer, tx, updateSentState) {
+    // const [sentState, setSentState] = useState(false);
+    console.log('Tx Initiated');
+    let rec = await signer.sendTransaction(tx);
+    console.log('Tx Sent', rec);
+    setSentState(true);
+    let resolvedRec = await rec.wait();
+    console.log('Tx Resolved, resolvedRec');
+    setSentState(false);
+    return { rec, resolvedRec };
+  }
+
+  async function SendTx(userAddress, contractInstance, functionName, argArray, updateSentState, overrides={}) {
+    if (contractInstance == null) {
+      throw "SendTx2 Attempted to Accept Null Contract";
+    }
+  
+    const signer = contractInstance.signer;
+  
+    let tx = {
+      to: contractInstance.address,
+      from: userAddress,
+      data: hoodEncodeABI(contractInstance, functionName, argArray),
+      nonce: await getNonce(signer.provider, userAddress),
+      gasLimit: (await contractInstance.estimateGas[functionName](...argArray)).toNumber() * 2,
+      ...overrides
+    }
+  
+    let { resolvedRec } = await BroadcastTx(signer, tx, updateSentState);
+  
+    return resolvedRec;
+  
+  }
+
   const depositOnClick = async () => {
     try {
       if (DAIbalance === null || DAIapproval === null || balanceLendShares === null) {
@@ -81,20 +118,48 @@ const DepositPopup = ({ handleClose }) => {
       else {
         setWaitConfirmation(true);
         await SendTx(userAddress, CMM, 'depositSpecificUnderlying', [userAddress, absoluteInput.toString()]);
+
       }
       setSuccess(true);
+      setWaitConfirmation(false);
     } catch (err) {
       setError(true);
       setWaitConfirmation(false);
     }
   };
 
+  /// Working on Component to avoid recursion
+
+    // const depositOnClick = async () => {
+  //   // try {
+  //     if (DAIbalance === null || DAIapproval === null || balanceLendShares === null) {
+  //       return;
+  //     }
+  //     if (absoluteInput.gt(DAIapproval) || DAIapproval.eq(BN.from(0))) {
+  //       setFunctionMessage('Approving');
+  //       setContractInstance(DAI);
+  //       setFunctionName('approve');
+  //       setArgArray([CMM.address, INF.toString()]);
+  //     }
+  //     else {
+  //       setFunctionMessage('Depositing');
+  //       setContractInstance(CMM);
+  //       setFunctionName('depositSpecificUnderlying');
+  //       setArgArray([userAddress, absoluteInput.toString()]);
+  //     }
+  //     setSuccess(true);
+  //     setWaitConfirmation(false);
+  //   // } catch (err) {
+  //   //   setError(true);
+  //   //   setWaitConfirmation(false);
+  //   // }
+  // };
+
+
   const handleDeposit = async () => {};
   const handleApprove = async () => {};
 
   useEffect(() => {
-    console.log(sentState);
-    sentState ? setWaitConfirmation(false) : console.log(sentState);
     let asyncUseEffect = async () => {
       if (provider != null && DAIbalance == null) {
         let promise0 = DAI.balanceOf(userAddress).then(res => {
@@ -120,10 +185,10 @@ const DepositPopup = ({ handleClose }) => {
       }
     }
     asyncUseEffect();
-  }, [DAIbalance, provider, sentState]);
+  }, [DAIbalance, provider]);
 
   const ButtonContents = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? 'Approve DAI' : 'Deposit DAI'
-  const LoadingContents = sentState ? 'Depositing' : 'Waiting For Confirmation';
+	const LoadingContents = sentState ? "Depositing" : 'Waiting For Confirmation';
 
   return (
     <div className="deposite-withdraw">
@@ -136,7 +201,7 @@ const DepositPopup = ({ handleClose }) => {
             <div className="text-center middle_part mt-3">
               <p style={{ color: "#EDF0EB" }}>Amount to deposit</p>
               <div className="form-group mt-3">
-                
+
                 <div className="relative">
                 <ControlledInput
                     type="text"
@@ -180,7 +245,7 @@ const DepositPopup = ({ handleClose }) => {
                 </button>
               :
                 <>
-                {waitConfirmation || sentState ?
+                {waitConfirmation ?
                   <button
                   className="btn btn-deactive"
                   >
