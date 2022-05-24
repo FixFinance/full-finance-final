@@ -33,6 +33,7 @@
       }
       @media (max-width: 500px) {
         text-align: center;
+        margin-top: 4px;
       }
       @media (max-width: 440px) {
         font-size: 30px;
@@ -56,6 +57,18 @@
       }
       @media (max-width: 440px) {
         font-size: 12px;
+      }
+    }
+
+    .lend-share-value {
+      @media (max-width: 500px) {
+        display: none;
+      }
+    }
+
+    .lend-share-value-mobile {
+      @media (min-width: 501px) {
+        display: none;
       }
     }
     .d-flex {

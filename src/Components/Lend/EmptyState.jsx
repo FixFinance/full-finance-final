@@ -99,11 +99,12 @@ const EmptyState = () => {
           <div className="d-flex">
             <div className="d-block">
               <img src={dai} alt="img" className="dai_img" />
-              <p>$ {lendShareUSDValueString}</p>
+              <p className="lend-share-value">$ {lendShareUSDValueString}</p>
             </div>
             <h5>{lendShareValueString}</h5>
             <h5>DAI</h5>
           </div>
+          <p className="lend-share-value-mobile">$ {lendShareUSDValueString}</p>
           <div className="deposit-container">
             <h5 className="m-0">{annualLendRateString} %</h5>
             <p className="text-white ">Deposit APY</p>

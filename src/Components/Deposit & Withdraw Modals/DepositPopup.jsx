@@ -128,7 +128,7 @@ const DepositPopup = ({ handleClose }) => {
     }
   };
 
-  /// Working on Component to avoid recursion
+  /// Working on Component to avoid recursion ///
 
     // const depositOnClick = async () => {
   //   // try {
