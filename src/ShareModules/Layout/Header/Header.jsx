@@ -65,7 +65,7 @@ const Header = ({ z }) => {
         >
           <div className="container">
           <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setShow3(!show3)}/>
-            <div className="navbar-brand" to="/">
+            <div className={userAddress !== ADDRESS0 ? "connected-navbar-brand" : "navbar-brand"} to="/">
               <img src="assets/images/logo.svg" alt="" />
             </div>
             <Navbar.Collapse id="basic-navbar-nav">
@@ -134,7 +134,7 @@ const Header = ({ z }) => {
                   <>
                   {show3 === true ? (
                     <>
-                      <div className="row g-3">
+                      <div className="row g-3 mt-1">
                         <div className="col-2">
                           <img className="ellip_img_overlay" src={userAvatar ? userAvatar : ellipse_icon} alt="img" />
                         </div>
