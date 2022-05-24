@@ -134,7 +134,7 @@ const Header = ({ z }) => {
                   <>
                   {show3 === true ? (
                     <>
-                      <div className="row g-3">
+                      <div className="row g-3 mt-1">
                         <div className="col-2">
                           <img className="ellip_img_overlay" src={userAvatar ? userAvatar : ellipse_icon} alt="img" />
                         </div>
