@@ -307,7 +307,17 @@
     border: none;
   }
 }
-.navbar-brand {
+.navbar-brand img {
+    width: 176px;
+    height: 24px;
+    @media (max-width: 500px) {
+      width: 96px;
+      height: 24px;
+    }
+  }
+
+
+.connected-navbar-brand {
   @media (min-width: 1000px) {
     margin-right: 15%;
   }
