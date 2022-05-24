@@ -69,7 +69,7 @@ const Header = ({ z }) => {
               <img src="assets/images/logo.svg" alt="" />
             </div>
             <Navbar.Collapse id="basic-navbar-nav">
-              <ul className={show3 ? "navbar-nav overlay-nav" : "navbar-nav mx-auto mb-2 mb-lg-0 justify-content-around"}>
+              <ul className={show3 ? "navbar-nav overlay-nav" : "navbar-nav mx-auto mb-2 mt-lg-3 justify-content-around"}>
                 <li>
                   <NavLink
                     to="/"
@@ -124,12 +124,7 @@ const Header = ({ z }) => {
                 </>
                 ) : (
                   <li className="align-middle">
-                    <NavLink
-                    to="/socials"
-                    activeClassName="none"
-                    >
                       <div>...</div>
-                    </NavLink>
                   </li>
                 )}
               </ul>
@@ -152,7 +147,7 @@ const Header = ({ z }) => {
                       </button>
                     </>
                   ) : (
-                    <div className="d-flex justify-content-center mt-lg-0 mt-3" onClick={handleShow2}>
+                    <div className="d-flex justify-content-center mt-lg-2 mt-3" onClick={handleShow2}>
                       <button className="btn eth_btn">{userETH} ETH</button>
                       <button className="btn num_btn d-flex">
                         <img

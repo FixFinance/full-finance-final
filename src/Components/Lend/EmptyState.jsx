@@ -86,9 +86,11 @@ const EmptyState = () => {
     asyncUseEffect();
   }, [provider, balanceLendShares]);
 
+  // p wont center on mobile because its actually in the same div as the DAI image
+
   return (
     <>
-    <div className="empty">
+    <div className="empty" style={signer ? {"min-height" : "445px"} : {"min-height" : "370px"}}>
       <div>
         <div className="d-flex justify-content-between">
           <span>Your Deposit Balance</span>

@@ -23,7 +23,7 @@
     width: 48px;
     height: 32px;
     text-align: center;
-    margin-bottom: -10px;
+    margin-top: -5px;
   }
 
   .navbar {
@@ -72,6 +72,18 @@
   @media (max-width: 1440px) {
     margin-left: 0px;
     margin-right: 0px;
+  }
+  li:last-child div {
+    background: #252727;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 24px;
+    letter-spacing: 2px;
+    border-bottom: none;
+    width: 48px;
+    height: 32px;
+    text-align: center;
+    margin-top: -5px;
   }
   .container {
     justify-content: flex-start;
@@ -127,7 +139,7 @@
 }
 
 .button-overlay-container {
-  margin-top: -50px;
+  margin-top: -20px;
 }
 
 .header-top-overlay {
@@ -186,10 +198,7 @@
   color: #edf0eb;
   padding: 0 45px 0 30px;
 
-  @media (max-width: 767px) {
-    display: none;
-  }
-  @media (max-width: 500px) {
+  @media (max-width: 960px) {
     display: none;
   }
 }
@@ -219,8 +228,11 @@
   color: #edf0eb;
   padding: 0 30px 0 14px;
   margin-left: -30px;
-  @media (max-width: 767px) {
+  @media (max-width: 960px) {
     margin-top: -5px;
+  }
+  @media (max-width: 767px) {
+    margin-bottom: 5px;
   }
   @media (max-width: 500px) {
     margin-top: -10px;
@@ -235,6 +247,7 @@
   color: #fff;
   padding: 12.25px 15.375px;
   text-decoration: none;
+  margin-top: 5px;
   &:hover {
     background-color: transparent;
     border: 2px solid #7e3ac3;
@@ -246,9 +259,16 @@
   @media (max-width: 765px) {
     margin-left: auto;
   }
+  @media (max-width: 500px) {
+    margin-top: 0px;
+  }
   @media (max-width: 400px) {
     margin-right: -20px;
   }
+}
+
+.navbar-expand-md .navbar-collapse {
+  margin-bottom: -20px;
 }
 
 .navbar-nav {
@@ -258,15 +278,18 @@
     font-size: 15px;
     line-height: 20px;
     text-decoration: none;
-    margin-top: 15px;
     height: 42px;
     align-items: center;
+    @media (max-width: 991px) {
+      margin-top: 20px;
+    }
     a {
       @media (max-width: 960) {
         font-size: 13px;
       }
       color: #edf0eb;
       text-decoration: none;
+      margin-top: 20px;
 
       &:hover {
         width: fit-content;

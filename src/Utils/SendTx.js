@@ -1,10 +1,10 @@
 import { hoodEncodeABI } from './HoodAbi.js';
 
-async function getNonce(provider, userAddress) {
+ export async function getNonce(provider, userAddress) {
 	return await provider.getTransactionCount(userAddress);
 }
 
-async function broadcastTx(signer, tx) {
+export async function BroadcastTx(signer, tx, updateSentState) {
 	console.log('Tx Initiated');
 	let rec = await signer.sendTransaction(tx);
 	console.log('Tx Sent', rec);
@@ -29,7 +29,7 @@ export async function SendTx(userAddress, contractInstance, functionName, argArr
 		...overrides
 	}
 
-	let { resolvedRec } = await broadcastTx(signer, tx);
+	let { resolvedRec } = await BroadcastTx(signer, tx);
 
 	return resolvedRec;
 
