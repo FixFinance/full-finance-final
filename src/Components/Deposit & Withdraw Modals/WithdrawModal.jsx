@@ -19,6 +19,7 @@ const getPureInput = (input) => input.substring(0, input.length-4);
 const WithdrawModal=({ handleClose2 })=> {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
+  const [wasError, setWasError] = useState(false);
   const [input, setInput] = useState('');
   const [sentState, setSentState] = useState(false);
   const [waitConfirmation, setWaitConfirmation] = useState(false);
@@ -109,8 +110,10 @@ const WithdrawModal=({ handleClose2 })=> {
       await SendTx(userAddress, CMM, 'withdrawSpecificShares', [userAddress, absoluteInput.toString()]);
       setWaitConfirmation(false);
       setSuccess(true);
+      setWasError(false);
     } catch (err) {
       setError(true);
+      setWasError(true);
       setWaitConfirmation(false);
     }
   }
@@ -137,7 +140,7 @@ const WithdrawModal=({ handleClose2 })=> {
   const LoadingContents = sentState ? "Withdrawing" : 'Waiting For Confirmation';
 
   return (
-    <div> 
+    <div>
         <div className="deposite-withdraw">
     {success || error ? null : (
       <div>
@@ -181,11 +184,16 @@ const WithdrawModal=({ handleClose2 })=> {
             :
               <>
               {input === '' ?
-                <button
-                  className="btn btn-deactive"
-                >
-                Enter an amount
-                </button>
+              <>
+                {wasError &&
+                  <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>
+                }
+                  <button
+                    className={wasError ? "btn btn-deactive mt-0":"btn btn-deactive"}
+                  >
+                  Enter an amount
+                  </button>
+                </>
               :
                 <>
                 {waitConfirmation ?

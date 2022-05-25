@@ -82,7 +82,7 @@
     padding: 20px 40px;
     margin-top: 75px;
   }
- 
+
   p {
     font-weight: 400;
     font-size: 14px;
@@ -92,7 +92,7 @@
     letter-spacing: 0.02em;
     text-transform: capitalize;
 
-    
+
     font-family: "Roobert-Regular";
   }
   .tick_img{
@@ -102,5 +102,8 @@
   }
   .border_bottom{
     border-bottom: 1px solid #313535;
+  }
+  .error-text {
+    margin-top: 75px;
   }
 }

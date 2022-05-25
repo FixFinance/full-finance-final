@@ -20,6 +20,7 @@ const getPureInput = (input) => input.substring(0, input.length-4);
 const DepositPopup = ({ handleClose }) => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
+  const [wasError, setWasError] = useState(false);
   const [waitConfirmation, setWaitConfirmation] = useState(false);
   const [sentState, setSentState] = useState(false);
 
@@ -121,9 +122,11 @@ const DepositPopup = ({ handleClose }) => {
 
       }
       setSuccess(true);
+      setWasError(false);
       setWaitConfirmation(false);
     } catch (err) {
       setError(true);
+      setWasError(true);
       setWaitConfirmation(false);
     }
   };
@@ -238,11 +241,16 @@ const DepositPopup = ({ handleClose }) => {
             :
               <>
               {input === '' ?
-                <button
-                  className="btn btn-deactive"
-                >
-                Enter an amount
-                </button>
+                <>
+                {wasError &&
+                  <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>
+                }
+                  <button
+                    className={wasError ? "btn btn-deactive mt-0":"btn btn-deactive"}
+                  >
+                  Enter an amount
+                  </button>
+                </>
               :
                 <>
                 {waitConfirmation ?
