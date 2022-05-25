@@ -2,6 +2,7 @@ import React from "react";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import { Accordion } from "react-bootstrap";
+import '../Index.scss';
 
 const GetStartedCon = () => {
   const loop = [
@@ -49,10 +50,10 @@ const GetStartedCon = () => {
                   key={index}
                 >
                   <Accordion.Header className="bg-transparent">
-                    {item?.heading}
+                  <div className="accordion-content">{item?.heading}</div>
                   </Accordion.Header>
                   <Accordion.Body>
-                  <div>{item?.description}</div>
+                  {item?.description}
                   </Accordion.Body>
                 </Accordion.Item>
               );

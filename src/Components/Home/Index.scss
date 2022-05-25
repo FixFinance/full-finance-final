@@ -28,12 +28,12 @@
 
 }
 
-.button-text-one{ 
+.button-text-one{
   border-radius:50rem;
-   padding:27px 20px; width:100%; 
+   padding:27px 20px; width:100%;
    background: #7e3ac3;
-    color: #fff; 
-    border:0px; 
+    color: #fff;
+    border:0px;
     font-size: 16px;
     margin-top:5px;
     margin-bottom: 30px;border: 2px solid #7e3ac3;
@@ -56,6 +56,9 @@
     @media(max-width:767px){
       font-size: 18px;
     }
+  }
+  .accordion-content {
+    margin-right: 35px;
   }
   .accordion-body {
     color: #7D8282;
@@ -211,10 +214,10 @@
       font-size: 24px;
       line-height:33px;
       @media(max-width:992px){
-        font-size: 20px;
+        max-width: 430px
       }
       @media(max-width:767px){
-        font-size: 17px;
+        max-width: 420px
       }
       a{
         width: fit-content;
