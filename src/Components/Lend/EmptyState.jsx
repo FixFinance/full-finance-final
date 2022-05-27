@@ -53,7 +53,7 @@ const EmptyState = () => {
 
 
   const lendShareValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
-  const lendShareUSDValueString = getDecimalString(lendShareUSDValue == null ? '0' : lendShareUSDValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
+  const lendShareUSDValueString = getDecimalString(lendShareUSDValue == null ? '0.00' : lendShareUSDValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
 
   const signer = provider == null ? null : provider.getSigner();
   let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
@@ -101,13 +101,13 @@ const EmptyState = () => {
               <img src={dai} alt="img" className="dai_img" />
               <p className="lend-share-value">$ {lendShareUSDValueString}</p>
             </div>
-            <h5>{lendShareValueString}</h5>
+            <h5 className="lend-share-value-bold">{lendShareValueString}</h5>
             <h5>DAI</h5>
           </div>
           <p className="lend-share-value-mobile">$ {lendShareUSDValueString}</p>
           <div className="deposit-container">
             <h5 className="m-0">{annualLendRateString} %</h5>
-            <p className="text-white ">Deposit APY</p>
+            <p className="text-white ">Deposit APR</p>
           </div>
         </div>
         {signer !== null ?

@@ -23,17 +23,17 @@
       font-weight: 400;
       font-size: 40px;
       line-height: 1.1;
-      letter-spacing: 2.5px;
 
       color: #edf0eb;
-      font-family: "Roobert-Regular";
       margin: 0 5px;
+      margin-top: 5px;
       @media (max-width: 576px) {
         font-size: 35px;
       }
       @media (max-width: 500px) {
         text-align: center;
         margin-top: 4px;
+        margin-left: 5px;
       }
       @media (max-width: 440px) {
         font-size: 30px;
@@ -47,7 +47,7 @@
       text-transform: capitalize;
 
       color: #7d8282;
-      text-align: left;
+      text-align: right;
       @media (max-width: 576px) {
         font-size: 14px;
       }
@@ -61,8 +61,15 @@
     }
 
     .lend-share-value {
+      text-align: left;
       @media (max-width: 500px) {
         display: none;
+      }
+    }
+
+    .lend-share-value-bold {
+      @media (max-width: 500px) {
+        margin-left: 15px;
       }
     }
 
@@ -76,15 +83,27 @@
         justify-content: center;
       }
     }
+
+    .d-block {
+      margin-right: -10px;
+    }
     .question_img {
       width: 40px;
       height: 40px;
       border-radius: 50%;
     }
-    .rupee_img {
+    .dai_img {
       width: 44px;
       height: 44px;
       border-radius: 50%;
+      @media (max-width: 576px) {
+        width: 38.5px;
+        height: 38.5px;
+      }
+      @media (max-width: 440px) {
+        width: 33px;
+        height: 33px;
+      }
     }
     .margin_small {
       margin-top: 67px;
@@ -108,11 +127,9 @@
       text-transform: capitalize;
       width: 100%;
       margin-top: 15px;
-      font-family: "Roobert-Regular";
     }
     .deposit {
       background: #7e3ac3;
-
       color: #edf0eb;
       border: 2px solid transparent;
       &:hover {

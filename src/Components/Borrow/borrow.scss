@@ -86,6 +86,11 @@
     width: 371px;
     height: 66px;
     margin: auto;
+    @media(max-width:520px){
+        max-width: 250px;
+        max-height: 44px;
+        font-size: 12px;
+    }
     &:hover {
       background-color: transparent;
       border: 2px solid #7e3ac3;
