@@ -25,7 +25,7 @@ function Index() {
        <section>
          <GetStartedCon/>
        </section>
-        <section>
+       <section>
          <JoinCommunity/>
        </section>
        <Footer />

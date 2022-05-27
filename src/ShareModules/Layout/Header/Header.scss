@@ -73,6 +73,10 @@
     margin-left: 0px;
     margin-right: 0px;
   }
+  @media (max-width: 400px) {
+    margin-left: -5px;
+    margin-right: -5px;
+  }
   li:last-child div {
     background: #252727;
     border-radius: 6px;
