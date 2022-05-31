@@ -16,7 +16,7 @@ const ICoreMoneyMarketABI = require('../../../abi/ICoreMoneyMarket.json');
 const IERC20ABI = require('../../../abi/IERC20.json');
 const IChainlinkAggregatorABI = require('../../../abi/IChainlinkAggregator.json');
 
-const Deposit=()=> {
+const Deposit = () => {
 
   const [show, setShow] = useState(false);
 

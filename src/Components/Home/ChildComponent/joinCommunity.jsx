@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import bubbleImg from "../../../assets/image/bubble.png";
 
-function JoinCommunity() {
+const JoinCommunity = () => {
   return (
     <div className=" community marginclass text-center px-3">
       <img src={bubbleImg} alt="img" />
