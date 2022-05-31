@@ -5,7 +5,7 @@ import Banner from "./ChildComponent/Banner";
 import Deposit from "./ChildComponent/Deposit";
 import GetStarted from "./ChildComponent/GetStarted";
 import GetStartedCon from "./ChildComponent/GetStartedCon";
-import JoinCommunity from "./JoinCommunity";
+import JoinCommunity from "./ChildComponent/JoinCommunity";
 
 import "./Index.scss";
 function Index() {
