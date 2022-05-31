@@ -148,14 +148,14 @@ const Header = ({ z }) => {
                     </>
                   ) : (
                     <div className="d-flex justify-content-center mt-lg-2 mt-3" onClick={handleShow2}>
-                      <button className="btn eth_btn">{userETH} ETH</button>
+                      <button className="btn eth_btn pt-1">{userETH} ETH</button>
                       <button className="btn num_btn d-flex">
                         <img
                           src={userAvatar ? userAvatar : ellipse_icon}
                           alt="img"
                           className="ellip_img align-self-center"
                         />
-                        <div>{abbreviatedAddress}</div>
+                        <div className="pt-1" style={{ "font-family": "Nib Pro SemiBold", }}>{abbreviatedAddress}</div>
                       </button>
                   </div>
                   )}

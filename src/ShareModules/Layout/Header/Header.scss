@@ -138,13 +138,18 @@
 
 .address {
   margin-right: auto;
-  font-family: 'Roobert';
+  font-family: 'Nib Pro SemiBold';
   font-style: normal;
   font-weight: 600;
   font-size: 28px;
+  margin-top: 4px;
 
   letter-spacing: 0.02em;
   text-transform: capitalize;
+
+  &:hover {
+    color: #787877;
+  }
 }
 
 .button-overlay-container {
@@ -193,11 +198,11 @@
 
 .eth_btn {
   background: #7e3ac3;
-  font-family: "Roobert-Regular";
   font-style: normal;
   font-weight: 400;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 2.6;
+  font-family: 'Nib Pro SemiBold';
 
   letter-spacing: 0.02em;
   text-transform: capitalize;
@@ -227,9 +232,8 @@
 .num_btn {
   background: #252727;
   font-weight: 400;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 2.6;
-  font-family: "Roobert-Regular";
 
   letter-spacing: 0.02em;
   text-transform: capitalize;
@@ -237,6 +241,11 @@
   color: #edf0eb;
   padding: 0 30px 0 14px;
   margin-left: -30px;
+
+  &:hover {
+    color: #787877;
+  }
+
   @media (max-width: 960px) {
     margin-top: -5px;
   }

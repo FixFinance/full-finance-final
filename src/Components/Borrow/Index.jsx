@@ -302,7 +302,7 @@ function Index() {
           animation={false}
           className="deposit-modal"
         >
-          <ManagePositionPopup 
+          <ManagePositionPopup
             handleClose={handleClose2}
             provider={provider}
             userAddress={userAddress}

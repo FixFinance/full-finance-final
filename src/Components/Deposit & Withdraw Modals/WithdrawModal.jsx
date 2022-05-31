@@ -175,7 +175,7 @@ const WithdrawModal=({ handleClose2 })=> {
             </div>
           </div>
           <div className="text-center mb-4">
-          {balanceLendShares === 0 ?
+          {Number(lendShareBalanceString) < getPureInput(input) ?
               <button
                 className="btn btn-deactive"
               >

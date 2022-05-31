@@ -232,7 +232,7 @@ const DepositPopup = ({ handleClose }) => {
 
             </div>
             <div className="text-center mb-4">
-            {DAIbalance === 0 ?
+            {Number(balanceString) < getPureInput(input) ?
               <button
                 className="btn btn-deactive"
               >
