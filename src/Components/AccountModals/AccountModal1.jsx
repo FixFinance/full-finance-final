@@ -1,10 +1,10 @@
 import React from "react";
-import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import ellipse1 from "../../assets/image/ellipse1.svg";
 import "./accountmodal.scss";
 const AccountModal1 = ({ handleClose, address }) => {
   let abbreviatedAddress = address.substring(0, 9)+'...'+address.substring(address.length-4)
+
   return (
     <div className="connect-modal account-modal">
       <Modal.Header closeButton>
