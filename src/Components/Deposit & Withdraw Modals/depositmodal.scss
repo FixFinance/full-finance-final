@@ -1,4 +1,10 @@
 .deposit-modal {
+  .deposit-header {
+    button {
+      display: none;
+    }
+  }
+
     .modal-content{
         border-radius: 40px;
     }

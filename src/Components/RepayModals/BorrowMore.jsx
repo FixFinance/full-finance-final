@@ -124,7 +124,7 @@ const BorrowMore=({
     !success && !error &&
     <div className="deposite-withdraw">
     <div>
-      <Modal.Header closeButton>
+      <Modal.Header closeButton className={sentState || waitConfirmation ? "deposit-header": ""}>
         <h5>Borrow More</h5>
       </Modal.Header>
       <Modal.Body>

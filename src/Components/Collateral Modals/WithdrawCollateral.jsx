@@ -8,7 +8,7 @@ import { getNonce } from '../../Utils/SendTx';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import { SendTx } from '../../Utils/SendTx';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
-
+import './add-withdraw.scss';
 
 const WithdrawCollateral = ({
   handleClose,
@@ -109,7 +109,7 @@ const WithdrawCollateral = ({
     !success && error === false &&
     <div className="deposite-withdraw">
       <div>
-        <Modal.Header closeButton>
+        <Modal.Header closeButton className={sentState || waitConfirmation ? "deposit-header": ""}>
           <h5>Withdraw collateral</h5>
         </Modal.Header>
         <Modal.Body>
