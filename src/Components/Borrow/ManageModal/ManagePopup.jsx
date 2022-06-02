@@ -6,7 +6,6 @@ import BorrowMore from "../../RepayModals/BorrowMore";
 import Debt from "../../RepayModals/Debt";
 import ClosePosition from "../../RepayModals/ClosePosition";
 import "./managepopup.scss";
-import ManagePositionPopup from './ManagePositionPopup';
 import { ethers, BigNumber as BN } from 'ethers';
 import { ADDRESS0, TOTAL_SBPS } from '../../../Utils/Consts.js';
 
