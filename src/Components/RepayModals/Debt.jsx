@@ -2,8 +2,10 @@ import React, {useState, useEffect} from "react";
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
 import SuccessModal from "../Success/SuccessModal";
+import ErrorModal from "../ErrorModal/Errormodal";
 import { TOTAL_SBPS, INF, _0, INF_CHAR } from '../../Utils/Consts';
-import { SendTx } from '../../Utils/SendTx';
+import { getNonce } from '../../Utils/SendTx';
+import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
 
 const Debt = ({
@@ -20,6 +22,9 @@ const Debt = ({
     REPAY_SUCCESS: 2
   }
   const [success, setSuccess] = useState(SUCCESS_STATUS.BASE);
+  const [wasError, setWasError] = useState(false);
+  const [waitConfirmation, setWaitConfirmation] = useState(false);
+  const [sentState, setSentState] = useState(false);
 
   const [input, setInput] = useState('');
   const [balanceDASSET, setBalanceDASSET] = useState(null);
@@ -57,25 +62,80 @@ const Debt = ({
     setInput(borrowObligationString);
     setMaxClicked(true);
   }
+  async function BroadcastTx(signer, tx) {
+    console.log('Tx Initiated');
+    let rec = await signer.sendTransaction(tx);
+    console.log('Tx Sent', rec);
+    setSentState(true);
+    let resolvedRec = await rec.wait();
+    console.log('Tx Resolved, resolvedRec');
+    setSentState(false);
+    return { rec, resolvedRec };
+  }
+
+  async function SendTx(userAddress, contractInstance, functionName, argArray, updateSentState, overrides={}) {
+    if (contractInstance == null) {
+      throw "SendTx2 Attempted to Accept Null Contract";
+    }
+  
+    const signer = contractInstance.signer;
+  
+    let tx = {
+      to: contractInstance.address,
+      from: userAddress,
+      data: hoodEncodeABI(contractInstance, functionName, argArray),
+      nonce: await getNonce(signer.provider, userAddress),
+      gasLimit: (await contractInstance.estimateGas[functionName](...argArray)).toNumber() * 2,
+      ...overrides
+    }
+  
+    let { resolvedRec } = await BroadcastTx(signer, tx, updateSentState);
+  
+    return resolvedRec;
+  
+  }
 
   const handleClickRepay = async () => {
-    if (balanceDASSET != null && approvalDASSET != null && balanceDASSET.gte(absInputAmt)) {
-      if (maxClicked) {
-        await SendTx(userAddress, CMM, 'repayCVault', [vault.index, vault.borrowSharesOwed.toString(), false]);
+    try {
+      if (balanceDASSET != null && approvalDASSET != null && balanceDASSET.gte(absInputAmt)) {
+        if (maxClicked) {
+          setWaitConfirmation(true);
+          await SendTx(userAddress, CMM, 'repayCVault', [vault.index, vault.borrowSharesOwed.toString(), false]);
+          setWasError(false);
+          setWaitConfirmation(false);
+        }
+        else {
+          setWaitConfirmation(true);
+          await SendTx(userAddress, CMM, 'repayCVault', [vault.index, absInputAmt.toString(), true]);
+          setWasError(false);
+          setWaitConfirmation(false);
+        }
+        setSuccess(SUCCESS_STATUS.REPAY_SUCCESS);
+        setWasError(false);
+        setWaitConfirmation(false);
       }
-      else {
-        await SendTx(userAddress, CMM, 'repayCVault', [vault.index, absInputAmt.toString(), true]);
-      }
-      setSuccess(SUCCESS_STATUS.REPAY_SUCCESS);
+    } catch (err) {
+      setSuccess(SUCCESS_STATUS.ERROR);
+      setWasError(true);
+      setWaitConfirmation(false);
     }
   }
 
   const handleClickApprove = async () => {
-    if (balanceDASSET != null && approvalDASSET != null) {
-      await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
-      setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
-      setMaxClicked(false);
-      setInput('');
+    try {
+      if (balanceDASSET != null && approvalDASSET != null) {
+        setWaitConfirmation(true);
+        await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
+        setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
+        setMaxClicked(false);
+        setInput('');
+        setWasError(false);
+        setWaitConfirmation(false);
+      }
+    } catch (err) {
+      setSuccess(SUCCESS_STATUS.ERROR);
+      setWasError(true);
+      setWaitConfirmation(false);
     }
   }
 
@@ -89,10 +149,20 @@ const Debt = ({
     }
   }
 
+  const handleErrorClose = () => {
+    setSuccess(SUCCESS_STATUS.BASE);
+    // force reload
+    setAllowanceDASSET(null);
+    setInput('');
+    handleClose();
+  }
+
   const sufficientApproval = balanceDASSET == null || approvalDASSET == null || (approvalDASSET.gte(absInputAmt) && !approvalDASSET.eq(_0));
 
   const buttonMessage = sufficientApproval ? "Repay DAI" : "Approve DAI";
   const onClick = sufficientApproval ? handleClickRepay : handleClickApprove;
+  const txMessage = sufficientApproval ? "Repaying Debt" : "Approving DAI";
+  const LoadingContents = sentState ? txMessage : 'Waiting For Confirmation';
 
   const BaseContents = (
     success === SUCCESS_STATUS.BASE &&
@@ -145,7 +215,41 @@ const Debt = ({
           </div>
 
           <div className="text-center mb-4">
-            <button className="btn btn-deactive btn-active " onClick={onClick}>{buttonMessage}</button>
+          {Number(balanceDAIString) < Number(input) ?
+              <button
+                className="btn btn-deactive"
+              >
+              Insufficient Balance For Transaction
+              </button>
+            :
+              <>
+              {input === '' ?
+                <>
+                {wasError &&
+                  <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>
+                }
+                  <button
+                    className={wasError ? "btn btn-deactive mt-0":"btn btn-deactive"}
+                  >
+                  Enter an amount
+                  </button>
+                </>
+              :
+                <>
+                {waitConfirmation ?
+                  <button
+                  className="btn btn-deactive"
+                  >
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span className="ms-3">{LoadingContents}</span>
+                  </button>
+                :
+                  <button className="btn btn-deactive btn-active " onClick={onClick}>{buttonMessage}</button>
+                }
+                </>
+              }
+              </>
+            }
           </div>
         </Modal.Body>
       </div>
@@ -154,7 +258,7 @@ const Debt = ({
 
   const successmodal = (
     <Modal
-        show={success !== SUCCESS_STATUS.BASE}
+        show={success !== SUCCESS_STATUS.BASE && success !== SUCCESS_STATUS.ERROR}
         onHide={handleClosesuccess}
         centered
         animation={false}
@@ -164,10 +268,23 @@ const Debt = ({
     </Modal>
   );
 
+  const errorModal = (
+    <Modal
+      show={success === SUCCESS_STATUS.ERROR}
+      onHide={handleErrorClose}
+      centered
+      animation={false}
+      className="deposit-modal"
+    >
+      <ErrorModal handleErrorClose={handleErrorClose}/>
+    </Modal>
+);
+
   return (
     <>
       {BaseContents}
       {successmodal}
+      {errorModal}
     </>
   );
 };

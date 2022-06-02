@@ -56,7 +56,6 @@ const DepositPopup = ({ handleClose }) => {
     setLendShareValue(null);
     setInput('');
   }
-  const handleShow = () => setSuccess(true);
 
   const handleInput = (param) => {
     let value = param.target.value;
@@ -74,8 +73,7 @@ const DepositPopup = ({ handleClose }) => {
   let FLT = signer == null ? null : new ethers.Contract(process.env.REACT_APP_FLT_ADDRESS, IERC20ABI, signer);
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
 
-  async function BroadcastTx(signer, tx, updateSentState) {
-    // const [sentState, setSentState] = useState(false);
+  async function BroadcastTx(signer, tx) {
     console.log('Tx Initiated');
     let rec = await signer.sendTransaction(tx);
     console.log('Tx Sent', rec);
@@ -114,12 +112,12 @@ const DepositPopup = ({ handleClose }) => {
         return;
       }
       if (absoluteInput.gt(DAIapproval) || DAIapproval.eq(BN.from(0))) {
+        setWaitConfirmation(true);
         await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
       }
       else {
         setWaitConfirmation(true);
         await SendTx(userAddress, CMM, 'depositSpecificUnderlying', [userAddress, absoluteInput.toString()]);
-
       }
       setSuccess(true);
       setWasError(false);
@@ -217,8 +215,8 @@ const DepositPopup = ({ handleClose }) => {
                   />
                   <div className="highlight" onClick={handleClickMax}>max</div>
                 </div>
-                 
-               
+
+
               </div>
               <div className="d-flex justify-content-between text-part">
                 <p style={{ color: "#7D8282" }}>Wallet Balance</p>

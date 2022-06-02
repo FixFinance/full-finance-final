@@ -2,8 +2,10 @@ import React, {useState, useEffect} from "react";
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
 import SuccessModal from "../Success/SuccessModal";
+import ErrorModal from "../ErrorModal/Errormodal";
 import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
-import { SendTx } from '../../Utils/SendTx';
+import { getNonce } from '../../Utils/SendTx';
+import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
 import './collateral-ratio.scss';
 import { BNmin, BNmax } from '../../Utils/BNtools';
@@ -22,6 +24,11 @@ const BorrowMore=({
   const [success, setSuccess] = useState(false);
   const [input, setInput] = useState('');
   const [balanceDASSET, setBalanceDASSET] = useState(null);
+
+  const [error, setError] = useState(false);
+  const [wasError, setWasError] = useState(false);
+  const [waitConfirmation, setWaitConfirmation] = useState(false);
+  const [sentState, setSentState] = useState(false);
 
   useEffect(() => {
     if (balanceDASSET == null) {
@@ -47,6 +54,39 @@ const BorrowMore=({
   const MIN_SAFE_COLLAT_RATIO = BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)).mul(BN.from(10).pow(BN.from(16)));
   let resultantCollatRatioSafe = resultantCollateralizationRatio.gte(MIN_SAFE_COLLAT_RATIO);
 
+  async function BroadcastTx(signer, tx) {
+    console.log('Tx Initiated');
+    let rec = await signer.sendTransaction(tx);
+    console.log('Tx Sent', rec);
+    setSentState(true);
+    let resolvedRec = await rec.wait();
+    console.log('Tx Resolved, resolvedRec');
+    setSentState(false);
+    return { rec, resolvedRec };
+  }
+
+  async function SendTx(userAddress, contractInstance, functionName, argArray, updateSentState, overrides={}) {
+    if (contractInstance == null) {
+      throw "SendTx2 Attempted to Accept Null Contract";
+    }
+  
+    const signer = contractInstance.signer;
+  
+    let tx = {
+      to: contractInstance.address,
+      from: userAddress,
+      data: hoodEncodeABI(contractInstance, functionName, argArray),
+      nonce: await getNonce(signer.provider, userAddress),
+      gasLimit: (await contractInstance.estimateGas[functionName](...argArray)).toNumber() * 2,
+      ...overrides
+    }
+  
+    let { resolvedRec } = await BroadcastTx(signer, tx, updateSentState);
+  
+    return resolvedRec;
+  
+  }
+
   const handleInput = (param) => {
     let value = param.target.value;
     let filteredValue = filterInput(value);
@@ -54,14 +94,34 @@ const BorrowMore=({
   }
 
   const handleClickBorrow = async () => {
-    if (resultantBorrowObligation.lte(maxBorrowObligation)) {
-      await SendTx(userAddress, CMM, 'borrowFromCVault', [vault.index, absInputAmt.toString(), true]);
-      setSuccess(true);
+    try {
+      if (resultantBorrowObligation.lte(maxBorrowObligation)) {
+        setWaitConfirmation(true);
+        await SendTx(userAddress, CMM, 'borrowFromCVault', [vault.index, absInputAmt.toString(), true]);
+        setSuccess(true);
+        setWaitConfirmation(false);
+        setWasError(false);
+      }
+    } catch (err) {
+      setSuccess(false);
+      setError(true);
+      setWasError(true);
+      setWaitConfirmation(false);
     }
   }
 
+  const handleErrorClose = () => {
+    setSuccess(false);
+    // force reload
+    setInput('');
+    setError(false);
+    handleClose();
+  }
+
+  const LoadingContents = sentState ? "Borrowing DAI" : 'Waiting For Confirmation';
+
   const BaseContents = (
-    !success &&
+    !success && !error &&
     <div className="deposite-withdraw">
     <div>
       <Modal.Header closeButton>
@@ -113,14 +173,48 @@ const BorrowMore=({
         </div>
 
         <div className="text-center mb-4">
-          <button className="btn btn-deactive btn-active " onClick={handleClickBorrow}> Borrow DAI</button>
+        {Number(balanceDASSETString) < Number(input) ?
+              <button
+                className="btn btn-deactive"
+              >
+              Insufficient Balance For Transaction
+              </button>
+            :
+              <>
+              {input === '' ?
+                <>
+                {wasError &&
+                  <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>
+                }
+                  <button
+                    className={wasError ? "btn btn-deactive mt-0":"btn btn-deactive"}
+                  >
+                  Enter an amount
+                  </button>
+                </>
+              :
+                <>
+                {waitConfirmation ?
+                  <button
+                  className="btn btn-deactive"
+                  >
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span className="ms-3">{LoadingContents}</span>
+                  </button>
+                :
+                  <button className="btn btn-deactive btn-active " onClick={handleClickBorrow}> Borrow DAI</button>
+                }
+                </>
+              }
+              </>
+            }
         </div>
       </Modal.Body>
     </div>
   </div>
   );
 
-  const successmodal = (
+  const successModal = (
     <Modal
         show={success}
         onHide={handleClose}
@@ -132,10 +226,23 @@ const BorrowMore=({
     </Modal>
   );
 
+  const errorModal = (
+    <Modal
+      show={error}
+      onHide={handleErrorClose}
+      centered
+      animation={false}
+      className="deposit-modal"
+    >
+      <ErrorModal handleErrorClose={handleErrorClose}/>
+    </Modal>
+);
+
   return(
     <>
       {BaseContents}
-      {successmodal}
+      {successModal}
+      {errorModal}
     </>
   );
 }
