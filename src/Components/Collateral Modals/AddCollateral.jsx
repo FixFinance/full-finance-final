@@ -7,6 +7,7 @@ import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
 import { getNonce } from '../../Utils/SendTx';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
+import './add-withdraw.scss';
 
 
 const AddCollateral = ({
@@ -156,7 +157,7 @@ const AddCollateral = ({
     success === SUCCESS_STATUS.BASE &&
     <div className="deposite-withdraw">
       <div>
-        <Modal.Header closeButton>
+        <Modal.Header closeButton className={sentState || waitConfirmation ? "deposit-header": ""}>
           <h5>Add Collateral</h5>
         </Modal.Header>
         <Modal.Body>

@@ -144,7 +144,7 @@ const WithdrawModal=({ handleClose2 })=> {
         <div className="deposite-withdraw">
     {success || error ? null : (
       <div>
-        <Modal.Header closeButton>
+        <Modal.Header closeButton className={sentState || waitConfirmation ? "deposit-header": ""}>
           <h5>Redeem FLT for DAI</h5>
         </Modal.Header>
         <Modal.Body>

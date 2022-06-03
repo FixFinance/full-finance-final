@@ -188,14 +188,15 @@ const DepositPopup = ({ handleClose }) => {
     asyncUseEffect();
   }, [DAIbalance, provider]);
 
-  const ButtonContents = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? 'Approve DAI' : 'Deposit DAI'
-	const LoadingContents = sentState ? "Depositing" : 'Waiting For Confirmation';
+  const ButtonContents = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? 'Approve DAI' : 'Deposit DAI';
+  const txMessage = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? "Approving DAI" : "Depositing DAI";
+	const LoadingContents = sentState ? txMessage : 'Waiting For Confirmation';
 
   return (
     <div className="deposite-withdraw">
       {success || error ? null : (
         <div>
-          <Modal.Header closeButton>
+          <Modal.Header closeButton className={sentState || waitConfirmation ? "deposit-header" : ""}>
             <h5>Deposit DAI</h5>
           </Modal.Header>
           <Modal.Body>

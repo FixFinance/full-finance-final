@@ -168,7 +168,7 @@ const Debt = ({
     success === SUCCESS_STATUS.BASE &&
     <div className="deposite-withdraw">
       <div>
-        <Modal.Header closeButton>
+        <Modal.Header closeButton className={sentState || waitConfirmation ? "deposit-header": ""}>
           <h5>Repay Debt</h5>
         </Modal.Header>
         <Modal.Body>
