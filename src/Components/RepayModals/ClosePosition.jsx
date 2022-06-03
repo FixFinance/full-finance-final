@@ -1,29 +1,92 @@
 import React, { useState, useEffect } from 'react';
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
-import { SendTx } from '../../Utils/SendTx';
+import { getNonce } from '../../Utils/SendTx';
+import { hoodEncodeABI } from '../../Utils/HoodAbi';
 import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
 import { getDecimalString } from '../../Utils/StringAlteration';
+import SuccessModal from '../Success/SuccessModal';
+import ErrorModal from '../ErrorModal/Errormodal';
 
 const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
 
+  const [success, setSuccess] = useState(false);
+
   const [approval, setApproval] = useState(null);
+  const [waitConfirmation, setWaitConfirmation] = useState(false);
+  const [sentState, setSentState] = useState(false);
+  const [error, setError] = useState(false);
+  const [wasError, setWasError] = useState(false);
 
   const sufficientApproval = approval == null ? true : vault.borrowObligation.mul(BN.from(101)).div(BN.from(100)).lte(approval);
 
   const handleClickApprove = async () => {
     if (approval != null) {
+      setWaitConfirmation(true);
       await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
+      setWaitConfirmation(false);
+      setSuccess(true);
+      setWasError(false);
       setApproval(null);
     }
   }
 
   const handleClickClose = async () => {
-    if (approval != null && sufficientApproval) {
-      await SendTx(userAddress, CMM, 'closeCVault', [vault.index]);
-      handleClose();
+    try {
+      if (approval != null && sufficientApproval) {
+        setWaitConfirmation(true);
+        await SendTx(userAddress, CMM, 'closeCVault', [vault.index]);
+        setWaitConfirmation(false);
+        setSuccess(true);
+        setWaitConfirmation(false);
+        setWasError(false);
+      }
+    } catch (err) {
+      setSuccess(false);
+      setError(true);
+      setWasError(true);
+      setWaitConfirmation(false);
     }
   };
+
+  async function BroadcastTx(signer, tx) {
+    console.log('Tx Initiated');
+    let rec = await signer.sendTransaction(tx);
+    console.log('Tx Sent', rec);
+    setSentState(true);
+    let resolvedRec = await rec.wait();
+    console.log('Tx Resolved, resolvedRec');
+    setSentState(false);
+    return { rec, resolvedRec };
+  }
+
+  async function SendTx(userAddress, contractInstance, functionName, argArray, updateSentState, overrides={}) {
+    if (contractInstance == null) {
+      throw "SendTx2 Attempted to Accept Null Contract";
+    }
+  
+    const signer = contractInstance.signer;
+  
+    let tx = {
+      to: contractInstance.address,
+      from: userAddress,
+      data: hoodEncodeABI(contractInstance, functionName, argArray),
+      nonce: await getNonce(signer.provider, userAddress),
+      gasLimit: (await contractInstance.estimateGas[functionName](...argArray)).toNumber() * 2,
+      ...overrides
+    }
+  
+    let { resolvedRec } = await BroadcastTx(signer, tx, updateSentState);
+  
+    return resolvedRec;
+  
+  }
+
+  const handleErrorClose = () => {
+    setSuccess(false);
+    setError(false);
+    handleClose();
+  }
 
   useEffect(() => {
     if (approval == null) {
@@ -33,11 +96,13 @@ const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
 
   const message = sufficientApproval ? "Close DAI/WETH Position" : "Approve DAI";
   const onClick = sufficientApproval ? handleClickClose : handleClickApprove;
+  const LoadingContents = sentState ? "Closing Position" : 'Waiting For Confirmation';
 
-  return (
+  const BaseContents = (
+    !success && !error &&
     <div className="deposite-withdraw">
     <div>
-      <Modal.Header closeButton>
+      <Modal.Header closeButton className={sentState || waitConfirmation ? "deposit-header": ""}>
         <h5>Close Position (DAI/wETH)</h5>
       </Modal.Header>
       <Modal.Body>
@@ -73,13 +138,55 @@ const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
         </div>
 
         <div className="text-center mb-4">
-          <button className="btn btn-deactive btn-active " style={{ background: "#EF767A"}} onClick={onClick}>{message}</button>
+        {waitConfirmation ?
+                  <button
+                  className="btn btn-deactive"
+                  >
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span className="ms-3">{LoadingContents}</span>
+                  </button>
+                :
+                  <button className="btn btn-deactive btn-active " style={{ background: "#EF767A"}} onClick={onClick}>{message}</button>
+        }
         </div>
         </Modal.Body>
     </div>
     </div>
 
-    )
+);
+
+const successModal = (
+  <Modal
+      show={success}
+      onHide={handleClose}
+      centered
+      animation={false}
+      className="deposit-modal"
+  >
+      <SuccessModal handleClosesuccess={handleClose} />
+  </Modal>
+);
+
+const errorModal = (
+  <Modal
+    show={error}
+    onHide={handleErrorClose}
+    centered
+    animation={false}
+    className="deposit-modal"
+  >
+    <ErrorModal handleErrorClose={handleErrorClose}/>
+  </Modal>
+);
+
+return (
+  <>
+    {BaseContents}
+    {errorModal}
+    {successModal}
+  </>
+  );
+
 }
 
 export default ClosePosition;
