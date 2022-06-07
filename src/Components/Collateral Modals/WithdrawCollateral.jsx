@@ -24,6 +24,7 @@ const WithdrawCollateral = ({
   const [wasError, setWasError] = useState(false);
   const [waitConfirmation, setWaitConfirmation] = useState(false);
   const [sentState, setSentState] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
 
   const minCollatRatioBN = BN.from(parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5).mul(BN.from(10).pow(BN.from(16)));
@@ -53,6 +54,7 @@ const WithdrawCollateral = ({
     let resolvedRec = await rec.wait();
     console.log('Tx Resolved, resolvedRec');
     setSentState(false);
+    setDisabled(false);
     return { rec, resolvedRec };
   }
 
@@ -82,6 +84,7 @@ const WithdrawCollateral = ({
     try {
       if (absInputAmt.gt(_0) && impliedAmountSupplied.gte(minimumCollateral)) {
         setWaitConfirmation(true);
+        setDisabled(true);
         await SendTx(userAddress, CMM, 'withdrawFromCVault', [vault.index, absInputAmt.toString()]);
         setSuccess(true);
         setWasError(false);
@@ -89,6 +92,7 @@ const WithdrawCollateral = ({
       }
     } catch (err) {
       setSuccess(false);
+      setDisabled(false);
       setWasError(true);
       setError(true)
       setWaitConfirmation(false);
@@ -125,6 +129,7 @@ const WithdrawCollateral = ({
                     placeholder="00.00"
                     value={input}
                     onChange={handleInput}
+                    disabled={disabled}
                   />
                 </div>
             </div>

@@ -29,6 +29,7 @@ const BorrowMore=({
   const [wasError, setWasError] = useState(false);
   const [waitConfirmation, setWaitConfirmation] = useState(false);
   const [sentState, setSentState] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
   useEffect(() => {
     if (balanceDASSET == null) {
@@ -62,6 +63,7 @@ const BorrowMore=({
     let resolvedRec = await rec.wait();
     console.log('Tx Resolved, resolvedRec');
     setSentState(false);
+    setDisabled(false);
     return { rec, resolvedRec };
   }
 
@@ -97,6 +99,7 @@ const BorrowMore=({
     try {
       if (resultantBorrowObligation.lte(maxBorrowObligation)) {
         setWaitConfirmation(true);
+        setDisabled(true);
         await SendTx(userAddress, CMM, 'borrowFromCVault', [vault.index, absInputAmt.toString(), true]);
         setSuccess(true);
         setWaitConfirmation(false);
@@ -104,6 +107,7 @@ const BorrowMore=({
       }
     } catch (err) {
       setSuccess(false);
+      setDisabled(false);
       setError(true);
       setWasError(true);
       setWaitConfirmation(false);
@@ -140,6 +144,7 @@ const BorrowMore=({
                     placeholder="00.00"
                     value={input}
                     onChange={handleInput}
+                    disabled={disabled}
                   />
                 </div>
           </div>
