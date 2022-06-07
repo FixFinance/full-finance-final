@@ -301,7 +301,7 @@ const ManagePositionPopup = ({
                         <button
                         className="btn btn-deactive"
                         >
-                        'Not Enough Collateral'
+                        Not Enough Collateral
                         </button>
                     :
                         <>
