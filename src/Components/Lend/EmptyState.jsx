@@ -52,7 +52,7 @@ const EmptyState = () => {
   const handleShow3 = () => setShow3(true);
 
 
-  const lendShareValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
+  const lendShareValueString = getDecimalString(lendShareValue == null ? '0.00' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
   const lendShareUSDValueString = getDecimalString(lendShareUSDValue == null ? '0.00' : lendShareUSDValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
 
   const signer = provider == null ? null : provider.getSigner();

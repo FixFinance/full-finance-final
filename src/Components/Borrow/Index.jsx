@@ -239,12 +239,11 @@ function Index() {
             </div>
           </div>
           <div className="col-lg-4 col-md-4">
-            <div className="borrow_box_add">
+            <div className="borrow_box_add" onClick={() => handleShow2()}>
               <div className="plus_added"
-                onClick={() => handleShow2()}
               >
-                <button>+</button>
-                <p>open Borrowing positions</p>
+                <div style={{ "font-size" : "45px"}}>+</div>
+                <p>Open Borrowing Positions</p>
               </div>
             </div>
           </div>

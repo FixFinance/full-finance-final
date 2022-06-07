@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react'
 import Modal from "react-bootstrap/Modal";
 import "./managepopup.scss";
 import SuccessModal from "../../Success/SuccessModal";
+import ErrorModal from '../../ErrorModal/Errormodal';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../../Utils/StringAlteration.js';
 import { TOTAL_SBPS, _0, INF } from '../../../Utils/Consts.js';
 import { ethers, BigNumber as BN } from 'ethers';
-import { SendTx } from '../../../Utils/SendTx';
+import { getNonce } from '../../../Utils/SendTx';
+import { hoodEncodeABI } from '../../../Utils/HoodAbi';
 import { BNmin, BNmax } from '../../../Utils/BNtools';
 
 const ManagePositionPopup = ({
@@ -29,9 +31,13 @@ const ManagePositionPopup = ({
     const SUCCESS_STATUS = {
         BASE: 0,
         APPROVAL_SUCCESS: 1,
-        OPEN_SUCCESS: 2
+        OPEN_SUCCESS: 2,
+        ERROR: 3
     }
     const [success, setSuccess] = useState(SUCCESS_STATUS.BASE);
+    const [wasError, setWasError] = useState(false);
+    const [waitConfirmation, setWaitConfirmation] = useState(false);
+    const [sentState, setSentState] = useState(false);
 
     const [cInput, setCInput] = useState(null);
     const [dInput, setDInput] = useState(null);
@@ -39,7 +45,6 @@ const ManagePositionPopup = ({
     const [balanceCollateral, setBalanceCollateral] = useState(null);
     const [approvedCollateral, setApprovedCollateral] = useState(null);
     const [maxBorrowAmount, setMaxBorrowAmount] = useState(null);
-    const [collatRatioCheck, setCollatRatioCheck] = useState(false); // This variable controls the color of the Implied Collateralization Ratio
 
     //Borrow-Lend Supply Difference
     const BLSdiff = supplyBorrowedBN != null && supplyLentBN != null ? supplyLentBN.sub(supplyBorrowedBN) : _0;
@@ -57,6 +62,12 @@ const ManagePositionPopup = ({
         else {
             handleClose();
         }
+    }
+
+    const handleErrorClose = () => {
+        setSuccess(SUCCESS_STATUS.BASE);
+        setApprovedCollateral(null);
+        handleClose();
     }
 
     function getEffCollatRatioBN() {
@@ -98,23 +109,73 @@ const ManagePositionPopup = ({
     const MIN_SAFE_COLLAT_RATIO = BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)).mul(BN.from(10).pow(BN.from(16)));
     let resultantCollatRatioSafe = getEffCollatRatioBN().gte(MIN_SAFE_COLLAT_RATIO);
 
+    async function BroadcastTx(signer, tx) {
+        console.log('Tx Initiated');
+        let rec = await signer.sendTransaction(tx);
+        console.log('Tx Sent', rec);
+        setSentState(true);
+        let resolvedRec = await rec.wait();
+        console.log('Tx Resolved, resolvedRec');
+        setSentState(false);
+        return { rec, resolvedRec };
+      }
+    
+      async function SendTx(userAddress, contractInstance, functionName, argArray, updateSentState, overrides={}) {
+        if (contractInstance == null) {
+          throw "SendTx2 Attempted to Accept Null Contract";
+        }
+      
+        const signer = contractInstance.signer;
+      
+        let tx = {
+          to: contractInstance.address,
+          from: userAddress,
+          data: hoodEncodeABI(contractInstance, functionName, argArray),
+          nonce: await getNonce(signer.provider, userAddress),
+          gasLimit: (await contractInstance.estimateGas[functionName](...argArray)).toNumber() * 2,
+          ...overrides
+        }
+      
+        let { resolvedRec } = await BroadcastTx(signer, tx, updateSentState);
+      
+        return resolvedRec;
+      
+    }
+
     async function approveOnClick() {
-        if (CASSET !== null && CMM !== null) {
-            await SendTx(userAddress, CASSET, 'approve', [CMM.address, INF.toString()]);
-            setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
-            setBalanceCollateral(null);
-            setApprovedCollateral(null);
+        try {
+            if (CASSET !== null && CMM !== null) {
+                setWaitConfirmation(true);
+                await SendTx(userAddress, CASSET, 'approve', [CMM.address, INF.toString()]);
+                setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
+                setWasError(false);
+                setWaitConfirmation(false);
+                setBalanceCollateral(null);
+                setApprovedCollateral(null);
+            }
+        } catch (err) {
+            setSuccess(SUCCESS_STATUS.ERROR);
+            setWasError(true);
+            setWaitConfirmation(false);
         }
     }
 
     async function openVaultOnClick() {
-        if (
-            approvedCollateral != null && balanceCollateral != null && maxBorrowAmount != null &&
-            !collateralAmountInput.eq(_0) && !debtAmountInput.eq(_0) &&
-            debtAmountInput.lte(maxBorrowAmount)
-        ) {
-            await SendTx(userAddress, CMM, 'openCVault', [process.env.REACT_APP_COLLATERAL_ADDRESS, collateralAmountInput.toString(), debtAmountInput.toString()]);
-            await setSuccess(SUCCESS_STATUS.OPEN_SUCCESS);
+        try {
+            if (
+                approvedCollateral != null && balanceCollateral != null && maxBorrowAmount != null &&
+                !collateralAmountInput.eq(_0) && !debtAmountInput.eq(_0) &&
+                debtAmountInput.lte(maxBorrowAmount)
+            ) {
+                setWaitConfirmation(true);
+                await SendTx(userAddress, CMM, 'openCVault', [process.env.REACT_APP_COLLATERAL_ADDRESS, collateralAmountInput.toString(), debtAmountInput.toString()]);
+                setSuccess(SUCCESS_STATUS.OPEN_SUCCESS);
+                setWaitConfirmation(true);
+            }
+        } catch (err) {
+            setSuccess(SUCCESS_STATUS.ERROR);
+            setWasError(true);
+            setWaitConfirmation(false);
         }
     }
 
@@ -207,18 +268,67 @@ const ManagePositionPopup = ({
 
 
     let sufficientWETHApproval = approvedCollateral == null || balanceCollateral == null || approvedCollateral.gte(balanceCollateral);
+    const txMessage = !sufficientWETHApproval ? "Approving WETH" : "Opening Position";
+	const LoadingContents = sentState ? txMessage : 'Waiting For Confirmation';
+	const InputContents = cInput === '' || cInput === null || Number(cInput) === 0 ? 'Enter A Collateral Amount' : 'Enter A Borrow Amount';
 
     let buttons = (
         <>
             {!sufficientWETHApproval && <button className="btn activate" onClick={approveOnClick}>Approve WETH</button>}
-            <button className={"btn "+(sufficientWETHApproval ? "" : "di")+"activate"} onClick={openVaultOnClick}>Open Vault, Borrow DAI</button>
+            <>
+                {Number(collateralBalanceString) < Number(cInput) ?
+                <button
+                    className="btn btn-deactive"
+                >
+                Insufficient Balance For Transaction
+                </button>
+                :
+                <>
+                {dInput === '' || cInput === '' || dInput === null  || Number(dInput) === 0 ?
+                    <>
+                    {wasError &&
+                    <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>
+                    }
+                    <button
+                        className={wasError ? "btn btn-deactive mt-0":"btn btn-deactive"}
+                    >
+                    {InputContents}
+                    </button>
+                    </>
+                :
+                    <>
+                    {!resultantCollatRatioSafe  ?
+                        <button
+                        className="btn btn-deactive"
+                        >
+                        'Not Enough Collateral'
+                        </button>
+                    :
+                        <>
+                        {waitConfirmation ?
+                        <button
+                        className="btn btn-deactive"
+                        >
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span className="ms-3">{LoadingContents}</span>
+                        </button>
+                        :
+                            <button className={"btn "+(sufficientWETHApproval ? "" : "di")+"activate"} onClick={openVaultOnClick}>Open Vault, Borrow DAI</button>
+                        }
+                        </>
+                    }
+                    </>
+                }
+                </>
+                }
+            </>
         </>
     );
 
     let inputs = (
         success === SUCCESS_STATUS.BASE &&
         <div className="manage_popup">
-            <Modal.Header closeButton>
+            <Modal.Header closeButton className={sentState || waitConfirmation ? "deposit-header": ""}>
             <h5>Open Borrowing Position</h5>
             </Modal.Header>
             <Modal.Body>
@@ -230,14 +340,14 @@ const ManagePositionPopup = ({
 
                     {buttons}
 
-               </div> 
+               </div>
             </Modal.Body>
         </div>
     );
 
-    let successmodal = (
+    let successModal = (
         <Modal
-            show={success !== SUCCESS_STATUS.BASE}
+            show={success === SUCCESS_STATUS.APPROVAL_SUCCESS || success === SUCCESS_STATUS.OPEN_SUCCESS}
             onHide={handleClosesuccess}
             centered
             animation={false}
@@ -247,10 +357,23 @@ const ManagePositionPopup = ({
         </Modal>
     );
 
+    const errorModal = (
+        <Modal
+          show={success === SUCCESS_STATUS.ERROR}
+          onHide={handleErrorClose}
+          centered
+          animation={false}
+          className="deposit-modal"
+        >
+          <ErrorModal handleErrorClose={handleErrorClose}/>
+        </Modal>
+    );
+
     return (
         <div>
             {inputs}
-            {successmodal}
+            {successModal}
+            {errorModal}
         </div>
     )
 }

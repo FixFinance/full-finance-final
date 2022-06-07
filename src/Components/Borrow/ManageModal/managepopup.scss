@@ -2,6 +2,12 @@
     padding: 0 20px;
     margin: 0 auto;
 
+    .deposit-header {
+        button {
+          display: none;
+        }
+    }
+
     .modal-body{
         overflow-y: auto;
         &::-webkit-scrollbar {
