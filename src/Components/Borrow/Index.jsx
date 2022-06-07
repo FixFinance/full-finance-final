@@ -244,7 +244,7 @@ function Index() {
                 onClick={() => handleShow2()}
               >
                 <div style={{ "font-size" : "45px"}}>+</div>
-                <p>open Borrowing positions</p>
+                <p>Open Borrowing Positions</p>
               </div>
             </div>
           </div>
