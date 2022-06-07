@@ -313,7 +313,7 @@ const ManagePositionPopup = ({
                             <span className="ms-3">{LoadingContents}</span>
                         </button>
                         :
-                            <button className={"btn "+(sufficientWETHApproval ? "" : "di")+"activate"} onClick={openVaultOnClick}>Open Vault, Borrow DAI</button>
+                            <button className={"btn"+(sufficientWETHApproval ? "" : "di")+"activate"} onClick={openVaultOnClick}>Open Vault, Borrow DAI</button>
                         }
                         </>
                     }

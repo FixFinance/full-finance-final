@@ -186,7 +186,9 @@ const DepositPopup = ({ handleClose }) => {
       }
     }
     asyncUseEffect();
-  }, [DAIbalance, provider]);
+    console.log(getPureInput(input));
+    console.log(Number(getPureInput(input)) === 0)
+  }, [DAIbalance, provider, input]);
 
   const ButtonContents = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? 'Approve DAI' : 'Deposit DAI';
   const txMessage = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? "Approving DAI" : "Depositing DAI";
@@ -239,7 +241,7 @@ const DepositPopup = ({ handleClose }) => {
               </button>
             :
               <>
-              {input === '' ?
+              {input === '' || Number(getPureInput(input)) === 0 ?
                 <>
                 {wasError &&
                   <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>

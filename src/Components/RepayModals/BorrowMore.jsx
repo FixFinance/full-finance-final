@@ -181,7 +181,7 @@ const BorrowMore=({
               </button>
             :
               <>
-              {input === '' ?
+              {input === '' || Number(input) === 0 ?
                 <>
                 {wasError &&
                   <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>
