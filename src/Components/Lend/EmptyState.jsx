@@ -52,8 +52,8 @@ const EmptyState = () => {
   const handleShow3 = () => setShow3(true);
 
 
-  const lendShareValueString = getDecimalString(lendShareValue == null ? '0.00' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
-  const lendShareUSDValueString = getDecimalString(lendShareUSDValue == null ? '0.00' : lendShareUSDValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
+  const lendShareValueString = getDecimalString(lendShareValue == null ? '0.0000' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
+  const lendShareUSDValueString = getDecimalString(lendShareUSDValue == null ? '0.0000' : lendShareUSDValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
 
   const signer = provider == null ? null : provider.getSigner();
   let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
@@ -85,8 +85,6 @@ const EmptyState = () => {
     }
     asyncUseEffect();
   }, [provider, balanceLendShares]);
-
-  // p wont center on mobile because its actually in the same div as the DAI image
 
   return (
     <>

@@ -23,6 +23,7 @@ const DepositPopup = ({ handleClose }) => {
   const [wasError, setWasError] = useState(false);
   const [waitConfirmation, setWaitConfirmation] = useState(false);
   const [sentState, setSentState] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
   const [input, setInput] = useState('');
 
@@ -81,6 +82,7 @@ const DepositPopup = ({ handleClose }) => {
     let resolvedRec = await rec.wait();
     console.log('Tx Resolved, resolvedRec');
     setSentState(false);
+    setDisabled(false);
     return { rec, resolvedRec };
   }
 
@@ -113,10 +115,12 @@ const DepositPopup = ({ handleClose }) => {
       }
       if (absoluteInput.gt(DAIapproval) || DAIapproval.eq(BN.from(0))) {
         setWaitConfirmation(true);
+        setDisabled(true);
         await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
       }
       else {
         setWaitConfirmation(true);
+        setDisabled(true);
         await SendTx(userAddress, CMM, 'depositSpecificUnderlying', [userAddress, absoluteInput.toString()]);
       }
       setSuccess(true);
@@ -124,6 +128,7 @@ const DepositPopup = ({ handleClose }) => {
       setWaitConfirmation(false);
     } catch (err) {
       setError(true);
+      setDisabled(false);
       setWasError(true);
       setWaitConfirmation(false);
     }
@@ -186,7 +191,9 @@ const DepositPopup = ({ handleClose }) => {
       }
     }
     asyncUseEffect();
-  }, [DAIbalance, provider]);
+    console.log(getPureInput(input));
+    console.log(Number(getPureInput(input)) === 0)
+  }, [DAIbalance, provider, input]);
 
   const ButtonContents = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? 'Approve DAI' : 'Deposit DAI';
   const txMessage = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? "Approving DAI" : "Depositing DAI";
@@ -213,6 +220,7 @@ const DepositPopup = ({ handleClose }) => {
                     onChange={handleInput}
                     placeholder="           0.00 DAI "
                     value={input}
+                    disabled={disabled}
                   />
                   <div className="highlight" onClick={handleClickMax}>max</div>
                 </div>
@@ -239,7 +247,7 @@ const DepositPopup = ({ handleClose }) => {
               </button>
             :
               <>
-              {input === '' ?
+              {input === '' || Number(getPureInput(input)) === 0 ?
                 <>
                 {wasError &&
                   <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>

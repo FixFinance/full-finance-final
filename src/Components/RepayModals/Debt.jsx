@@ -25,6 +25,8 @@ const Debt = ({
   const [wasError, setWasError] = useState(false);
   const [waitConfirmation, setWaitConfirmation] = useState(false);
   const [sentState, setSentState] = useState(false);
+  const [disabled, setDisabled] = useState(false);
+
 
   const [input, setInput] = useState('');
   const [balanceDASSET, setBalanceDASSET] = useState(null);
@@ -70,6 +72,7 @@ const Debt = ({
     let resolvedRec = await rec.wait();
     console.log('Tx Resolved, resolvedRec');
     setSentState(false);
+    setDisabled(false);
     return { rec, resolvedRec };
   }
 
@@ -100,12 +103,14 @@ const Debt = ({
       if (balanceDASSET != null && approvalDASSET != null && balanceDASSET.gte(absInputAmt)) {
         if (maxClicked) {
           setWaitConfirmation(true);
+          setDisabled(true);
           await SendTx(userAddress, CMM, 'repayCVault', [vault.index, vault.borrowSharesOwed.toString(), false]);
           setWasError(false);
           setWaitConfirmation(false);
         }
         else {
           setWaitConfirmation(true);
+          setDisabled(true);
           await SendTx(userAddress, CMM, 'repayCVault', [vault.index, absInputAmt.toString(), true]);
           setWasError(false);
           setWaitConfirmation(false);
@@ -116,6 +121,7 @@ const Debt = ({
       }
     } catch (err) {
       setSuccess(SUCCESS_STATUS.ERROR);
+      setDisabled(false);
       setWasError(true);
       setWaitConfirmation(false);
     }
@@ -125,6 +131,7 @@ const Debt = ({
     try {
       if (balanceDASSET != null && approvalDASSET != null) {
         setWaitConfirmation(true);
+        setDisabled(true);
         await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
         setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
         setMaxClicked(false);
@@ -134,6 +141,7 @@ const Debt = ({
       }
     } catch (err) {
       setSuccess(SUCCESS_STATUS.ERROR);
+      setDisabled(false);
       setWasError(true);
       setWaitConfirmation(false);
     }
@@ -223,7 +231,7 @@ const Debt = ({
               </button>
             :
               <>
-              {input === '' ?
+              {input === '' || Number(input) === 0 ?
                 <>
                 {wasError &&
                   <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>

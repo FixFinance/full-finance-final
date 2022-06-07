@@ -38,6 +38,7 @@ const ManagePositionPopup = ({
     const [wasError, setWasError] = useState(false);
     const [waitConfirmation, setWaitConfirmation] = useState(false);
     const [sentState, setSentState] = useState(false);
+    const [disabled, setDisabled] = useState(false);
 
     const [cInput, setCInput] = useState(null);
     const [dInput, setDInput] = useState(null);
@@ -117,6 +118,7 @@ const ManagePositionPopup = ({
         let resolvedRec = await rec.wait();
         console.log('Tx Resolved, resolvedRec');
         setSentState(false);
+        setDisabled(false);
         return { rec, resolvedRec };
       }
     
@@ -168,12 +170,14 @@ const ManagePositionPopup = ({
                 debtAmountInput.lte(maxBorrowAmount)
             ) {
                 setWaitConfirmation(true);
+                setDisabled(true);
                 await SendTx(userAddress, CMM, 'openCVault', [process.env.REACT_APP_COLLATERAL_ADDRESS, collateralAmountInput.toString(), debtAmountInput.toString()]);
                 setSuccess(SUCCESS_STATUS.OPEN_SUCCESS);
-                setWaitConfirmation(true);
+                setWaitConfirmation(false);
             }
         } catch (err) {
             setSuccess(SUCCESS_STATUS.ERROR);
+            setDisabled(false);
             setWasError(true);
             setWaitConfirmation(false);
         }
@@ -232,6 +236,7 @@ const ManagePositionPopup = ({
                     placeholder="00.00"
                     onChange={handleCInput}
                     value={cInput}
+                    disabled={disabled}
                 />
                 <bottun
                     className="btn"
@@ -254,6 +259,7 @@ const ManagePositionPopup = ({
                     placeholder="00.00"
                     onChange={handleDInput}
                     value={dInput}
+                    disabled={disabled}
                 />
             </div>
             <h3>Max Available to borrow <span>{maxBorrowString} DAI</span></h3>

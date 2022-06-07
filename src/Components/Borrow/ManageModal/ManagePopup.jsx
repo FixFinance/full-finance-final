@@ -95,7 +95,7 @@ const ManagePopup = ({
           </div>
         </div>
       )}
-      {modalType === "add" && 
+      {modalType === "add" &&
         <AddCollateral handleClose={handleClose} userAddress={userAddress} CMM={CMM} CASSET={CASSET} vault={vault} forceUpdateVault={forceUpdateVault}/>
       }
       {modalType === "Withdraw" && hasGoodCollatRatio &&

@@ -28,6 +28,7 @@ const AddCollateral = ({
   const [wasError, setWasError] = useState(false);
   const [waitConfirmation, setWaitConfirmation] = useState(false);
   const [sentState, setSentState] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
 
   const [input, setInput] = useState('');
@@ -69,6 +70,7 @@ const AddCollateral = ({
     let resolvedRec = await rec.wait();
     console.log('Tx Resolved, resolvedRec');
     setSentState(false);
+    setDisabled(false);
     return { rec, resolvedRec };
   }
 
@@ -98,6 +100,7 @@ const AddCollateral = ({
     try {
       if (collApproval != null) {
         setWaitConfirmation(true);
+        setDisabled(true);
         await SendTx(userAddress, CASSET, 'approve', [CMM.address, INF.toString()]);
         setCollApproval(null);
         setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
@@ -106,6 +109,7 @@ const AddCollateral = ({
       }
     } catch (err) {
       setSuccess(SUCCESS_STATUS.ERROR);
+      setDisabled(false);
       setWasError(true);
       setWaitConfirmation(false);
     }
@@ -115,6 +119,7 @@ const AddCollateral = ({
     try {
       if (collApproval != null && walletBalance != null && !absInputAmt.eq(_0) && absInputAmt.lte(walletBalance)) {
         setWaitConfirmation(true);
+        setDisabled(true);
         await SendTx(userAddress, CMM, 'supplyToCVault', [vault.index, absInputAmt.toString()]);
         setSuccess(SUCCESS_STATUS.ADD_SUCCESS);
         setWasError(false);
@@ -122,6 +127,7 @@ const AddCollateral = ({
       }
     } catch (err) {
       setSuccess(SUCCESS_STATUS.ERROR);
+      setDisabled(false);
       setWasError(true);
       setWaitConfirmation(false);
     }
@@ -173,6 +179,7 @@ const AddCollateral = ({
                     placeholder="00.00"
                     value={input}
                     onChange={handleInput}
+                    disabled={disabled}
                   />
                   <div
                     className="highlight"
@@ -209,7 +216,7 @@ const AddCollateral = ({
               </button>
             :
               <>
-              {input === '' ?
+              {input === '' || Number(input) === 0 ?
                 <>
                 {wasError &&
                   <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>

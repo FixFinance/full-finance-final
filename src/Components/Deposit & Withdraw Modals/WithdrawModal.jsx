@@ -23,7 +23,7 @@ const WithdrawModal=({ handleClose2 })=> {
   const [input, setInput] = useState('');
   const [sentState, setSentState] = useState(false);
   const [waitConfirmation, setWaitConfirmation] = useState(false);
-
+  const [disabled, setDisabled] = useState(false);
 
 
   const [balanceLendShares, setBalanceLendShares] = useState(null);
@@ -76,6 +76,7 @@ const WithdrawModal=({ handleClose2 })=> {
     let resolvedRec = await rec.wait();
     console.log('Tx Resolved, resolvedRec');
     setSentState(false);
+    setDisabled(false);
     return { rec, resolvedRec };
   }
 
@@ -107,12 +108,14 @@ const WithdrawModal=({ handleClose2 })=> {
         return;
       }
       setWaitConfirmation(true);
+      setDisabled(true);
       await SendTx(userAddress, CMM, 'withdrawSpecificShares', [userAddress, absoluteInput.toString()]);
       setWaitConfirmation(false);
       setSuccess(true);
       setWasError(false);
     } catch (err) {
       setError(true);
+      setDisabled(false);
       setWasError(true);
       setWaitConfirmation(false);
     }
@@ -160,6 +163,7 @@ const WithdrawModal=({ handleClose2 })=> {
                     onChange={handleInput}
                     placeholder="           0.00 FLT"
                     value={input}
+                    disabled={disabled}
                   />
                   <div className="highlight" onClick={handleClickMax}>max</div>
                 </div>
@@ -183,7 +187,7 @@ const WithdrawModal=({ handleClose2 })=> {
               </button>
             :
               <>
-              {input === '' ?
+              {input === '' || Number(getPureInput(input)) === 0 ?
               <>
                 {wasError &&
                   <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 export const ControlledInput = (props) => {
-   const { value, onChange, ...rest } = props;
+   const { value, onChange, disabled, ...rest } = props;
    const [cursor, setCursor] = useState(null);
    const ref = useRef(null);
 
@@ -16,5 +16,5 @@ export const ControlledInput = (props) => {
       onChange && onChange(e);
    };
 
-   return <input ref={ref} value={value} onChange={handleChange} {...rest} />;
+   return <input ref={ref} value={value} disabled={disabled} onChange={handleChange} {...rest} />;
 };
