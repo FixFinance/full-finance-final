@@ -41,7 +41,6 @@
             &.active {
                 background: #0F1010;
             }
-            
         }
         button.btn.close{
             background: #EF767A;
@@ -143,4 +142,8 @@
     button.btn.diactivate {
         background: #7E3AC3 !important;
     }
+}
+
+.dropdown-toggle::after {
+    display: none;
 }
