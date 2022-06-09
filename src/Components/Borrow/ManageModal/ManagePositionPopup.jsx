@@ -252,7 +252,7 @@ const ManagePositionPopup = ({
     );
 
     let selectBorrowAsset = (
-        <div className="amount_section">
+        <div className="amount_section mb-4">
         <h5>2/3</h5>
         <h4>Choose An Asset To borrow</h4>
             <button className="btn dropdown-toggle" style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
