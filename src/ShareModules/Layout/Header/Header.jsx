@@ -29,26 +29,15 @@ const Header = ({ z }) => {
   const handleShow2 = () => setShow2(true);
 
   const [zData, setZData] = useState(z);
-  const [userAvatar, setUserAvatar] = useState(null);
   const [getWalletInfo] = useContext(EthersContext);
-  const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo();
+  const [provider, userAddress, userETH, userENS, userAvatar, chainId, walletType] = getWalletInfo();
 
-  const getAvatar = async () => {
-    const userAvatar = await provider.getAvatar(userENS.toString());
-    setUserAvatar(userAvatar);
-  }
 
   const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
   const menuAbbreviatedAddress = userAddress.substring(0, 11)+'...'+userAddress.substring(userAddress.length-4);
 
-  // let y = ["/lend", "/borrow"];
-  // let currentPath = window.location.pathname.split('/');
-  // let endLocation = currentPath.length > 0 ? '/'+currentPath[currentPath.length-1] : '/';
-  // const [xData, setXData] = useState(endLocation);
-  // let z = y.includes(xData);
   useEffect(() => {
     setZData(z);
-    getAvatar()
   }, [z]);
 
   return (

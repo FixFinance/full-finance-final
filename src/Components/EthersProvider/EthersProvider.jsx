@@ -29,6 +29,7 @@ export default function EthersProvider({children}) {
     const [userAddress, setUserAddress] = useState(ADDRESS0);
     const [userETH, setUserETH] = useState('0');
     const [userENS, setUserENS] = useState(null);
+    const [userAvatar, setUserAvatar] = useState(null);
     const [chainId, setChainId] = useState(-1);
 
     const [supplyLentBN, setSupplyLentBN] = useState(null);
@@ -45,6 +46,7 @@ export default function EthersProvider({children}) {
         setUserAddress(ADDRESS0);
         setUserETH('0');
         setUserENS(null);
+        setUserAvatar(null);
         setChainId(-1);
     }
 
@@ -59,6 +61,7 @@ export default function EthersProvider({children}) {
                 let _userAddress = ADDRESS0;
                 let _userETH = '0';
                 let _userENS = null;
+                let _userAvatar = null;
                 let _chainId = -1;
                 let promiseArray = [
                     providerSet.send("eth_requestAccounts", []).then(accounts => {
@@ -66,9 +69,11 @@ export default function EthersProvider({children}) {
                             _userAddress = accounts[0];
                             let getETHpromise = providerSet.getBalance(accounts[0]);
                             let ensPromise = providerSet.lookupAddress(accounts[0]).catch(err => null);
-                            return Promise.all([getETHpromise, ensPromise]).then(resArr => {
+                            let avatarPromise = providerSet.getAvatar(accounts[0]).catch(err => null);
+                            return Promise.all([getETHpromise, ensPromise, avatarPromise]).then(resArr => {
                                 _userETH = getDecimalString(resArr[0].toString(), 18, 4);
-                                _userENS = resArr[1]
+                                _userENS = resArr[1];
+                                _userAvatar = resArr[2];
                             });
                         }
                     }),
@@ -82,6 +87,7 @@ export default function EthersProvider({children}) {
                         setUserAddress(_userAddress);
                         setUserETH(_userETH);
                         setUserENS(_userENS);
+                        setUserAvatar(_userAvatar);
                         setChainId(network.chainId);
                     }
                     else {
@@ -92,7 +98,7 @@ export default function EthersProvider({children}) {
             }
         }
         let providerToReturn = walletType === selectedWalletType ? ethersProvider : providerSet;
-        return [providerToReturn, userAddress, userETH, userENS, chainId, walletType];
+        return [providerToReturn, userAddress, userETH, userENS, userAvatar, chainId, walletType];
     }
 
     function getBasicInfo() {

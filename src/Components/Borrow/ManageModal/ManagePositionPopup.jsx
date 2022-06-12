@@ -258,7 +258,7 @@ const ManagePositionPopup = ({
             <button className="btn dropdown-toggle" style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                     <span><img style={{ "width" : "24px", "margin-top" : "-2px" }} src={dai_logo} alt="dai logo" /></span>
                     <span style={{ "margin-right" : "77.5%", "margin-left" : "7.5px" }}>DAI</span>
-                    <span><img src={dropdown_button}/></span>
+                    <span><img src={dropdown_button} alt="dropdown button"/></span>
             </button>
             <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                 <li><a className="dropdown-item" href="#">Action</a></li>
