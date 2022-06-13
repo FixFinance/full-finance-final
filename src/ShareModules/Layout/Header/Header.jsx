@@ -125,7 +125,7 @@ const Header = ({ z }) => {
                     <>
                       <div className="row g-3 mt-1">
                         <div className="col-2">
-                          <img className="ellip_img_overlay" src={userAvatar ? userAvatar : ellipse_icon} alt="img" />
+                          <img className={userAvatar ? "avatar_img_overlay" : "ellip_img_overlay"} src={userAvatar ? userAvatar : ellipse_icon} alt="img" />
                         </div>
                         <div className="col-9">
                           <p className="address">{menuAbbreviatedAddress}</p>
@@ -142,7 +142,7 @@ const Header = ({ z }) => {
                         <img
                           src={userAvatar ? userAvatar : ellipse_icon}
                           alt="img"
-                          className="ellip_img align-self-center"
+                          className={userAvatar ? "avatar_img align-self-center" : "ellip_img align-self-center"}
                         />
                         <div className="pt-1" style={{ "font-family": "Nib Pro SemiBold", }}>{abbreviatedAddress}</div>
                       </button>
@@ -177,7 +177,7 @@ const Header = ({ z }) => {
           animation={false}
           className=""
         >
-          <AccountModal2 handleClose={handleClose2} address={userAddress} ens={userENS} />
+          <AccountModal2 handleClose={handleClose2} address={userAddress} ens={userENS} avatar={userAvatar} />
         </Modal>
         </div>
         </div>
