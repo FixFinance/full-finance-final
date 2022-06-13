@@ -22,7 +22,7 @@ const ConnectModal = ({ handleClose }) => {
   const handleSetWrongNetwork = () => setShowWrongNetwork(true);
 
   const [getWalletInfo] = useContext(EthersContext);
-  const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo(selectedModal, handleSetWrongNetwork);
+  const [provider, userAddress, userETH, userENS, userAvatar, chainId, walletType] = getWalletInfo(selectedModal, handleSetWrongNetwork);
 
   let connectedToWallet = selectedModal !== 'basic' && selectedModal !== 'error';
   let onWrongChain = connectedToWallet && chainId !== -1 && !TargetChains.includes(chainId);
@@ -102,7 +102,7 @@ const ConnectModal = ({ handleClose }) => {
         )}
 
         {selectedModal !== "error" && selectedModal !== "basic" && !showWrongNetwork &&
-          <AccountModal2 address={userAddress} ens={userENS}/>
+          <AccountModal2 address={userAddress} ens={userENS} avatar={userAvatar}/>
         }
       </Modal.Body>
     </div>

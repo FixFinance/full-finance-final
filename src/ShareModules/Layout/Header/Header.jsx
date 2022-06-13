@@ -29,26 +29,15 @@ const Header = ({ z }) => {
   const handleShow2 = () => setShow2(true);
 
   const [zData, setZData] = useState(z);
-  const [userAvatar, setUserAvatar] = useState(null);
   const [getWalletInfo] = useContext(EthersContext);
-  const [provider, userAddress, userETH, userENS, chainId, walletType] = getWalletInfo();
+  const [provider, userAddress, userETH, userENS, userAvatar, chainId, walletType] = getWalletInfo();
 
-  const getAvatar = async () => {
-    const userAvatar = await provider.getAvatar(userENS.toString());
-    setUserAvatar(userAvatar);
-  }
 
   const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
   const menuAbbreviatedAddress = userAddress.substring(0, 11)+'...'+userAddress.substring(userAddress.length-4);
 
-  // let y = ["/lend", "/borrow"];
-  // let currentPath = window.location.pathname.split('/');
-  // let endLocation = currentPath.length > 0 ? '/'+currentPath[currentPath.length-1] : '/';
-  // const [xData, setXData] = useState(endLocation);
-  // let z = y.includes(xData);
   useEffect(() => {
     setZData(z);
-    getAvatar()
   }, [z]);
 
   return (
@@ -136,7 +125,7 @@ const Header = ({ z }) => {
                     <>
                       <div className="row g-3 mt-1">
                         <div className="col-2">
-                          <img className="ellip_img_overlay" src={userAvatar ? userAvatar : ellipse_icon} alt="img" />
+                          <img className={userAvatar ? "avatar_img_overlay" : "ellip_img_overlay"} src={userAvatar ? userAvatar : ellipse_icon} alt="img" />
                         </div>
                         <div className="col-9">
                           <p className="address">{menuAbbreviatedAddress}</p>
@@ -153,7 +142,7 @@ const Header = ({ z }) => {
                         <img
                           src={userAvatar ? userAvatar : ellipse_icon}
                           alt="img"
-                          className="ellip_img align-self-center"
+                          className={userAvatar ? "avatar_img align-self-center" : "ellip_img align-self-center"}
                         />
                         <div className="pt-1" style={{ "font-family": "Nib Pro SemiBold", }}>{abbreviatedAddress}</div>
                       </button>
@@ -188,7 +177,7 @@ const Header = ({ z }) => {
           animation={false}
           className=""
         >
-          <AccountModal2 handleClose={handleClose2} address={userAddress} ens={userENS} />
+          <AccountModal2 handleClose={handleClose2} address={userAddress} ens={userENS} avatar={userAvatar} />
         </Modal>
         </div>
         </div>

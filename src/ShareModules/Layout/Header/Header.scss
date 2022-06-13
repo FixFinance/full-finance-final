@@ -217,13 +217,27 @@
   }
 }
 
-.ellip_img{
+.avatar_img {
+  width: 24px;
+  height: 24px;
+  margin-right: 5px;
+  border-radius: 50%;
+}
+
+.ellip_img {
   width: 24px;
   height: 24px;
   margin-right: 5px;
 }
 
-.ellip_img_overlay{
+.avatar_img_overlay {
+  width: 32px;
+  height: 32px;
+  margin-top: 4px;
+  border-radius: 50%;
+}
+
+.ellip_img_overlay {
   width: 32px;
   height: 32px;
   margin-top: 4px;
