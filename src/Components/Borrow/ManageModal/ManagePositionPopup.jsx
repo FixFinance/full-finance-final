@@ -42,6 +42,7 @@ const ManagePositionPopup = ({
 
     const [cInput, setCInput] = useState(null);
     const [dInput, setDInput] = useState(null);
+    const [asset, setAsset] = useState(null);
 
     const [balanceCollateral, setBalanceCollateral] = useState(null);
     const [approvedCollateral, setApprovedCollateral] = useState(null);
@@ -248,6 +249,27 @@ const ManagePositionPopup = ({
             <h3>Wallet balance <span>{collateralBalanceString} wETH</span></h3>
         </div>
     );
+{/*Take out the inline styling */}
+    let selectBorrowAsset = (
+        <div className="amount_section mb-4">
+        <h5>2/3</h5>
+        <h4>Choose An Asset To borrow</h4>
+            <button className="btn dropdown-toggle" style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span style={{ "margin-right" : "65%", "margin-left" : "7.5px", "color" : "#7D8282" }}>Choose Asset</span>
+                    <span><img src={dropdown_button} alt="dropdown button"/></span>
+            </button>
+            {/* <button className="btn dropdown-toggle" style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span><img style={{ "width" : "24px", "margin-top" : "-2px" }} src={dai_logo} alt="dai logo" /></span>
+                    <span style={{ "margin-right" : "77.5%", "margin-left" : "7.5px" }}>DAI</span>
+                    <span><img src={dropdown_button} alt="dropdown button"/></span>
+            </button> */}
+            <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a className="dropdown-item" href="#">DAI</a></li>
+                <li><a className="dropdown-item" href="#">USDC</a></li>
+                <li><a className="dropdown-item" href="#">USDT</a></li>
+            </ul>
+        </div>
+    );
 
     let selectBorrowAmount = (
         <div className="amount_section">
@@ -266,7 +288,7 @@ const ManagePositionPopup = ({
 
             <div className="amount_section_text">
                 <h3 className={!resultantCollatRatioSafe ? "unhealthy_collat_ratio" : "healthy_collat_ratio"}>Implied Collateralization Ratio <span>{getEffCollatRatioString()} %</span></h3>
-                <h3>Minimum Collateralization Ratio <span>{parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5} %</span></h3> 
+                <h3>Minimum Collateralization Ratio <span>{parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5} %</span></h3>
             </div>
 
         </div>
@@ -275,8 +297,9 @@ const ManagePositionPopup = ({
 
     let sufficientWETHApproval = approvedCollateral == null || balanceCollateral == null || approvedCollateral.gte(balanceCollateral);
     const txMessage = !sufficientWETHApproval ? "Approving WETH" : "Opening Position";
-	const LoadingContents = sentState ? txMessage : 'Waiting For Confirmation';
-	const InputContents = cInput === '' || cInput === null || Number(cInput) === 0 ? 'Enter A Collateral Amount' : 'Enter A Borrow Amount';
+	const LoadingContents = sentState ? txMessage : "Waiting For Confirmation";
+    const MoreInputContents = asset === null ? "Choose An Asset To Borrow" : "Enter An Amount To Borrow"
+	const InputContents = cInput === '' || cInput === null || Number(cInput) === 0 ? "Enter Collateral Amount" : MoreInputContents;
 
     let buttons = (
         <>
@@ -290,7 +313,7 @@ const ManagePositionPopup = ({
                 </button>
                 :
                 <>
-                {dInput === '' || cInput === '' || dInput === null  || Number(dInput) === 0 ?
+                {dInput === '' || cInput === '' || dInput === null  || Number(dInput) === 0 || asset === null ?
                     <>
                     {wasError &&
                     <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>
