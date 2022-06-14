@@ -142,8 +142,50 @@
     button.btn.diactivate {
         background: #7E3AC3 !important;
     }
+
+    button.btn.btn-deactive {
+        color: #646868;
+        background: #0F1010;
+    }
+}
+
+.rotated-up-arrow {
+    transition-duration: 500ms;
+    transform: rotate(180deg);
+}
+
+.rotated-down-arrow {
+    transition-duration: 500ms;
+    transform: scaleY(1);
 }
 
 .dropdown-toggle::after {
     display: none;
+}
+
+.drowdown-deactive {
+    span {
+        color: #3E4242;
+    }
+}
+.dropdown-toggle {
+    span {
+        color: #7D8282;
+    }
+}
+
+.asset-menu {
+    position: absolute;
+    z-index: 1000;
+    min-width: 10rem;
+    padding: 0.5rem 0;
+    margin: 0;
+    font-size: 1rem;
+    color: #212529;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.25rem;
 }

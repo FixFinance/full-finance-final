@@ -11,6 +11,7 @@ import { hoodEncodeABI } from '../../../Utils/HoodAbi';
 import { BNmin, BNmax } from '../../../Utils/BNtools';
 import dai_logo from '../../../assets/image/dai.svg';
 import dropdown_button from '../../../assets/image/dropdown-button.svg';
+import dropdown_deactive from '../../../assets/image/dropdown_deactive.svg'
 
 const ManagePositionPopup = ({
     handleClose,
@@ -41,6 +42,7 @@ const ManagePositionPopup = ({
     const [waitConfirmation, setWaitConfirmation] = useState(false);
     const [sentState, setSentState] = useState(false);
     const [disabled, setDisabled] = useState(false);
+    const [menu, setMenu] = useState(false);
 
     const [cInput, setCInput] = useState(null);
     const [dInput, setDInput] = useState(null);
@@ -252,20 +254,23 @@ const ManagePositionPopup = ({
         </div>
     );
 {/*Take out the inline styling */}
+
+    const responsive_arrow = menu;
+
     let selectBorrowAsset = (
         <div className="amount_section mb-4">
         <h5>2/3</h5>
         <h4>Choose An Asset To borrow</h4>
-            <button className="btn dropdown-toggle" style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span style={{ "margin-right" : "65%", "margin-left" : "7.5px", "color" : "#7D8282" }}>Choose Asset</span>
-                    <span><img src={dropdown_button} alt="dropdown button"/></span>
+            <button className={cInput === '' || Number(cInput) === 0 ? "btn drowdown-deactive" : "btn dropdown-toggle"} style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" onClick={cInput === '' || Number(cInput) === 0 ? "" : () => setMenu(!menu)} >
+                    <span style={{ "margin-right" : "65%", "margin-left" : "7.5px" }}>Choose Asset</span>
+                    <span><img className={menu ? "rotated-up-arrow" : "rotated-down-arrow"} src={cInput === '' || Number(cInput) === 0 ?  dropdown_deactive : dropdown_button} alt="dropdown button"/></span>
             </button>
             {/* <button className="btn dropdown-toggle" style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                     <span><img style={{ "width" : "24px", "margin-top" : "-2px" }} src={dai_logo} alt="dai logo" /></span>
                     <span style={{ "margin-right" : "77.5%", "margin-left" : "7.5px" }}>DAI</span>
                     <span><img src={dropdown_button} alt="dropdown button"/></span>
             </button> */}
-            <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            <ul className={menu ? "asset-menu" : "d-none"} aria-labelledby="dropdownMenuButton1">
                 <li><a className="dropdown-item" href="#">DAI</a></li>
                 <li><a className="dropdown-item" href="#">USDC</a></li>
                 <li><a className="dropdown-item" href="#">USDT</a></li>
