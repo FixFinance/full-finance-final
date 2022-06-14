@@ -205,8 +205,8 @@ function Index() {
             </div>
           </div>
           <div className="mx-auto">
-            <div className="borrow_position_box total_debt_box">
-              <button onClick={clickManagePositionFactory(vault)}><h5>Manage position</h5></button>
+            <div onClick={clickManagePositionFactory(vault)} className="borrow_position_box total_debt_box">
+              <button><h5>Manage position</h5></button>
             </div>
           </div>
         </div>
@@ -225,7 +225,7 @@ function Index() {
               <h5>Lend Rate</h5>
               <div className="borrow_box_text">
                 <h2>{annualLendRateString} %</h2>
-                <p>Lend Variable APY</p>
+                <p>Lend Variable APR</p>
               </div>
             </div>
           </div>

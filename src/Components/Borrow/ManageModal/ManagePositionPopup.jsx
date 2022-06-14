@@ -9,6 +9,8 @@ import { ethers, BigNumber as BN } from 'ethers';
 import { getNonce } from '../../../Utils/SendTx';
 import { hoodEncodeABI } from '../../../Utils/HoodAbi';
 import { BNmin, BNmax } from '../../../Utils/BNtools';
+import dai_logo from '../../../assets/image/dai.svg';
+import dropdown_button from '../../../assets/image/dropdown-button.svg';
 
 const ManagePositionPopup = ({
     handleClose,
@@ -229,8 +231,8 @@ const ManagePositionPopup = ({
 
     let selectCollateralAmount = (
         <div className="amount_section">
-            <h5>1/2</h5>
-            <h4>Enter collateral amount</h4>
+            <h5>1/3</h5>
+            <h4>Enter Collateral Amount</h4>
             <div className="input_section">
                 <input
                     type="text"
@@ -271,10 +273,27 @@ const ManagePositionPopup = ({
         </div>
     );
 
+    let selectBorrowAsset = (
+        <div className="amount_section mb-4">
+        <h5>2/3</h5>
+        <h4>Choose An Asset To borrow</h4>
+            <button className="btn dropdown-toggle" style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span><img style={{ "width" : "24px", "margin-top" : "-2px" }} src={dai_logo} alt="dai logo" /></span>
+                    <span style={{ "margin-right" : "77.5%", "margin-left" : "7.5px" }}>DAI</span>
+                    <span><img src={dropdown_button} alt="dropdown button"/></span>
+            </button>
+            <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a className="dropdown-item" href="#">Action</a></li>
+                <li><a className="dropdown-item" href="#">Another action</a></li>
+                <li><a className="dropdown-item" href="#">Something else here</a></li>
+            </ul>
+        </div>
+    );
+
     let selectBorrowAmount = (
         <div className="amount_section">
-            <h5>2/2</h5>
-            <h4>Enter an Amount to borrow</h4>
+            <h5>3/3</h5>
+            <h4>Enter An Amount To borrow</h4>
             <div className="input_section">
                 <input
                     type="text"
@@ -330,7 +349,7 @@ const ManagePositionPopup = ({
                         <button
                         className="btn btn-deactive"
                         >
-                        'Not Enough Collateral'
+                        Not Enough Collateral
                         </button>
                     :
                         <>
@@ -364,6 +383,8 @@ const ManagePositionPopup = ({
                <div className="managepopup_details">
 
                     {selectCollateralAmount}
+
+                    {selectBorrowAsset}
 
                     {selectBorrowAmount}
 
