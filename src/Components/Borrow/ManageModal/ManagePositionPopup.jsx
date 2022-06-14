@@ -228,7 +228,11 @@ const ManagePositionPopup = ({
                 setApprovedCollateral(res);
             });
         }
-    }, [balanceCollateral, approvedCollateral]);
+
+        if (cInput === '' || Number(cInput) === 0) {
+            setMenu(false);
+        }
+    }, [balanceCollateral, approvedCollateral, cInput]);
 
 
     let selectCollateralAmount = (
