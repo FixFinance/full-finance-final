@@ -273,23 +273,6 @@ const ManagePositionPopup = ({
         </div>
     );
 
-    let selectBorrowAsset = (
-        <div className="amount_section mb-4">
-        <h5>2/3</h5>
-        <h4>Choose An Asset To borrow</h4>
-            <button className="btn dropdown-toggle" style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span><img style={{ "width" : "24px", "margin-top" : "-2px" }} src={dai_logo} alt="dai logo" /></span>
-                    <span style={{ "margin-right" : "77.5%", "margin-left" : "7.5px" }}>DAI</span>
-                    <span><img src={dropdown_button} alt="dropdown button"/></span>
-            </button>
-            <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <li><a className="dropdown-item" href="#">Action</a></li>
-                <li><a className="dropdown-item" href="#">Another action</a></li>
-                <li><a className="dropdown-item" href="#">Something else here</a></li>
-            </ul>
-        </div>
-    );
-
     let selectBorrowAmount = (
         <div className="amount_section">
             <h5>3/3</h5>
