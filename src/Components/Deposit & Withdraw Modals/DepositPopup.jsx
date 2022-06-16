@@ -170,7 +170,6 @@ const DepositPopup = ({ handleClose }) => {
       if (provider != null && DAIbalance == null) {
         let promise0 = DAI.balanceOf(userAddress).then(res => {
           setDAIbalance(res);
-          console.log(DAIbalance);
           return res;
         });
         let promise1 = DAI.allowance(userAddress, CMM.address).then(res => {
@@ -191,8 +190,6 @@ const DepositPopup = ({ handleClose }) => {
       }
     }
     asyncUseEffect();
-    console.log(getPureInput(input));
-    console.log(Number(getPureInput(input)) === 0)
   }, [DAIbalance, provider, input]);
 
   const ButtonContents = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? 'Approve DAI' : 'Deposit DAI';

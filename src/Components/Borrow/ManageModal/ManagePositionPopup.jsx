@@ -11,6 +11,7 @@ import { hoodEncodeABI } from '../../../Utils/HoodAbi';
 import { BNmin, BNmax } from '../../../Utils/BNtools';
 import dai_logo from '../../../assets/image/dai.svg';
 import dropdown_button from '../../../assets/image/dropdown-button.svg';
+import dropdown_deactive from '../../../assets/image/dropdown_deactive.svg'
 
 const ManagePositionPopup = ({
     handleClose,
@@ -41,9 +42,11 @@ const ManagePositionPopup = ({
     const [waitConfirmation, setWaitConfirmation] = useState(false);
     const [sentState, setSentState] = useState(false);
     const [disabled, setDisabled] = useState(false);
+    const [menu, setMenu] = useState(false);
 
     const [cInput, setCInput] = useState(null);
     const [dInput, setDInput] = useState(null);
+    const [asset, setAsset] = useState(null);
 
     const [balanceCollateral, setBalanceCollateral] = useState(null);
     const [approvedCollateral, setApprovedCollateral] = useState(null);
@@ -213,6 +216,11 @@ const ManagePositionPopup = ({
         handleCInput({target: {value: collateralBalanceString}});
     }
 
+    const setAssetHandler = (asset) => {
+        setAsset(asset)
+        setMenu(false);
+    }
+
 
     useEffect(() => {
         if (balanceCollateral == null) {
@@ -225,7 +233,11 @@ const ManagePositionPopup = ({
                 setApprovedCollateral(res);
             });
         }
-    }, [balanceCollateral, approvedCollateral]);
+
+        if (cInput === '' || Number(cInput) === 0) {
+            setMenu(false);
+        }
+    }, [balanceCollateral, approvedCollateral, cInput]);
 
 
     let selectCollateralAmount = (
@@ -251,19 +263,24 @@ const ManagePositionPopup = ({
         </div>
     );
 
+    const AssetInput = asset ? asset : "Choose Asset";
+
     let selectBorrowAsset = (
         <div className="amount_section mb-4">
         <h5>2/3</h5>
         <h4>Choose An Asset To borrow</h4>
-            <button className="btn dropdown-toggle" style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span><img style={{ "width" : "24px", "margin-top" : "-2px" }} src={dai_logo} alt="dai logo" /></span>
-                    <span style={{ "margin-right" : "77.5%", "margin-left" : "7.5px" }}>DAI</span>
-                    <span><img src={dropdown_button} alt="dropdown button"/></span>
+            <button className={cInput === '' || Number(cInput) === 0 ? "btn drowdown-deactive" : "btn dropdown-toggle"} style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" onClick={cInput === '' || Number(cInput) === 0 ? "" : () => setMenu(!menu)} >
+                    <span><img className={asset ? "asset-image" : "d-none"} src={dai_logo} alt="asset logo" /></span>
+                    <span className={asset ? "selected-asset-span" : "choose-asset-span"}>{AssetInput}</span>
+                    <span><img className={menu ? "rotated-up-arrow" : "rotated-down-arrow"} src={cInput === '' || Number(cInput) === 0 ?  dropdown_deactive : dropdown_button} alt="dropdown button"/></span>
             </button>
-            <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <li><a className="dropdown-item" href="#">Action</a></li>
-                <li><a className="dropdown-item" href="#">Another action</a></li>
-                <li><a className="dropdown-item" href="#">Something else here</a></li>
+            <ul className={menu ? "asset-menu" : "d-none"} >
+                <li onClick={() => setAssetHandler("DAI")}>
+                  <div className="list-element-container">
+                    <span><img className="dropdown-asset-image" src={dai_logo} alt="dai logo" /></span>
+                    <span className="selected-asset-span">DAI</span>
+                  </div>
+                </li>
             </ul>
         </div>
     );
@@ -285,7 +302,7 @@ const ManagePositionPopup = ({
 
             <div className="amount_section_text">
                 <h3 className={!resultantCollatRatioSafe ? "unhealthy_collat_ratio" : "healthy_collat_ratio"}>Implied Collateralization Ratio <span>{getEffCollatRatioString()} %</span></h3>
-                <h3>Minimum Collateralization Ratio <span>{parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5} %</span></h3> 
+                <h3>Minimum Collateralization Ratio <span>{parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5} %</span></h3>
             </div>
 
         </div>
@@ -294,8 +311,9 @@ const ManagePositionPopup = ({
 
     let sufficientWETHApproval = approvedCollateral == null || balanceCollateral == null || approvedCollateral.gte(balanceCollateral);
     const txMessage = !sufficientWETHApproval ? "Approving WETH" : "Opening Position";
-	const LoadingContents = sentState ? txMessage : 'Waiting For Confirmation';
-	const InputContents = cInput === '' || cInput === null || Number(cInput) === 0 ? 'Enter A Collateral Amount' : 'Enter A Borrow Amount';
+	const LoadingContents = sentState ? txMessage : "Waiting For Confirmation";
+    const MoreInputContents = asset === null ? "Choose An Asset To Borrow" : "Enter An Amount To Borrow"
+	const InputContents = cInput === '' || cInput === null || Number(cInput) === 0 ? "Enter Collateral Amount" : MoreInputContents;
 
     let buttons = (
         <>
@@ -309,7 +327,7 @@ const ManagePositionPopup = ({
                 </button>
                 :
                 <>
-                {dInput === '' || cInput === '' || dInput === null  || Number(dInput) === 0 ?
+                {dInput === '' || cInput === '' || dInput === null  || Number(dInput) === 0 || asset === null ?
                     <>
                     {wasError &&
                     <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>
