@@ -216,6 +216,11 @@ const ManagePositionPopup = ({
         handleCInput({target: {value: collateralBalanceString}});
     }
 
+    const setAssetHandler = (asset) => {
+        setAsset(asset)
+        setMenu(false);
+    }
+
 
     useEffect(() => {
         if (balanceCollateral == null) {
@@ -259,25 +264,24 @@ const ManagePositionPopup = ({
     );
 {/*Take out the inline styling */}
 
-    const responsive_arrow = menu;
+    const AssetInput = asset ? asset : "Choose Asset";
 
     let selectBorrowAsset = (
         <div className="amount_section mb-4">
         <h5>2/3</h5>
         <h4>Choose An Asset To borrow</h4>
             <button className={cInput === '' || Number(cInput) === 0 ? "btn drowdown-deactive" : "btn dropdown-toggle"} style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" onClick={cInput === '' || Number(cInput) === 0 ? "" : () => setMenu(!menu)} >
-                    <span style={{ "margin-right" : "65%", "margin-left" : "7.5px" }}>Choose Asset</span>
+                    <span><img className={asset ? "asset-image" : "d-none"} src={dai_logo} alt="asset logo" /></span>
+                    <span className={asset ? "selected-asset-span" : "choose-asset-span"}>{AssetInput}</span>
                     <span><img className={menu ? "rotated-up-arrow" : "rotated-down-arrow"} src={cInput === '' || Number(cInput) === 0 ?  dropdown_deactive : dropdown_button} alt="dropdown button"/></span>
             </button>
-            {/* <button className="btn dropdown-toggle" style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span><img style={{ "width" : "24px", "margin-top" : "-2px" }} src={dai_logo} alt="dai logo" /></span>
-                    <span style={{ "margin-right" : "77.5%", "margin-left" : "7.5px" }}>DAI</span>
-                    <span><img src={dropdown_button} alt="dropdown button"/></span>
-            </button> */}
-            <ul className={menu ? "asset-menu" : "d-none"} aria-labelledby="dropdownMenuButton1">
-                <li><a className="dropdown-item" href="#">DAI</a></li>
-                <li><a className="dropdown-item" href="#">USDC</a></li>
-                <li><a className="dropdown-item" href="#">USDT</a></li>
+            <ul className={menu ? "asset-menu" : "d-none"} >
+                <li onClick={() => setAssetHandler("DAI")}>
+                  <div className="list-element-container">
+                    <span><img className="dropdown-asset-image" src={dai_logo} alt="dai logo" /></span>
+                    <span className="selected-asset-span">DAI</span>
+                  </div>
+                </li>
             </ul>
         </div>
     );
