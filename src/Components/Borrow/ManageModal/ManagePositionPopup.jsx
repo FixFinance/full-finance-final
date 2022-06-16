@@ -262,7 +262,6 @@ const ManagePositionPopup = ({
             <h3>Wallet balance <span>{collateralBalanceString} wETH</span></h3>
         </div>
     );
-{/*Take out the inline styling */}
 
     const AssetInput = asset ? asset : "Choose Asset";
 
