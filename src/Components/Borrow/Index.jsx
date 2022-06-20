@@ -44,6 +44,8 @@ function Index() {
   } = getBasicInfo();
   const [provider, userAddress] = getWalletInfo();
 
+  const COLLATERAL_ADDRESSES = process.env.REACT_APP_COLLATERAL_ADDRESSES.split(", ");
+
   if (
     annualLendRateString == '0' &&
     annualBorrowRateString == '0'
@@ -101,7 +103,7 @@ function Index() {
 
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
   let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
-  let CASSET = signer == null ? null : new ethers.Contract(process.env.REACT_APP_COLLATERAL_ADDRESS, IERC20ABI, signer);
+  let CASSET = signer == null ? null : new ethers.Contract(COLLATERAL_ADDRESSES[1], IERC20ABI, signer);
   let BaseAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
   let CollateralAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_COLLATERAL_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
 

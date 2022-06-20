@@ -33,6 +33,8 @@ const ManagePositionPopup = ({
     supplyLentBN
 }) => {
 
+    const COLLATERAL_ADDRESSES = process.env.REACT_APP_COLLATERAL_ADDRESSES.split(", ");
+
     const SUCCESS_STATUS = {
         BASE: 0,
         APPROVAL_SUCCESS: 1,
@@ -180,7 +182,7 @@ const ManagePositionPopup = ({
             ) {
                 setWaitConfirmation(true);
                 setDisabled(true);
-                await SendTx(userAddress, CMM, 'openCVault', [process.env.REACT_APP_COLLATERAL_ADDRESS, collateralAmountInput.toString(), debtAmountInput.toString()]);
+                await SendTx(userAddress, CMM, 'openCVault', [COLLATERAL_ADDRESSES[1], collateralAmountInput.toString(), debtAmountInput.toString()]);
                 setSuccess(SUCCESS_STATUS.OPEN_SUCCESS);
                 setWaitConfirmation(false);
             }
@@ -232,6 +234,7 @@ const ManagePositionPopup = ({
 
 
     useEffect(() => {
+        console.log(COLLATERAL_ADDRESSES);
         if (balanceCollateral == null) {
             CASSET.balanceOf(userAddress).then(res => {
                 setBalanceCollateral(res);
@@ -306,10 +309,10 @@ const ManagePositionPopup = ({
         <div className="amount_section mb-4">
         <h5>3/4</h5>
         <h4>Choose An Asset To borrow</h4>
-            <button className={cInput === '' || Number(cInput) === 0 ? "btn drowdown-deactive" : "btn dropdown-toggle"} style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" onClick={cInput === '' || Number(cInput) === 0 || waitConfirmation === true || sentState === true ? "" : () => setMenu2(!menu2)} >
+            <button className={cInput === '' || Number(cInput) === 0 || collateralAsset === null ? "btn drowdown-deactive" : "btn dropdown-toggle"} style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" onClick={cInput === '' || Number(cInput) === 0 || collateralAsset === null || waitConfirmation === true || sentState === true ? "" : () => setMenu2(!menu2)} >
                     <span><img className={borrowAsset ? "asset-image" : "d-none"} src={dai_logo} alt="asset logo" /></span>
                     <span className={borrowAsset ? "selected-asset-span" : "choose-asset-span"}>{AssetInput}</span>
-                    <span><img className={menu2 ? "rotated-up-arrow" : "rotated-down-arrow"} src={cInput === '' || Number(cInput) === 0 || waitConfirmation === true || sentState === true ? dropdown_deactive : dropdown_button} alt="dropdown button"/></span>
+                    <span><img className={menu2 ? "rotated-up-arrow" : "rotated-down-arrow"} src={cInput === '' || Number(cInput) === 0 || collateralAsset === null || waitConfirmation === true || sentState === true ? dropdown_deactive : dropdown_button} alt="dropdown button"/></span>
             </button>
             <ul className={menu2 ? "asset-menu" : "d-none"} >
                 <li onClick={() => setBorrowAssetHandler("DAI")}>
@@ -401,7 +404,7 @@ const ManagePositionPopup = ({
                     </>
                 }
                 </>
-                }
+            }
             </>
         </>
     );
