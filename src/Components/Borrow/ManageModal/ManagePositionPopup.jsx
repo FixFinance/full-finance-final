@@ -18,10 +18,10 @@ import dropdown_deactive from '../../../assets/image/dropdown_deactive.svg'
 const ManagePositionPopup = ({
     handleClose,
     provider,
+    signer,
     userAddress,
     CMM,
     DAI,
-    CASSET,
     userVaults,
     supplyBorrowed,
     supplyBorrowShares,
@@ -33,7 +33,12 @@ const ManagePositionPopup = ({
     supplyLentBN
 }) => {
 
+    const IERC20ABI = require('../../../abi/IERC20.json');
+
+
     const COLLATERAL_ADDRESSES = process.env.REACT_APP_COLLATERAL_ADDRESSES.split(", ");
+    const COLLATERAL_SYMBOLS = process.env.REACT_APP_COLLATERAL_SYMBOLS.split(", ");
+
 
     const SUCCESS_STATUS = {
         BASE: 0,
@@ -52,6 +57,7 @@ const ManagePositionPopup = ({
     const [cInput, setCInput] = useState(null);
     const [dInput, setDInput] = useState(null);
     const [collateralAsset, setCollateralAsset] = useState(null);
+    const [collateralAddress, setCollateralAddress] = useState("");
     const [borrowAsset, setBorrowAsset] = useState(null);
 
     const [balanceCollateral, setBalanceCollateral] = useState(null);
@@ -65,6 +71,8 @@ const ManagePositionPopup = ({
 
     const collateralAmountInput = cInput == null ? _0 : BN.from(getAbsoluteString(cInput, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
     const debtAmountInput = dInput == null ? _0 : BN.from(getAbsoluteString(dInput, parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
+
+    const CASSET = signer == null ? null : new ethers.Contract(collateralAddress, IERC20ABI, signer);
 
     const handleClosesuccess = () => {
         if (success == SUCCESS_STATUS.APPROVAL_SUCCESS) {
@@ -228,13 +236,14 @@ const ManagePositionPopup = ({
     }
 
     const setCollateralAssetHandler = (asset) => {
-        setCollateralAsset(asset)
         setMenu(false);
+        setCollateralAsset(asset);
+        let collateralIndex = COLLATERAL_SYMBOLS.indexOf(asset);
+        setCollateralAddress(COLLATERAL_ADDRESSES[collateralIndex]);
     }
 
 
     useEffect(() => {
-        console.log(COLLATERAL_ADDRESSES);
         if (balanceCollateral == null) {
             CASSET.balanceOf(userAddress).then(res => {
                 setBalanceCollateral(res);
@@ -270,10 +279,10 @@ const ManagePositionPopup = ({
                     <span className="weth-asset-span">WETH</span>
                   </div>
                 </li>
-                <li onClick={() => setCollateralAssetHandler("WSTETH")}>
+                <li onClick={() => setCollateralAssetHandler("wstETH")}>
                   <div className="list-element2-container">
                     <span><img className="dropdown-asset-image" src={steth_logo} alt="steth logo" /></span>
-                    <span className="wsteth-asset-span">WSTETH</span>
+                    <span className="wsteth-asset-span">wstETH</span>
                   </div>
                 </li>
             </ul>
