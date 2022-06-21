@@ -4,7 +4,7 @@ import "./managepopup.scss";
 import SuccessModal from "../../Success/SuccessModal";
 import ErrorModal from '../../ErrorModal/Errormodal';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../../Utils/StringAlteration.js';
-import { TOTAL_SBPS, _0, INF } from '../../../Utils/Consts.js';
+import { TOTAL_SBPS, _0, INF, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS } from '../../../Utils/Consts.js';
 import { ethers, BigNumber as BN } from 'ethers';
 import { getNonce } from '../../../Utils/SendTx';
 import { hoodEncodeABI } from '../../../Utils/HoodAbi';
@@ -34,11 +34,6 @@ const ManagePositionPopup = ({
 }) => {
 
     const IERC20ABI = require('../../../abi/IERC20.json');
-
-
-    const COLLATERAL_ADDRESSES = process.env.REACT_APP_COLLATERAL_ADDRESSES.split(", ");
-    const COLLATERAL_SYMBOLS = process.env.REACT_APP_COLLATERAL_SYMBOLS.split(", ");
-
 
     const SUCCESS_STATUS = {
         BASE: 0,

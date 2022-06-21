@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import "./borrow.scss";
 import dai from "../../assets/image/dai.svg";
 import weth from "../../assets/image/weth.svg";
-import wstWETH from "../../assets/image/lidosteth.png";
+import wstETH from "../../assets/image/lidosteth.png";
 import ratio_question from "../../assets/image/ratio_question.svg";
 import t_icon from "../../assets/image/t_icon.png";
 import Modal from "react-bootstrap/Modal";
@@ -13,7 +13,7 @@ import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate } from '../../Utils/RateMath';
-import { ADDRESS0, TOTAL_SBPS, _0 } from '../../Utils/Consts.js';
+import { ADDRESS0, TOTAL_SBPS, _0, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS } from '../../Utils/Consts.js';
 import Header from "../../ShareModules/Layout/Header/Header";
 
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
@@ -44,9 +44,6 @@ function Index() {
     supplyBorrowedBN
   } = getBasicInfo();
   const [provider, userAddress] = getWalletInfo();
-
-  const COLLATERAL_ADDRESSES = process.env.REACT_APP_COLLATERAL_ADDRESSES.split(", ");
-  const COLLATERAL_SYMBOLS = process.env.REACT_APP_COLLATERAL_SYMBOLS.split(", ");
 
   if (
     annualLendRateString == '0' &&
@@ -180,7 +177,7 @@ function Index() {
       collateralAsset = vault.assetSupplied;
       let collateralIndex = COLLATERAL_ADDRESSES.indexOf(collateralAsset);
       let collateralSymbol = COLLATERAL_SYMBOLS[collateralIndex];
-      let collateralImage = collateralSymbol === "WETH" ? weth : wstWETH;
+      let collateralImage = collateralSymbol === "WETH" ? weth : wstETH;
       let borrowObligation = vault.borrowSharesOwed.mul(supplyBorrowed).div(supplyBorrowShares);
       let borrowUSDValue = baseAggAnswer == null || baseAggDecimals == null ? _0 : borrowObligation.mul(baseAggAnswer).div(BN.from(10).pow(baseAggDecimals));
       let collateralUSDValue = collateralAggAnswer == null || collateralAggDecimals == null ? _0 : vault.amountSupplied.mul(collateralAggAnswer).div(BN.from(10).pow(collateralAggDecimals));
