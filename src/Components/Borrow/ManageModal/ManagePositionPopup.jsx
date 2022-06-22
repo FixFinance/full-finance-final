@@ -4,7 +4,7 @@ import "./managepopup.scss";
 import SuccessModal from "../../Success/SuccessModal";
 import ErrorModal from '../../ErrorModal/Errormodal';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../../Utils/StringAlteration.js';
-import { TOTAL_SBPS, _0, INF } from '../../../Utils/Consts.js';
+import { TOTAL_SBPS, _0, INF, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS } from '../../../Utils/Consts.js';
 import { ethers, BigNumber as BN } from 'ethers';
 import { getNonce } from '../../../Utils/SendTx';
 import { hoodEncodeABI } from '../../../Utils/HoodAbi';
@@ -18,10 +18,10 @@ import dropdown_deactive from '../../../assets/image/dropdown_deactive.svg'
 const ManagePositionPopup = ({
     handleClose,
     provider,
+    signer,
     userAddress,
     CMM,
     DAI,
-    CASSET,
     userVaults,
     supplyBorrowed,
     supplyBorrowShares,
@@ -33,7 +33,7 @@ const ManagePositionPopup = ({
     supplyLentBN
 }) => {
 
-    const COLLATERAL_ADDRESSES = process.env.REACT_APP_COLLATERAL_ADDRESSES.split(", ");
+    const IERC20ABI = require('../../../abi/IERC20.json');
 
     const SUCCESS_STATUS = {
         BASE: 0,
@@ -46,12 +46,15 @@ const ManagePositionPopup = ({
     const [waitConfirmation, setWaitConfirmation] = useState(false);
     const [sentState, setSentState] = useState(false);
     const [disabled, setDisabled] = useState(false);
+    const [disabled2, setDisabled2] = useState(false);
     const [menu, setMenu] = useState(false);
     const [menu2, setMenu2] = useState(false);
 
     const [cInput, setCInput] = useState(null);
     const [dInput, setDInput] = useState(null);
     const [collateralAsset, setCollateralAsset] = useState(null);
+    const [collateralSymbol, setCollateralSymbol] = useState(null);
+    const [collateralAddress, setCollateralAddress] = useState("");
     const [borrowAsset, setBorrowAsset] = useState(null);
 
     const [balanceCollateral, setBalanceCollateral] = useState(null);
@@ -65,6 +68,8 @@ const ManagePositionPopup = ({
 
     const collateralAmountInput = cInput == null ? _0 : BN.from(getAbsoluteString(cInput, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
     const debtAmountInput = dInput == null ? _0 : BN.from(getAbsoluteString(dInput, parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
+
+    const CASSET = signer == null ? null : new ethers.Contract(collateralAddress, IERC20ABI, signer);
 
     const handleClosesuccess = () => {
         if (success == SUCCESS_STATUS.APPROVAL_SUCCESS) {
@@ -130,6 +135,7 @@ const ManagePositionPopup = ({
         console.log('Tx Resolved, resolvedRec');
         setSentState(false);
         setDisabled(false);
+        setDisabled2(false);
         return { rec, resolvedRec };
       }
     
@@ -182,13 +188,15 @@ const ManagePositionPopup = ({
             ) {
                 setWaitConfirmation(true);
                 setDisabled(true);
-                await SendTx(userAddress, CMM, 'openCVault', [COLLATERAL_ADDRESSES[1], collateralAmountInput.toString(), debtAmountInput.toString()]);
+                setDisabled2(true);
+                await SendTx(userAddress, CMM, 'openCVault', [CASSET.address, collateralAmountInput.toString(), debtAmountInput.toString()]);
                 setSuccess(SUCCESS_STATUS.OPEN_SUCCESS);
                 setWaitConfirmation(false);
             }
         } catch (err) {
             setSuccess(SUCCESS_STATUS.ERROR);
             setDisabled(false);
+            setDisabled2(false);
             setWasError(true);
             setWaitConfirmation(false);
         }
@@ -228,13 +236,15 @@ const ManagePositionPopup = ({
     }
 
     const setCollateralAssetHandler = (asset) => {
-        setCollateralAsset(asset)
         setMenu(false);
+        setCollateralAsset(asset);
+        let collateralIndex = COLLATERAL_SYMBOLS.indexOf(asset);
+        setCollateralAddress(COLLATERAL_ADDRESSES[collateralIndex]);
+        setCollateralSymbol(COLLATERAL_SYMBOLS[collateralIndex]);
     }
 
 
     useEffect(() => {
-        console.log(COLLATERAL_ADDRESSES);
         if (balanceCollateral == null) {
             CASSET.balanceOf(userAddress).then(res => {
                 setBalanceCollateral(res);
@@ -249,7 +259,20 @@ const ManagePositionPopup = ({
         if (cInput === '' || Number(cInput) === 0) {
             setMenu2(false);
         }
-    }, [balanceCollateral, approvedCollateral, cInput]);
+
+        if (collateralAsset === null) {
+            setDisabled(true);
+        } else {
+            setDisabled(false);
+        }
+
+        if (borrowAsset === null) {
+            setDisabled2(true);
+        } else {
+            setDisabled2(false);
+        }
+
+    }, [balanceCollateral, approvedCollateral, cInput, collateralAsset, borrowAsset]);
 
     const CollateralInput = collateralAsset ? collateralAsset : "Choose Asset";
     const CollateralClass = collateralAsset === "WETH" ? "weth-asset-span" : "wsteth-asset-span";
@@ -270,10 +293,10 @@ const ManagePositionPopup = ({
                     <span className="weth-asset-span">WETH</span>
                   </div>
                 </li>
-                <li onClick={() => setCollateralAssetHandler("WSTETH")}>
+                <li onClick={() => setCollateralAssetHandler("wstETH")}>
                   <div className="list-element2-container">
                     <span><img className="dropdown-asset-image" src={steth_logo} alt="steth logo" /></span>
-                    <span className="wsteth-asset-span">WSTETH</span>
+                    <span className="wsteth-asset-span">wstETH</span>
                   </div>
                 </li>
             </ul>
@@ -299,7 +322,7 @@ const ManagePositionPopup = ({
                     max
                 </bottun>
             </div>
-            <h3>Wallet balance <span>{collateralBalanceString} wETH</span></h3>
+            <h3>Wallet balance <span>{collateralBalanceString} {collateralSymbol}</span></h3>
         </div>
     );
 
@@ -335,7 +358,7 @@ const ManagePositionPopup = ({
                     placeholder="00.00"
                     onChange={handleDInput}
                     value={dInput}
-                    disabled={disabled}
+                    disabled={disabled2}
                 />
             </div>
             <h3>Max Available to borrow <span>{maxBorrowString} DAI</span></h3>

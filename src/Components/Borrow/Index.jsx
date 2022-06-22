@@ -1,7 +1,8 @@
 import React, { useState, useContext, useEffect } from "react";
 import "./borrow.scss";
-import debt_icon from "../../assets/image/dai.svg";
-import collateral_value from "../../assets/image/collateral_value.svg";
+import dai from "../../assets/image/dai.svg";
+import weth from "../../assets/image/weth.svg";
+import wstETH from "../../assets/image/lidosteth.png";
 import ratio_question from "../../assets/image/ratio_question.svg";
 import t_icon from "../../assets/image/t_icon.png";
 import Modal from "react-bootstrap/Modal";
@@ -12,7 +13,7 @@ import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate } from '../../Utils/RateMath';
-import { ADDRESS0, TOTAL_SBPS, _0 } from '../../Utils/Consts.js';
+import { ADDRESS0, TOTAL_SBPS, _0, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS } from '../../Utils/Consts.js';
 import Header from "../../ShareModules/Layout/Header/Header";
 
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
@@ -43,8 +44,6 @@ function Index() {
     supplyBorrowedBN
   } = getBasicInfo();
   const [provider, userAddress] = getWalletInfo();
-
-  const COLLATERAL_ADDRESSES = process.env.REACT_APP_COLLATERAL_ADDRESSES.split(", ");
 
   if (
     annualLendRateString == '0' &&
@@ -100,10 +99,11 @@ function Index() {
   const handleShow3 = () => setModal3(true);
 
   const signer = provider == null ? null : provider.getSigner();
+  let collateralAsset = "";
 
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
   let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
-  let CASSET = signer == null ? null : new ethers.Contract(COLLATERAL_ADDRESSES[1], IERC20ABI, signer);
+  let CASSET = signer == null ? null : new ethers.Contract(collateralAsset, IERC20ABI, signer);
   let BaseAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
   let CollateralAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_COLLATERAL_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
 
@@ -143,6 +143,7 @@ function Index() {
                 }
                 return toReturn;
               })
+            // Get the collateral type from a call in the above section
             setUserVaults(_userVaults);
             setSelectedVault(_selectedVault);
             setSelectedVaultIndex(_selectedVaultIndex);
@@ -173,6 +174,10 @@ function Index() {
 
   const vaultComponents = ([userVaults, supplyBorrowed, supplyBorrowShares].includes(null) ? [] : userVaults)
     .map(vault => {
+      collateralAsset = vault.assetSupplied;
+      let collateralIndex = COLLATERAL_ADDRESSES.indexOf(collateralAsset);
+      let collateralSymbol = COLLATERAL_SYMBOLS[collateralIndex];
+      let collateralImage = collateralSymbol === "WETH" ? weth : wstETH;
       let borrowObligation = vault.borrowSharesOwed.mul(supplyBorrowed).div(supplyBorrowShares);
       let borrowUSDValue = baseAggAnswer == null || baseAggDecimals == null ? _0 : borrowObligation.mul(baseAggAnswer).div(BN.from(10).pow(baseAggDecimals));
       let collateralUSDValue = collateralAggAnswer == null || collateralAggDecimals == null ? _0 : vault.amountSupplied.mul(collateralAggAnswer).div(BN.from(10).pow(collateralAggDecimals));
@@ -184,18 +189,18 @@ function Index() {
       let collateralizationRatioString = collateralizationRatio == null ? '0' : getDecimalString(collateralizationRatio.toString(), 16, 2);
       return (
         <div className="row borrow_position_wrap">
-          <h4>DAI / wETH</h4>
+          <h4>DAI / {collateralSymbol}</h4>
           <div className="col-lg-4 col-md-4">
             <div className="borrow_position_box">
               <h5>Total debt</h5>
-              <h2><img src={debt_icon} alt="img" className="debt_icon"/> {borrowString} DAI</h2>
+              <h2><img src={dai} alt="img" className="vault_icon"/> {borrowString} DAI</h2>
               <p>~ $ {borrowUSDString}</p>
             </div>
           </div>
           <div className="col-lg-4 col-md-4">
             <div className="borrow_position_box">
               <h5>Collateral Value</h5>
-              <h2><img src={collateral_value} alt=""/> {collateralString} wETH</h2>
+              <h2><img src={collateralImage} alt="collateral_image" className="vault_icon"/> {collateralString} {collateralSymbol}</h2>
               <p>~ $ {collateralUSDString}</p>
             </div>
           </div>
@@ -306,10 +311,10 @@ function Index() {
           <ManagePositionPopup
             handleClose={handleClose2}
             provider={provider}
+            signer={signer}
             userAddress={userAddress}
             CMM={CMM}
             DAI={DAI}
-            CASSET={CASSET}
             userVaults={userVaults}
             supplyBorrowed={supplyBorrowed}
             supplyBorrowShares={supplyBorrowShares}
