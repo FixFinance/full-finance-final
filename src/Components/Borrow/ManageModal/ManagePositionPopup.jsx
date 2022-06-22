@@ -46,12 +46,14 @@ const ManagePositionPopup = ({
     const [waitConfirmation, setWaitConfirmation] = useState(false);
     const [sentState, setSentState] = useState(false);
     const [disabled, setDisabled] = useState(false);
+    const [disabled2, setDisabled2] = useState(false);
     const [menu, setMenu] = useState(false);
     const [menu2, setMenu2] = useState(false);
 
     const [cInput, setCInput] = useState(null);
     const [dInput, setDInput] = useState(null);
     const [collateralAsset, setCollateralAsset] = useState(null);
+    const [collateralSymbol, setCollateralSymbol] = useState(null);
     const [collateralAddress, setCollateralAddress] = useState("");
     const [borrowAsset, setBorrowAsset] = useState(null);
 
@@ -133,6 +135,7 @@ const ManagePositionPopup = ({
         console.log('Tx Resolved, resolvedRec');
         setSentState(false);
         setDisabled(false);
+        setDisabled2(false);
         return { rec, resolvedRec };
       }
     
@@ -185,13 +188,15 @@ const ManagePositionPopup = ({
             ) {
                 setWaitConfirmation(true);
                 setDisabled(true);
-                await SendTx(userAddress, CMM, 'openCVault', [COLLATERAL_ADDRESSES[1], collateralAmountInput.toString(), debtAmountInput.toString()]);
+                setDisabled2(true);
+                await SendTx(userAddress, CMM, 'openCVault', [CASSET.address, collateralAmountInput.toString(), debtAmountInput.toString()]);
                 setSuccess(SUCCESS_STATUS.OPEN_SUCCESS);
                 setWaitConfirmation(false);
             }
         } catch (err) {
             setSuccess(SUCCESS_STATUS.ERROR);
             setDisabled(false);
+            setDisabled2(false);
             setWasError(true);
             setWaitConfirmation(false);
         }
@@ -235,6 +240,7 @@ const ManagePositionPopup = ({
         setCollateralAsset(asset);
         let collateralIndex = COLLATERAL_SYMBOLS.indexOf(asset);
         setCollateralAddress(COLLATERAL_ADDRESSES[collateralIndex]);
+        setCollateralSymbol(COLLATERAL_SYMBOLS[collateralIndex]);
     }
 
 
@@ -253,7 +259,20 @@ const ManagePositionPopup = ({
         if (cInput === '' || Number(cInput) === 0) {
             setMenu2(false);
         }
-    }, [balanceCollateral, approvedCollateral, cInput]);
+
+        if (collateralAsset === null) {
+            setDisabled(true);
+        } else {
+            setDisabled(false);
+        }
+
+        if (borrowAsset === null) {
+            setDisabled2(true);
+        } else {
+            setDisabled2(false);
+        }
+
+    }, [balanceCollateral, approvedCollateral, cInput, collateralAsset, borrowAsset]);
 
     const CollateralInput = collateralAsset ? collateralAsset : "Choose Asset";
     const CollateralClass = collateralAsset === "WETH" ? "weth-asset-span" : "wsteth-asset-span";
@@ -303,7 +322,7 @@ const ManagePositionPopup = ({
                     max
                 </bottun>
             </div>
-            <h3>Wallet balance <span>{collateralBalanceString} wETH</span></h3>
+            <h3>Wallet balance <span>{collateralBalanceString} {collateralSymbol}</span></h3>
         </div>
     );
 
@@ -339,7 +358,7 @@ const ManagePositionPopup = ({
                     placeholder="00.00"
                     onChange={handleDInput}
                     value={dInput}
-                    disabled={disabled}
+                    disabled={disabled2}
                 />
             </div>
             <h3>Max Available to borrow <span>{maxBorrowString} DAI</span></h3>
