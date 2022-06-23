@@ -32,7 +32,7 @@ const DepositPopup = ({ handleClose }) => {
   const [balanceLendShares, setBalanceLendShares] = useState(null);
   const [lendShareValue, setLendShareValue] = useState(null);
 
-  const [getWalletInfo] = useContext(EthersContext);
+  const [getWalletInfo, , updateBasicInfo] = useContext(EthersContext);
   const [provider, userAddress] = getWalletInfo();
 
   const balanceString = getDecimalString(DAIbalance == null ? '0' : DAIbalance.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
@@ -81,6 +81,7 @@ const DepositPopup = ({ handleClose }) => {
   const TxCallback1 = async () => {
     setSentState(false);
     setDisabled(false);
+    updateBasicInfo();
   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);

@@ -1,6 +1,7 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useContext, useEffect} from "react";
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
+import { EthersContext } from '../EthersProvider/EthersProvider';
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
 import { TOTAL_SBPS, INF, _0, INF_CHAR } from '../../Utils/Consts';
@@ -32,6 +33,8 @@ const Debt = ({
   const [balanceDASSET, setBalanceDASSET] = useState(null);
   const [approvalDASSET, setAllowanceDASSET] = useState(null);
   const [maxClicked, setMaxClicked] = useState(false);
+
+  const [, , updateBasicInfo] = useContext(EthersContext);
 
   useEffect(() => {
     if (balanceDASSET == null) {
@@ -72,6 +75,7 @@ const Debt = ({
   const TxCallback1 = async () => {
     setSentState(false);
     setDisabled(false);
+    updateBasicInfo();
   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);
@@ -126,7 +130,7 @@ const Debt = ({
   }
 
   const handleClosesuccess = () => {
-    if (success == SUCCESS_STATUS.APPROVAL_SUCCESS) {
+    if (success === SUCCESS_STATUS.APPROVAL_SUCCESS) {
       setAllowanceDASSET(null);
       setSuccess(SUCCESS_STATUS.BASE);
     }

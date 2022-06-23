@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import Modal from "react-bootstrap/Modal";
 import "./managepopup.scss";
 import SuccessModal from "../../Success/SuccessModal";
@@ -6,6 +6,7 @@ import ErrorModal from '../../ErrorModal/Errormodal';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../../Utils/StringAlteration.js';
 import { TOTAL_SBPS, _0, INF, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS } from '../../../Utils/Consts.js';
 import { ethers, BigNumber as BN } from 'ethers';
+import { EthersContext } from '../../EthersProvider/EthersProvider';
 import { getNonce, getSendTx } from '../../../Utils/SendTx';
 import { hoodEncodeABI } from '../../../Utils/HoodAbi';
 import { BNmin, BNmax } from '../../../Utils/BNtools';
@@ -60,6 +61,8 @@ const ManagePositionPopup = ({
     const [balanceCollateral, setBalanceCollateral] = useState(null);
     const [approvedCollateral, setApprovedCollateral] = useState(null);
     const [maxBorrowAmount, setMaxBorrowAmount] = useState(null);
+
+    const [, , updateBasicInfo] = useContext(EthersContext);
 
     //Borrow-Lend Supply Difference
     const BLSdiff = supplyBorrowedBN != null && supplyLentBN != null ? supplyLentBN.sub(supplyBorrowedBN) : _0;
@@ -133,7 +136,8 @@ const ManagePositionPopup = ({
     const TxCallback1 = async () => {
         setSentState(false);
         setDisabled(false);
-        setDisabled2(false);        
+        setDisabled2(false);
+        updateBasicInfo();
     }
 
     const SendTx = getSendTx(TxCallback0, TxCallback1);

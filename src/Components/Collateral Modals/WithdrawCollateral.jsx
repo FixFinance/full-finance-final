@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
+import { EthersContext } from '../EthersProvider/EthersProvider';
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
 import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
-import { SendTx } from '../../Utils/SendTx';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
 import './add-withdraw.scss';
 
@@ -40,6 +40,8 @@ const WithdrawCollateral = ({
   const MIN_SAFE_COLLAT_RATIO = BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)).mul(BN.from(10).pow(BN.from(16)));
   let resultantCollatRatioSafe = impliedCollateralizationRatio.gte(MIN_SAFE_COLLAT_RATIO);
 
+  const [, , updateBasicInfo] = useContext(EthersContext);
+
   const handleInput = (param) => {
     let value = param.target.value;
     let filteredValue = filterInput(value);
@@ -53,6 +55,7 @@ const WithdrawCollateral = ({
   const TxCallback1 = async () => {
     setSentState(false);
     setDisabled(false);
+    updateBasicInfo();
   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);

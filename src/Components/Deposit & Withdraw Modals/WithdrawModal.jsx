@@ -29,7 +29,7 @@ const WithdrawModal=({ handleClose2 })=> {
   const [balanceLendShares, setBalanceLendShares] = useState(null);
   const [lendShareValue, setLendShareValue] = useState(null);
 
-  const [getWalletInfo] = useContext(EthersContext);
+  const [getWalletInfo, , updateBasicInfo] = useContext(EthersContext);
   const [provider, userAddress] = getWalletInfo();
 
   const lendShareBalanceString = getDecimalString(balanceLendShares == null ? '0' : balanceLendShares.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
@@ -74,6 +74,7 @@ const WithdrawModal=({ handleClose2 })=> {
   const TxCallback1 = async () => {
     setSentState(false);
     setDisabled(false);
+    updateBasicInfo();
   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);

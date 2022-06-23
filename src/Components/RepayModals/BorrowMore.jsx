@@ -1,6 +1,7 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useContext, useEffect} from "react";
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
+import { EthersContext } from '../EthersProvider/EthersProvider';
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
 import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
@@ -30,6 +31,8 @@ const BorrowMore=({
   const [waitConfirmation, setWaitConfirmation] = useState(false);
   const [sentState, setSentState] = useState(false);
   const [disabled, setDisabled] = useState(false);
+
+  const [, , updateBasicInfo] = useContext(EthersContext);
 
   useEffect(() => {
     if (balanceDASSET == null) {
@@ -62,6 +65,7 @@ const BorrowMore=({
   const TxCallback1 = async () => {
     setSentState(false);
     setDisabled(false);
+    updateBasicInfo();
   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);

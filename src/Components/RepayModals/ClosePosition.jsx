@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
+import { EthersContext } from '../EthersProvider/EthersProvider';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { hoodEncodeABI } from '../../Utils/HoodAbi';
 import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
@@ -17,6 +18,8 @@ const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
   const [sentState, setSentState] = useState(false);
   const [error, setError] = useState(false);
   const [wasError, setWasError] = useState(false);
+
+  const [, , updateBasicInfo] = useContext(EthersContext);
 
   const sufficientApproval = approval == null ? true : vault.borrowObligation.mul(BN.from(101)).div(BN.from(100)).lte(approval);
 
@@ -55,6 +58,7 @@ const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
 
   const TxCallback1 = async () => {
     setSentState(false);
+    updateBasicInfo();
   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);
