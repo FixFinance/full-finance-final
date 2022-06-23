@@ -6,7 +6,7 @@ import ErrorModal from '../../ErrorModal/Errormodal';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../../Utils/StringAlteration.js';
 import { TOTAL_SBPS, _0, INF, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS } from '../../../Utils/Consts.js';
 import { ethers, BigNumber as BN } from 'ethers';
-import { getNonce } from '../../../Utils/SendTx';
+import { getNonce, getSendTx } from '../../../Utils/SendTx';
 import { hoodEncodeABI } from '../../../Utils/HoodAbi';
 import { BNmin, BNmax } from '../../../Utils/BNtools';
 import dai_logo from '../../../assets/image/dai.svg';
@@ -126,40 +126,17 @@ const ManagePositionPopup = ({
     const MIN_SAFE_COLLAT_RATIO = BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)).mul(BN.from(10).pow(BN.from(16)));
     let resultantCollatRatioSafe = getEffCollatRatioBN().gte(MIN_SAFE_COLLAT_RATIO);
 
-    async function BroadcastTx(signer, tx) {
-        console.log('Tx Initiated');
-        let rec = await signer.sendTransaction(tx);
-        console.log('Tx Sent', rec);
-        setSentState(true);
-        let resolvedRec = await rec.wait();
-        console.log('Tx Resolved, resolvedRec');
+    const TxCallback0 = async () => {
+        setSentState(true);        
+    }
+
+    const TxCallback1 = async () => {
         setSentState(false);
         setDisabled(false);
-        setDisabled2(false);
-        return { rec, resolvedRec };
-      }
-    
-      async function SendTx(userAddress, contractInstance, functionName, argArray, updateSentState, overrides={}) {
-        if (contractInstance == null) {
-          throw "SendTx2 Attempted to Accept Null Contract";
-        }
-      
-        const signer = contractInstance.signer;
-      
-        let tx = {
-          to: contractInstance.address,
-          from: userAddress,
-          data: hoodEncodeABI(contractInstance, functionName, argArray),
-          nonce: await getNonce(signer.provider, userAddress),
-          gasLimit: (await contractInstance.estimateGas[functionName](...argArray)).toNumber() * 2,
-          ...overrides
-        }
-      
-        let { resolvedRec } = await BroadcastTx(signer, tx, updateSentState);
-      
-        return resolvedRec;
-      
+        setDisabled2(false);        
     }
+
+    const SendTx = getSendTx(TxCallback0, TxCallback1);
 
     async function approveOnClick() {
         try {
