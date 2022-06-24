@@ -44,6 +44,7 @@ const ManagePositionPopup = ({
     }
     const [success, setSuccess] = useState(SUCCESS_STATUS.BASE);
     const [wasError, setWasError] = useState(false);
+    const [approving, setApproving] = useState(false);
     const [waitConfirmation, setWaitConfirmation] = useState(false);
     const [sentState, setSentState] = useState(false);
     const [disabled, setDisabled] = useState(false);
@@ -59,6 +60,8 @@ const ManagePositionPopup = ({
     const [borrowAsset, setBorrowAsset] = useState(null);
 
     const [balanceCollateral, setBalanceCollateral] = useState(null);
+    const [wethBalance, setWETHBalance] = useState(null);
+    const [wSTETHBalance, setWSTETHBalance] = useState(null);
     const [approvedCollateral, setApprovedCollateral] = useState(null);
     const [maxBorrowAmount, setMaxBorrowAmount] = useState(null);
 
@@ -73,6 +76,9 @@ const ManagePositionPopup = ({
     const debtAmountInput = dInput == null ? _0 : BN.from(getAbsoluteString(dInput, parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
 
     const CASSET = signer == null ? null : new ethers.Contract(collateralAddress, IERC20ABI, signer);
+    const CASSET1 = provider == null ? null : new ethers.Contract(COLLATERAL_ADDRESSES[0], IERC20ABI, provider);
+    const CASSET2 = provider == null ? null : new ethers.Contract(COLLATERAL_ADDRESSES[1], IERC20ABI, provider);
+
 
     const handleClosesuccess = () => {
         if (success == SUCCESS_STATUS.APPROVAL_SUCCESS) {
@@ -145,9 +151,11 @@ const ManagePositionPopup = ({
     async function approveOnClick() {
         try {
             if (CASSET !== null && CMM !== null) {
+                setApproving(true);
                 setWaitConfirmation(true);
                 await SendTx(userAddress, CASSET, 'approve', [CMM.address, INF.toString()]);
                 setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
+                setApproving(false);
                 setWasError(false);
                 setWaitConfirmation(false);
                 setBalanceCollateral(null);
@@ -230,6 +238,12 @@ const ManagePositionPopup = ({
             CASSET.balanceOf(userAddress).then(res => {
                 setBalanceCollateral(res);
             });
+            CASSET1.balanceOf(userAddress).then(res => {
+                setWETHBalance(res);
+            });
+            CASSET2.balanceOf(userAddress).then(res => {
+                setWSTETHBalance(res);
+            });
         }
         if (approvedCollateral == null) {
             CASSET.allowance(userAddress, CMM.address).then(res => {
@@ -241,17 +255,10 @@ const ManagePositionPopup = ({
             setMenu2(false);
         }
 
-        if (collateralAsset === null) {
-            setDisabled(true);
-        } else {
-            setDisabled(false);
-        }
+        collateralAsset === "WETH" ? setBalanceCollateral(wethBalance) : setBalanceCollateral(wSTETHBalance);
 
-        if (borrowAsset === null) {
-            setDisabled2(true);
-        } else {
-            setDisabled2(false);
-        }
+        collateralAsset === null ? setDisabled(true) : setDisabled(false);
+        borrowAsset === null ? setDisabled2(true) : setDisabled2(false);
 
     }, [balanceCollateral, approvedCollateral, cInput, collateralAsset, borrowAsset]);
 
@@ -359,10 +366,11 @@ const ManagePositionPopup = ({
     const MoreInputContents = borrowAsset === null ? "Choose An Asset To Borrow" : "Enter An Amount To Borrow";
 	const InputContents = cInput === '' || cInput === null || Number(cInput) === 0 ? "Enter Collateral Amount" : MoreInputContents;
     const InputContent = collateralAsset === null ? "Choose An Asset For Collateral" : InputContents;
+    const BorrowCheck = !resultantCollatRatioSafe ? "Not Enough Collateral" : "Exceeds Max Avaliable Borrow";
 
     let buttons = (
         <>
-            {!sufficientWETHApproval && <button className="btn activate" onClick={approveOnClick}>Approve WETH</button>}
+            {!sufficientWETHApproval && <button className={!approving ? "btn activate" : "d-none"} onClick={approveOnClick}>Approve {collateralSymbol}</button>}
             <>
                 {Number(collateralBalanceString) < Number(cInput) ?
                 <button
@@ -371,42 +379,52 @@ const ManagePositionPopup = ({
                 Insufficient Balance For Transaction
                 </button>
                 :
-                <>
-                {dInput === '' || cInput === '' || dInput === null  || Number(dInput) === 0 || collateralAsset === null || borrowAsset === null?
                     <>
-                    {wasError &&
-                    <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>
-                    }
-                    <button
-                        className={wasError ? "btn btn-deactive mt-0":"btn btn-deactive"}
-                    >
-                    {InputContent}
-                    </button>
-                    </>
-                :
-                    <>
-                    {!resultantCollatRatioSafe  ?
-                        <button
-                        className="btn btn-deactive"
-                        >
-                        Not Enough Collateral
-                        </button>
-                    :
-                        <>
-                        {waitConfirmation ?
+                    {approving &&
                         <button
                         className="btn btn-deactive"
                         >
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             <span className="ms-3">{LoadingContents}</span>
                         </button>
-                        :
-                            <button className={"btn "+(sufficientWETHApproval ? "" : "di")+"activate"} onClick={openVaultOnClick}>Open Vault, Borrow DAI</button>
-                        }
-                        </>
                     }
-                    </>
-                }
+                        <>
+                        {dInput === '' || cInput === '' || dInput === null  || Number(dInput) === 0 || collateralAsset === null || borrowAsset === null ?
+                            <>
+                            {wasError &&
+                            <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>
+                            }
+                            <button
+                                className={wasError ? "btn btn-deactive mt-0":"btn btn-deactive"}
+                            >
+                            {InputContent}
+                            </button>
+                            </>
+                        :
+                            <>
+                            {!resultantCollatRatioSafe || Number(dInput) > Number(maxBorrowString) ?
+                                <button
+                                className="btn btn-deactive"
+                                >
+                                {BorrowCheck}
+                                </button>
+                            :
+                                <>
+                                {waitConfirmation ?
+                                <button
+                                className="btn btn-deactive"
+                                >
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span className="ms-3">{LoadingContents}</span>
+                                </button>
+                                :
+                                    <button className={"btn "+(sufficientWETHApproval ? "" : "di")+"activate"} onClick={openVaultOnClick}>Open Vault, Borrow DAI</button>
+                                }
+                                </>
+                            }
+                            </>
+                        }
+                      </>
                 </>
             }
             </>
