@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
+import { EthersContext } from '../EthersProvider/EthersProvider';
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
 import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
-import { getNonce } from '../../Utils/SendTx';
+import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
-import { SendTx } from '../../Utils/SendTx';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
 import './add-withdraw.scss';
 
@@ -40,45 +40,25 @@ const WithdrawCollateral = ({
   const MIN_SAFE_COLLAT_RATIO = BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)).mul(BN.from(10).pow(BN.from(16)));
   let resultantCollatRatioSafe = impliedCollateralizationRatio.gte(MIN_SAFE_COLLAT_RATIO);
 
+  const [, , updateBasicInfo] = useContext(EthersContext);
+
   const handleInput = (param) => {
     let value = param.target.value;
     let filteredValue = filterInput(value);
     setInput(filteredValue);
   }
 
-  async function BroadcastTx(signer, tx) {
-    console.log('Tx Initiated');
-    let rec = await signer.sendTransaction(tx);
-    console.log('Tx Sent', rec);
+  const TxCallback0 = async () => {
     setSentState(true);
-    let resolvedRec = await rec.wait();
-    console.log('Tx Resolved, resolvedRec');
-    setSentState(false);
-    setDisabled(false);
-    return { rec, resolvedRec };
   }
 
-  async function SendTx(userAddress, contractInstance, functionName, argArray, updateSentState, overrides={}) {
-    if (contractInstance == null) {
-      throw "SendTx2 Attempted to Accept Null Contract";
-    }
-  
-    const signer = contractInstance.signer;
-  
-    let tx = {
-      to: contractInstance.address,
-      from: userAddress,
-      data: hoodEncodeABI(contractInstance, functionName, argArray),
-      nonce: await getNonce(signer.provider, userAddress),
-      gasLimit: (await contractInstance.estimateGas[functionName](...argArray)).toNumber() * 2,
-      ...overrides
-    }
-  
-    let { resolvedRec } = await BroadcastTx(signer, tx, updateSentState);
-  
-    return resolvedRec;
-  
+  const TxCallback1 = async () => {
+    setSentState(false);
+    setDisabled(false);
+    updateBasicInfo();
   }
+
+  const SendTx = getSendTx(TxCallback0, TxCallback1);
 
   const handleClickWithdraw = async () => {
     try {

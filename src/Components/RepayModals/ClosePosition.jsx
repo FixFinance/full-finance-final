@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import Modal from "react-bootstrap/Modal";
 import { BigNumber as BN } from 'ethers';
-import { getNonce } from '../../Utils/SendTx';
+import { EthersContext } from '../EthersProvider/EthersProvider';
+import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { hoodEncodeABI } from '../../Utils/HoodAbi';
 import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
 import { getDecimalString } from '../../Utils/StringAlteration';
@@ -17,6 +18,8 @@ const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
   const [sentState, setSentState] = useState(false);
   const [error, setError] = useState(false);
   const [wasError, setWasError] = useState(false);
+
+  const [, , updateBasicInfo] = useContext(EthersContext);
 
   const sufficientApproval = approval == null ? true : vault.borrowObligation.mul(BN.from(101)).div(BN.from(100)).lte(approval);
 
@@ -49,38 +52,16 @@ const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
     }
   };
 
-  async function BroadcastTx(signer, tx) {
-    console.log('Tx Initiated');
-    let rec = await signer.sendTransaction(tx);
-    console.log('Tx Sent', rec);
+  const TxCallback0 = async () => {
     setSentState(true);
-    let resolvedRec = await rec.wait();
-    console.log('Tx Resolved, resolvedRec');
-    setSentState(false);
-    return { rec, resolvedRec };
   }
 
-  async function SendTx(userAddress, contractInstance, functionName, argArray, updateSentState, overrides={}) {
-    if (contractInstance == null) {
-      throw "SendTx2 Attempted to Accept Null Contract";
-    }
-  
-    const signer = contractInstance.signer;
-  
-    let tx = {
-      to: contractInstance.address,
-      from: userAddress,
-      data: hoodEncodeABI(contractInstance, functionName, argArray),
-      nonce: await getNonce(signer.provider, userAddress),
-      gasLimit: (await contractInstance.estimateGas[functionName](...argArray)).toNumber() * 2,
-      ...overrides
-    }
-  
-    let { resolvedRec } = await BroadcastTx(signer, tx, updateSentState);
-  
-    return resolvedRec;
-  
+  const TxCallback1 = async () => {
+    setSentState(false);
+    updateBasicInfo();
   }
+
+  const SendTx = getSendTx(TxCallback0, TxCallback1);
 
   const handleErrorClose = () => {
     setSuccess(false);
