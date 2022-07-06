@@ -39,7 +39,7 @@ const Header = ({ z }) => {
   const Web3Api = useMoralisWeb3Api();
   const { isAuthenticated, user } = useMoralis();
 
-  const {loggedIn, setLoggedIn, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar} = useContext(LoginContext);
+  const {loggedIn, setLoggedIn, signer, setSigner, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar} = useContext(LoginContext);
 
   const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
   const menuAbbreviatedAddress = userAddress.substring(0, 11)+'...'+userAddress.substring(userAddress.length-4);
@@ -57,7 +57,8 @@ const Header = ({ z }) => {
         setUserETH(rawBalance);
         const ethAddress = currentUser.get("ethAddress");
         setUserAddress(ethAddress);
-        console.log(ethAddress)
+        const signer = provider.getSigner(ethAddress);
+        setSigner(signer);
         const getEns = await provider.lookupAddress(ethAddress);
         setUserENS(getEns);
         const getAvatar = await provider.getAvatar(ethAddress);
@@ -65,7 +66,7 @@ const Header = ({ z }) => {
       }
 
       if (user) {
-      getUser();
+        getUser();
       };
 
   }, [z, user, isAuthenticated]);

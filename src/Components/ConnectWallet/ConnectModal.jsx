@@ -26,7 +26,7 @@ const ConnectModal = ({ handleClose }) => {
 
   const Web3Api = useMoralisWeb3Api();
 
-  const {loggedIn, setLoggedIn, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar} = useContext(LoginContext);
+  const {loggedIn, setLoggedIn, signer, setSigner, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar} = useContext(LoginContext);
 
   const [getWalletInfo] = useContext(EthersContext);
   const [chainId, walletType] = getWalletInfo(selectedModal, handleSetWrongNetwork);
@@ -43,14 +43,14 @@ const ConnectModal = ({ handleClose }) => {
         const balance = await Web3Api.account.getNativeBalance();
         let rawBalance = (balance.balance / 10e17).toFixed(4);
         setUserETH(rawBalance);
-        const ethAddress =await currentUser.get("ethAddress");
+        const ethAddress = await currentUser.get("ethAddress");
         setUserAddress(ethAddress);
-        console.log(ethAddress)
+        const signer = provider.getSigner(ethAddress);
+        setSigner(signer);
         const getEns = provider.lookupAddress(ethAddress);
         setUserENS(getEns);
         const getAvatar = await provider.getAvatar(ethAddress);
         setUserAvatar(getAvatar);
-        const signer = provider.getSigner(ethAddress);
         const networkInfo = await provider.getNetwork();
         const chainId = networkInfo.chainId.toString();
         console.log(currentUser)

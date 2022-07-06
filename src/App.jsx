@@ -13,6 +13,7 @@ import { ADDRESS0 } from "./Utils/Consts";
 function App() {
 
   const [loggedIn, setLoggedIn] = useState(false);
+  const [signer, setSigner] = useState(null);
   const [userAddress, setUserAddress] = useState(ADDRESS0);
   const [userETH, setUserETH] = useState('0');
   const [userENS, setUserENS] = useState(null);
@@ -20,7 +21,7 @@ function App() {
 
   return (
     <>
-      <LoginContext.Provider value = {{ loggedIn, setLoggedIn, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar }}>
+      <LoginContext.Provider value = {{ loggedIn, setLoggedIn, signer, setSigner, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar }}>
       <EthersProvider>
         <Routes>
           {/**************  Start public Route *********************/}
