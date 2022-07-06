@@ -9,7 +9,11 @@ import AccountModal2 from "../../../Components/AccountModals/AccountModal2";
 import WrongNetworkModal from "../../../Components/ConnectWallet/WrongNetworkModal";
 import ellipse_icon from "../../../assets/image/ellipse2.svg";
 import { EthersContext } from '../../../Components/EthersProvider/EthersProvider';
+import { LoginContext } from "../../../helper/userContext";
 import { ADDRESS0 } from '../../../Utils/Consts.js';
+import Moralis from "moralis";
+import { useMoralis, useMoralisWeb3Api } from "react-moralis";
+
 
 const Header = ({ z }) => {
   const [show, setShow] = useState(false);
@@ -30,15 +34,41 @@ const Header = ({ z }) => {
 
   const [zData, setZData] = useState(z);
   const [getWalletInfo] = useContext(EthersContext);
-  const [provider, userAddress, userETH, userENS, userAvatar, chainId, walletType] = getWalletInfo();
+  const [chainId, walletType] = getWalletInfo();
 
+  const Web3Api = useMoralisWeb3Api();
+  const { isAuthenticated, user } = useMoralis();
+
+  const {loggedIn, setLoggedIn, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar} = useContext(LoginContext);
 
   const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
   const menuAbbreviatedAddress = userAddress.substring(0, 11)+'...'+userAddress.substring(userAddress.length-4);
 
+
+
   useEffect(() => {
     setZData(z);
-  }, [z]);
+      const getUser = async () => {
+        setLoggedIn(true);
+        const provider = await Moralis.enableWeb3();
+        const currentUser = Moralis.User.current();
+        const balance = await Web3Api.account.getNativeBalance();
+        let rawBalance = (balance.balance / 10e17).toFixed(4);
+        setUserETH(rawBalance);
+        const ethAddress = currentUser.get("ethAddress");
+        setUserAddress(ethAddress);
+        console.log(ethAddress)
+        const getEns = await provider.lookupAddress(ethAddress);
+        setUserENS(getEns);
+        const getAvatar = await provider.getAvatar(ethAddress);
+        setUserAvatar(getAvatar);
+      }
+
+      if (user) {
+      getUser();
+      };
+
+  }, [z, user, isAuthenticated]);
 
   return (
     <>
@@ -119,7 +149,7 @@ const Header = ({ z }) => {
               </ul>
             </Navbar.Collapse>
             <div className={show3 ? "text-center mx-auto w-100 button-overlay-container" : "right-side-container text-center"}>
-                {userAddress !== ADDRESS0 ? (
+                {loggedIn ? (
                   <>
                   {show3 === true ? (
                     <>

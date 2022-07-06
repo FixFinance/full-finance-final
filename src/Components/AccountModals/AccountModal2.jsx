@@ -1,13 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import Modal from "react-bootstrap/Modal";
 import ellipse2 from "../../assets/image/ellipse2.svg"
 import "./accountmodal.scss";
 import AccountModal1 from "./AccountModal1";
+import Moralis from "moralis"
+import { EthersContext } from "../EthersProvider/EthersProvider";
+import { LoginContext } from "../../helper/userContext";
 
 const AccountModal2 = ({ handleClose, address, ens, avatar }) => {
   const [modalType, setModalType] = useState("basicColor");
 
   let abbreviatedAddress = address.substring(0, 10)+'...'+address.substring(address.length-9);
+
+  const {loggedIn, setLoggedIn} = useContext(LoginContext);
+
+
+  async function logout () {
+    try {
+        await Moralis.User.logOut();
+        setLoggedIn(false);
+        handleClose();
+    } catch (err) {
+        console.log(err)
+    }
+}
 
   return (
     <div>
@@ -43,7 +59,7 @@ const AccountModal2 = ({ handleClose, address, ens, avatar }) => {
                   {" "}
                   <button
                     className="btn common_btn switch"
-                    onClick={handleClose}
+                    onClick={logout}
                   >
                     Disconnect wallet
                   </button>

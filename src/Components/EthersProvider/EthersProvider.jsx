@@ -1,9 +1,11 @@
 import React, {createContext, useState} from 'react'
+import { useMoralis } from "react-moralis";
 import { ethers, BigNumber as BN } from 'ethers';
 import { ADDRESS0, TOTAL_SBPS, _0 } from '../../Utils/Consts.js';
 import { TargetChains } from '../../Utils/TargetChains';
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate } from '../../Utils/RateMath';
+import Moralis from "moralis";
 
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
 const IERC20ABI = require('../../abi/IERC20.json');
@@ -26,6 +28,7 @@ export default function EthersProvider({children}) {
 
     const [walletType, setWalletType] = useState('basic');
     const [ethersProvider, setEthersProvider] = useState(null);
+    const [user, setUser] = useState(null);
     const [userAddress, setUserAddress] = useState(ADDRESS0);
     const [userETH, setUserETH] = useState('0');
     const [userENS, setUserENS] = useState(null);
@@ -41,6 +44,7 @@ export default function EthersProvider({children}) {
     const [infuraUp, setInfuraUp] = useState(true);
 
     function setWrongChainState() {
+        console.log(`Logging out`);
         setWalletType('basic');
         setEthersProvider(null);
         setUserAddress(ADDRESS0);
@@ -50,7 +54,37 @@ export default function EthersProvider({children}) {
         setChainId(-1);
     }
 
+    async function login () {
+        try {
+            const provider = await Moralis.enableWeb3();
+            await Moralis.authenticate();
+            setUser(true);
+            const currentUser = Moralis.User.current();
+            const ethAddress = currentUser.get("ethAddress");
+            setUserAddress(ethAddress);
+            const getAvatar = await provider.getAvatar(ethAddress);
+            setUserAvatar(getAvatar);
+            const signer = provider.getSigner(ethAddress);
+            const networkInfo = await provider.getNetwork();
+            const chainId = networkInfo.chainId.toString();
+            setChainId(chainId);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function logout () {
+        try {
+            await Moralis.User.logOut();
+            setUser(null);
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+
     function getWalletInfo(selectedWalletType='basic', setWrongChainCallback=(() => {})) {
+
         if (selectedWalletType === 'basic' && walletType !== 'basic') {
             selectedWalletType = walletType;
         }
@@ -98,7 +132,7 @@ export default function EthersProvider({children}) {
             }
         }
         let providerToReturn = walletType === selectedWalletType ? ethersProvider : providerSet;
-        return [providerToReturn, userAddress, userETH, userENS, userAvatar, chainId, walletType];
+        return [providerToReturn, userAddress, userETH, userENS, userAvatar, chainId, walletType, user];
     }
 
     function getBasicInfo() {
@@ -150,7 +184,7 @@ export default function EthersProvider({children}) {
     }
 
     return (
-        <EthersContext.Provider value={[getWalletInfo, getBasicInfo, updateBasicInfo]}>
+        <EthersContext.Provider value={[getWalletInfo, getBasicInfo, updateBasicInfo, login, logout]}>
             {children}
         </EthersContext.Provider>
     )

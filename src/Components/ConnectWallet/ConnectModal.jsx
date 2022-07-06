@@ -11,6 +11,9 @@ import DepositPopup from "../Deposit & Withdraw Modals/DepositPopup";
 import WrongNetworkModal from "./WrongNetworkModal";
 import AccountModal2 from "../AccountModals/AccountModal2";
 import { EthersContext } from "../EthersProvider/EthersProvider";
+import { LoginContext } from "../../helper/userContext";
+import Moralis from "moralis";
+import { useMoralis, useMoralisWeb3Api } from "react-moralis";
 
 import { TargetChains } from '../../Utils/TargetChains.js';
 
@@ -21,11 +24,42 @@ const ConnectModal = ({ handleClose }) => {
 
   const handleSetWrongNetwork = () => setShowWrongNetwork(true);
 
+  const Web3Api = useMoralisWeb3Api();
+
+  const {loggedIn, setLoggedIn, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar} = useContext(LoginContext);
+
   const [getWalletInfo] = useContext(EthersContext);
-  const [provider, userAddress, userETH, userENS, userAvatar, chainId, walletType] = getWalletInfo(selectedModal, handleSetWrongNetwork);
+  const [chainId, walletType] = getWalletInfo(selectedModal, handleSetWrongNetwork);
 
   let connectedToWallet = selectedModal !== 'basic' && selectedModal !== 'error';
   let onWrongChain = connectedToWallet && chainId !== -1 && !TargetChains.includes(chainId);
+
+  async function login () {
+    try {
+        const provider = await Moralis.enableWeb3();
+        await Moralis.authenticate();
+        setLoggedIn(true);
+        const currentUser = Moralis.User.current();
+        const balance = await Web3Api.account.getNativeBalance();
+        let rawBalance = (balance.balance / 10e17).toFixed(4);
+        setUserETH(rawBalance);
+        const ethAddress =await currentUser.get("ethAddress");
+        setUserAddress(ethAddress);
+        console.log(ethAddress)
+        const getEns = provider.lookupAddress(ethAddress);
+        setUserENS(getEns);
+        const getAvatar = await provider.getAvatar(ethAddress);
+        setUserAvatar(getAvatar);
+        const signer = provider.getSigner(ethAddress);
+        const networkInfo = await provider.getNetwork();
+        const chainId = networkInfo.chainId.toString();
+        console.log(currentUser)
+        console.log(networkInfo)
+        handleClose();
+    } catch (error) {
+        console.log(error);
+    }
+  }
 
   return (
     <div className="connect-modal">
@@ -51,7 +85,7 @@ const ConnectModal = ({ handleClose }) => {
               <div
                   className="d-flex form-field justify-content-between"
                   onClick={() => {
-                    setSelectedModal("metamask");
+                    login();
                   }}
               >
                 <div className="field-text align-self-center">
