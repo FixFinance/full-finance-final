@@ -32,6 +32,11 @@ const Header = ({ z }) => {
   }
   const handleShow2 = () => setShow2(true);
 
+  const handleClose3 = () => {
+    setShow3(false);
+  }
+  const handleShow3 = () => setShow3(true);
+
   const [zData, setZData] = useState(z);
   const [getWalletInfo] = useContext(EthersContext);
   const [chainId, walletType] = getWalletInfo();
@@ -49,8 +54,13 @@ const Header = ({ z }) => {
   useEffect(() => {
     setZData(z);
       const getUser = async () => {
-        setLoggedIn(true);
         const provider = await Moralis.enableWeb3();
+        const network = await provider.getNetwork();
+        if (network.chainId !== 1 || 42 || 278) {
+          handleShow3();
+          return;
+        }
+        setLoggedIn(true);
         const currentUser = Moralis.User.current();
         const balance = await Web3Api.account.getNativeBalance();
         let rawBalance = (balance.balance / 10e17).toFixed(4);
@@ -65,7 +75,7 @@ const Header = ({ z }) => {
         setUserAvatar(getAvatar);
       }
 
-      if (user) {
+      if (user !== null && userAddress === ADDRESS0) {
         getUser();
       };
 
@@ -209,6 +219,16 @@ const Header = ({ z }) => {
           className=""
         >
           <AccountModal2 handleClose={handleClose2} address={userAddress} ens={userENS} avatar={userAvatar} />
+        </Modal>
+        {/* ************ wrong network modal ***************/}
+        <Modal
+          show={show3}
+          onHide={handleClose3}
+          centered
+          animation={false}
+          className=""
+        >
+          <WrongNetworkModal handleClose={handleClose3} />
         </Modal>
         </div>
         </div>
