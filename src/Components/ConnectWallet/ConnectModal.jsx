@@ -59,14 +59,13 @@ const ConnectModal = ({ handleClose }) => {
         setUserAddress(ethAddress);
         const signer = provider.getSigner(ethAddress);
         setSigner(signer);
+        if (Number(network.chainId) === 1) {
         const getEns = provider.lookupAddress(ethAddress);
         setUserENS(getEns);
         const getAvatar = await provider.getAvatar(ethAddress);
         setUserAvatar(getAvatar);
-        const networkInfo = await provider.getNetwork();
-        const chainId = networkInfo.chainId.toString();
+        }
         console.log(currentUser)
-        console.log(networkInfo)
         handleClose();
     } catch (error) {
         console.log(error);

@@ -5,6 +5,7 @@ import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import "./depositmodal.scss";
 import SuccessModal from "../Success/SuccessModal";
 import { EthersContext } from '../EthersProvider/EthersProvider';
+import { LoginContext } from "../../helper/userContext";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { ControlledInput } from '../ControlledInput/ControlledInput';
@@ -29,8 +30,10 @@ const WithdrawModal=({ handleClose2 })=> {
   const [balanceLendShares, setBalanceLendShares] = useState(null);
   const [lendShareValue, setLendShareValue] = useState(null);
 
-  const [getWalletInfo, , updateBasicInfo] = useContext(EthersContext);
-  const [provider, userAddress] = getWalletInfo();
+  const [updateBasicInfo] = useContext(EthersContext);
+
+  const {signer, userAddress} = useContext(LoginContext);
+
 
   const lendShareBalanceString = getDecimalString(balanceLendShares == null ? '0' : balanceLendShares.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
   const lendShareValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
@@ -62,7 +65,6 @@ const WithdrawModal=({ handleClose2 })=> {
     }
   }
 
-  const signer = provider == null ? null : provider.getSigner();
   let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
   let FLT = signer == null ? null : new ethers.Contract(process.env.REACT_APP_FLT_ADDRESS, IERC20ABI, signer);
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
@@ -100,7 +102,7 @@ const WithdrawModal=({ handleClose2 })=> {
 
   useEffect(() => {
     let asyncUseEffect = async () => {
-      if (provider != null && balanceLendShares == null) {
+      if (signer != null && balanceLendShares == null) {
         let promise0 = FLT.balanceOf(userAddress).then(res => {
           setBalanceLendShares(res);
           return res;
@@ -115,7 +117,7 @@ const WithdrawModal=({ handleClose2 })=> {
       }
     }
     asyncUseEffect();
-  }, [balanceLendShares, provider]);
+  }, [balanceLendShares, signer]);
 
   const LoadingContents = sentState ? "Withdrawing" : 'Waiting For Confirmation';
 

@@ -67,7 +67,7 @@ const EmptyState = () => {
 
   useEffect(() => {
     let asyncUseEffect = async () => {
-      if (provider != null && balanceLendShares == null) {
+      if (signer != null && balanceLendShares == null) {
         let promiseArray = [
           FLT.balanceOf(userAddress).then(res => {
             setBalanceLendShares(res);

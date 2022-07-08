@@ -67,10 +67,12 @@ const Header = ({ z }) => {
         setUserAddress(ethAddress);
         const signer = provider.getSigner(ethAddress);
         setSigner(signer);
-        const getEns = await provider.lookupAddress(ethAddress);
-        setUserENS(getEns);
-        const getAvatar = await provider.getAvatar(ethAddress);
-        setUserAvatar(getAvatar);
+        if (Number(network.chainId) === 1) {
+          const getEns = provider.lookupAddress(ethAddress);
+          setUserENS(getEns);
+          const getAvatar = await provider.getAvatar(ethAddress);
+          setUserAvatar(getAvatar);
+        }
       }
 
       if (user !== null && userAddress === ADDRESS0) {

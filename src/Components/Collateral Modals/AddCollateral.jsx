@@ -35,7 +35,7 @@ const AddCollateral = ({
   const [walletBalance, setWalletBalance] = useState(null);
   const [collApproval, setCollApproval] = useState(null);
 
-  const [, , updateBasicInfo] = useContext(EthersContext);
+  const [updateBasicInfo] = useContext(EthersContext);
 
   useEffect(() => {
     if (walletBalance == null) {

@@ -18,7 +18,6 @@ import dropdown_deactive from '../../../assets/image/dropdown_deactive.svg'
 
 const ManagePositionPopup = ({
     handleClose,
-    provider,
     signer,
     userAddress,
     CMM,
@@ -76,8 +75,8 @@ const ManagePositionPopup = ({
     const debtAmountInput = dInput == null ? _0 : BN.from(getAbsoluteString(dInput, parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
 
     const CASSET = signer == null ? null : new ethers.Contract(collateralAddress, IERC20ABI, signer);
-    const CASSET1 = provider == null ? null : new ethers.Contract(COLLATERAL_ADDRESSES[0], IERC20ABI, provider);
-    const CASSET2 = provider == null ? null : new ethers.Contract(COLLATERAL_ADDRESSES[1], IERC20ABI, provider);
+    const CASSET1 = signer == null ? null : new ethers.Contract(COLLATERAL_ADDRESSES[0], IERC20ABI, signer);
+    const CASSET2 = signer == null ? null : new ethers.Contract(COLLATERAL_ADDRESSES[1], IERC20ABI, signer);
 
 
     const handleClosesuccess = () => {
