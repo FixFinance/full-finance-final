@@ -11,6 +11,7 @@ import ManagePositionPopup from './ManageModal/ManagePositionPopup';
 import ConnectModal from "../ConnectWallet/ConnectModal";
 import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
+import { LoginContext } from "../../helper/userContext";
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate } from '../../Utils/RateMath';
 import { ADDRESS0, TOTAL_SBPS, _0, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS } from '../../Utils/Consts.js';
@@ -43,7 +44,9 @@ function Index() {
     supplyLentBN,
     supplyBorrowedBN
   } = getBasicInfo();
-  const [provider, userAddress] = getWalletInfo();
+
+  const {signer, userAddress} = useContext(LoginContext);
+
 
   if (
     annualLendRateString == '0' &&
@@ -83,7 +86,7 @@ function Index() {
   }
   const handleShow2 = () => {
     if (
-        provider !== null &&
+        signer !== null &&
         userAddress !== ADDRESS0 &&
         supplyBorrowed !== null &&
         supplyBorrowShares !== null
@@ -98,7 +101,6 @@ function Index() {
   }
   const handleShow3 = () => setModal3(true);
 
-  const signer = provider == null ? null : provider.getSigner();
   let collateralAsset = "";
 
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
@@ -109,7 +111,7 @@ function Index() {
 
   useEffect(() => {
     let asyncUseEffect = async () => {
-      if (provider !== null) {
+      if (signer !== null) {
         if (
             userVaults === null &&
             baseAggAnswer !== null &&
@@ -287,7 +289,7 @@ function Index() {
         >
           <ManagePopup 
             handleClose={closeManagePosition}
-            provider={provider}
+            signer={signer}
             userAddress={userAddress}
             CMM={CMM}
             DAI={DAI}
@@ -310,7 +312,6 @@ function Index() {
         >
           <ManagePositionPopup
             handleClose={handleClose2}
-            provider={provider}
             signer={signer}
             userAddress={userAddress}
             CMM={CMM}

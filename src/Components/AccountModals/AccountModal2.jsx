@@ -1,13 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import Modal from "react-bootstrap/Modal";
 import ellipse2 from "../../assets/image/ellipse2.svg"
 import "./accountmodal.scss";
 import AccountModal1 from "./AccountModal1";
+import Moralis from "moralis"
+import { EthersContext } from "../EthersProvider/EthersProvider";
+import { LoginContext } from "../../helper/userContext";
+import { ADDRESS0 } from "../../Utils/Consts";
 
-const AccountModal2 = ({ handleClose, address, ens, avatar }) => {
+const AccountModal2 = ({ handleClose, ens, avatar }) => {
   const [modalType, setModalType] = useState("basicColor");
 
-  let abbreviatedAddress = address.substring(0, 10)+'...'+address.substring(address.length-9);
+  const {loggedIn, setLoggedIn, signer, setSigner, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar} = useContext(LoginContext);
+
+  let abbreviatedAddress = userAddress.substring(0, 10)+'...'+userAddress.substring(userAddress.length-9);
+
+  async function logout () {
+    try {
+        await Moralis.User.logOut();
+        setLoggedIn(false);
+        setSigner(null);
+        setUserAddress(ADDRESS0);
+        setUserETH('0');
+        setUserENS(null);
+        setUserAvatar(null);
+        handleClose();
+    } catch (err) {
+        console.log(err)
+    }
+}
 
   return (
     <div>
@@ -32,7 +53,7 @@ const AccountModal2 = ({ handleClose, address, ens, avatar }) => {
                   <button
                     onClick={() => {
                       setModalType("DhikaChikaColor");
-                      navigator.clipboard.writeText(address);
+                      navigator.clipboard.writeText(userAddress);
                     }}
                     className="btn common_btn cancel"
                   >
@@ -43,7 +64,7 @@ const AccountModal2 = ({ handleClose, address, ens, avatar }) => {
                   {" "}
                   <button
                     className="btn common_btn switch"
-                    onClick={handleClose}
+                    onClick={logout}
                   >
                     Disconnect wallet
                   </button>
@@ -54,7 +75,7 @@ const AccountModal2 = ({ handleClose, address, ens, avatar }) => {
         )}
         {modalType === "DhikaChikaColor" && (
           <>
-            <AccountModal1 address={address}/>
+            <AccountModal1 address={userAddress}/>
           </>
         )}
       </div>

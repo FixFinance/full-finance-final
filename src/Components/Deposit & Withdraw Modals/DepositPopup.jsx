@@ -6,6 +6,7 @@ import "./depositmodal.scss";
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
 import { EthersContext } from '../EthersProvider/EthersProvider';
+import { LoginContext } from "../../helper/userContext";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { INF } from '../../Utils/Consts';
@@ -32,12 +33,13 @@ const DepositPopup = ({ handleClose }) => {
   const [balanceLendShares, setBalanceLendShares] = useState(null);
   const [lendShareValue, setLendShareValue] = useState(null);
 
-  const [getWalletInfo, , updateBasicInfo] = useContext(EthersContext);
-  const [provider, userAddress] = getWalletInfo();
+  const [updateBasicInfo] = useContext(EthersContext);
 
   const balanceString = getDecimalString(DAIbalance == null ? '0' : DAIbalance.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
   const lsValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
   const absoluteInput = BN.from(getAbsoluteString('0'+getPureInput(input), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
+
+  const {signer, userAddress} = useContext(LoginContext);
 
   const handleClosesuccess = () => {
     setSuccess(false);
@@ -69,7 +71,6 @@ const DepositPopup = ({ handleClose }) => {
     }
   }
 
-  const signer = provider == null ? null : provider.getSigner();
   let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
   let FLT = signer == null ? null : new ethers.Contract(process.env.REACT_APP_FLT_ADDRESS, IERC20ABI, signer);
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
@@ -145,7 +146,7 @@ const DepositPopup = ({ handleClose }) => {
 
   useEffect(() => {
     let asyncUseEffect = async () => {
-      if (provider != null && DAIbalance == null) {
+      if (signer != null && DAIbalance == null) {
         let promise0 = DAI.balanceOf(userAddress).then(res => {
           setDAIbalance(res);
           return res;
@@ -168,7 +169,7 @@ const DepositPopup = ({ handleClose }) => {
       }
     }
     asyncUseEffect();
-  }, [DAIbalance, provider, input]);
+  }, [DAIbalance, signer, input]);
 
   const ButtonContents = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? 'Approve DAI' : 'Deposit DAI';
   const txMessage = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? "Approving DAI" : "Depositing DAI";

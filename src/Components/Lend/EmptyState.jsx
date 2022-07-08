@@ -7,9 +7,11 @@ import WithdrawModal from "../Deposit & Withdraw Modals/WithdrawModal";
 import ConnectModal from "../ConnectWallet/ConnectModal";
 import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
+import { LoginContext } from "../../helper/userContext";
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate, TOTAL_SBPS } from '../../Utils/RateMath';
 import Header from "../../ShareModules/Layout/Header/Header";
+import { useMoralis, useMoralisWeb3Api } from "react-moralis";
 
 const IERC20ABI = require('../../abi/IERC20.json');
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
@@ -24,9 +26,12 @@ const EmptyState = () => {
   const [lendShareValue, setLendShareValue] = useState(null);
   const [lendShareUSDValue, setLendShareUSDValue] = useState(null);
 
+  const {loggedIn, setLoggedIn, signer, setSigner, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar} = useContext(LoginContext);
+
+
   const [getWalletInfo, getBasicInfo, updateBasicInfo] = useContext(EthersContext);
   const { annualLendRateString } = getBasicInfo();
-  const [provider, userAddress] = getWalletInfo();
+  const [provider] = getWalletInfo();
 
   if (annualLendRateString == '0') {
     updateBasicInfo();
@@ -55,7 +60,6 @@ const EmptyState = () => {
   const lendShareValueString = getDecimalString(lendShareValue == null ? '0.0000' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
   const lendShareUSDValueString = getDecimalString(lendShareUSDValue == null ? '0.0000' : lendShareUSDValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
 
-  const signer = provider == null ? null : provider.getSigner();
   let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
   let FLT = signer == null ? null : new ethers.Contract(process.env.REACT_APP_FLT_ADDRESS, IERC20ABI, signer);
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
@@ -63,7 +67,7 @@ const EmptyState = () => {
 
   useEffect(() => {
     let asyncUseEffect = async () => {
-      if (provider != null && balanceLendShares == null) {
+      if (signer != null && balanceLendShares == null) {
         let promiseArray = [
           FLT.balanceOf(userAddress).then(res => {
             setBalanceLendShares(res);
@@ -150,7 +154,7 @@ const EmptyState = () => {
           animation={false}
           className="connect-wallet-modal"
         >
-          <ConnectModal handleClose2={handleClose3} />
+          <ConnectModal handleClose={handleClose3} />
         </Modal>
     </div>
     </>

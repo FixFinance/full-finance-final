@@ -9,7 +9,11 @@ import AccountModal2 from "../../../Components/AccountModals/AccountModal2";
 import WrongNetworkModal from "../../../Components/ConnectWallet/WrongNetworkModal";
 import ellipse_icon from "../../../assets/image/ellipse2.svg";
 import { EthersContext } from '../../../Components/EthersProvider/EthersProvider';
+import { LoginContext } from "../../../helper/userContext";
 import { ADDRESS0 } from '../../../Utils/Consts.js';
+import Moralis from "moralis";
+import { useMoralis, useMoralisWeb3Api } from "react-moralis";
+
 
 const Header = ({ z }) => {
   const [show, setShow] = useState(false);
@@ -28,17 +32,54 @@ const Header = ({ z }) => {
   }
   const handleShow2 = () => setShow2(true);
 
-  const [zData, setZData] = useState(z);
-  const [getWalletInfo] = useContext(EthersContext);
-  const [provider, userAddress, userETH, userENS, userAvatar, chainId, walletType] = getWalletInfo();
+  const handleClose3 = () => {
+    setShow3(false);
+  }
+  const handleShow3 = () => setShow3(true);
 
+  const [zData, setZData] = useState(z);
+
+  const Web3Api = useMoralisWeb3Api();
+  const { isAuthenticated, user } = useMoralis();
+
+  const {loggedIn, setLoggedIn, signer, setSigner, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar} = useContext(LoginContext);
 
   const abbreviatedAddress = userAddress.substring(0, 6)+'...'+userAddress.substring(userAddress.length-4);
   const menuAbbreviatedAddress = userAddress.substring(0, 11)+'...'+userAddress.substring(userAddress.length-4);
 
+
+
   useEffect(() => {
     setZData(z);
-  }, [z]);
+      const getUser = async () => {
+        const provider = await Moralis.enableWeb3();
+        const network = await provider.getNetwork();
+        if (Number(network.chainId) !== 1 && Number(network.chainId) !== 42) {
+          handleShow3();
+          return;
+        }
+        setLoggedIn(true);
+        const currentUser = Moralis.User.current();
+        const balance = await Web3Api.account.getNativeBalance();
+        let rawBalance = (balance.balance / 10e17).toFixed(4);
+        setUserETH(rawBalance);
+        const ethAddress = currentUser.get("ethAddress");
+        setUserAddress(ethAddress);
+        const signer = provider.getSigner(ethAddress);
+        setSigner(signer);
+        if (Number(network.chainId) === 1) {
+          const getEns = provider.lookupAddress(ethAddress);
+          setUserENS(getEns);
+          const getAvatar = await provider.getAvatar(ethAddress);
+          setUserAvatar(getAvatar);
+        }
+      }
+
+      if (user !== null && userAddress === ADDRESS0) {
+        getUser();
+      };
+
+  }, [z, user, isAuthenticated]);
 
   return (
     <>
@@ -119,7 +160,7 @@ const Header = ({ z }) => {
               </ul>
             </Navbar.Collapse>
             <div className={show3 ? "text-center mx-auto w-100 button-overlay-container" : "right-side-container text-center"}>
-                {userAddress !== ADDRESS0 ? (
+                {loggedIn ? (
                   <>
                   {show3 === true ? (
                     <>
@@ -178,6 +219,16 @@ const Header = ({ z }) => {
           className=""
         >
           <AccountModal2 handleClose={handleClose2} address={userAddress} ens={userENS} avatar={userAvatar} />
+        </Modal>
+        {/* ************ wrong network modal ***************/}
+        <Modal
+          show={show3}
+          onHide={handleClose3}
+          centered
+          animation={false}
+          className=""
+        >
+          <WrongNetworkModal handleClose={handleClose3} />
         </Modal>
         </div>
         </div>

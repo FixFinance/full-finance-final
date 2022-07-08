@@ -13,7 +13,7 @@ const IERC20ABI = require('../../../abi/IERC20.json');
 
 const ManagePopup = ({
   handleClose,
-  provider,
+  signer,
   userAddress,
   CMM,
   DAI,
@@ -33,7 +33,7 @@ const ManagePopup = ({
   const handleShow2 = () => setModal2(true);
 
   const allInitialized =
-    provider !== null &&
+    signer !== null &&
     userAddress !== ADDRESS0 &&
     CMM !== null &&
     vault !== null;
