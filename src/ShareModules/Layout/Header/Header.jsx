@@ -38,8 +38,6 @@ const Header = ({ z }) => {
   const handleShow3 = () => setShow3(true);
 
   const [zData, setZData] = useState(z);
-  const [getWalletInfo] = useContext(EthersContext);
-  const [chainId, walletType] = getWalletInfo();
 
   const Web3Api = useMoralisWeb3Api();
   const { isAuthenticated, user } = useMoralis();
@@ -56,7 +54,7 @@ const Header = ({ z }) => {
       const getUser = async () => {
         const provider = await Moralis.enableWeb3();
         const network = await provider.getNetwork();
-        if (network.chainId !== 1 || 42 || 278) {
+        if (Number(network.chainId) !== 1 && Number(network.chainId) !== 42) {
           handleShow3();
           return;
         }

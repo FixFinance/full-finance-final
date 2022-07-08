@@ -44,7 +44,7 @@ const ConnectModal = ({ handleClose }) => {
     try {
         const provider = await Moralis.enableWeb3();
         const network = await provider.getNetwork();
-        if (network.chainId !== 1 || 42 || 278) {
+        if (Number(network.chainId) !== 1 && Number(network.chainId) !== 42) {
           handleSetWrongNetwork();
           setShow(false);
           return;

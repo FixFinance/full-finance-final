@@ -154,7 +154,7 @@ const EmptyState = () => {
           animation={false}
           className="connect-wallet-modal"
         >
-          <ConnectModal handleClose2={handleClose3} />
+          <ConnectModal handleClose={handleClose3} />
         </Modal>
     </div>
     </>
