@@ -103,7 +103,6 @@ function Index() {
 
   let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
   let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);  
-  //let CASSET = signer == null ? null : new ethers.Contract(collateralAsset, IERC20ABI, signer);
   let CASSET = signer == null || selectedVault == null ? null : new ethers.Contract(selectedVault.assetSupplied, IERC20ABI, signer);
   let BaseAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
   let CollateralAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_COLLATERAL_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
