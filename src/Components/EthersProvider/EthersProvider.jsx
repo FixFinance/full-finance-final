@@ -11,10 +11,10 @@ const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
 const IERC20ABI = require('../../abi/IERC20.json');
 const IChainlinkAggregatorABI = require('../../abi/IChainlinkAggregator.json');
 
-function getProvider(walletType)  {
+async function getProvider(walletType)  {
     if (walletType === 'metamask') {
         if (typeof(window.ethereum) !== 'undefined') {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const provider = await Moralis.enableWeb3({provider: 'metamask'});
             return provider;
         }
         return null;
@@ -54,6 +54,17 @@ export default function EthersProvider({children}) {
         setChainId(-1);
     }
 
+    function provider_disconnect() {
+        setWalletType('basic');
+        setEthersProvider(null);
+        setUserAddress(ADDRESS0);
+        setUserETH('0');
+        setUserENS(null);
+        setUserAvatar(null);
+        setChainId(-1);
+        Moralis.User.logOut();
+    }
+
     async function login () {
         try {
             const provider = await Moralis.enableWeb3();
@@ -82,57 +93,59 @@ export default function EthersProvider({children}) {
         }
     }
 
+    function updateWalletInfo(providerSet, selectedWalletType, setWrongChainCallback) {
+        let _userAddress = ADDRESS0;
+        let _userETH = '0';
+        let _userENS = null;
+        let _userAvatar = null;
+        let promiseArray = [
+            providerSet.send("eth_requestAccounts", []).then(accounts => {
+                if (accounts.length > 0) {
+                    _userAddress = accounts[0];
+                    let getETHpromise = providerSet.getBalance(accounts[0]);
+                    let ensPromise = providerSet.lookupAddress(accounts[0]).catch(err => null);
+                    let avatarPromise = providerSet.getAvatar(accounts[0]).catch(err => null);
+                    return Promise.all([getETHpromise, ensPromise, avatarPromise]).then(resArr => {
+                        _userETH = getDecimalString(resArr[0].toString(), 18, 4);
+                        _userENS = resArr[1];
+                        _userAvatar = resArr[2];
+                    });
+                }
+            }),
+            providerSet.getNetwork()
+        ];
+        Promise.all(promiseArray).then(res => {
+            let network = res[1];
+            if (typeof(network) !== 'undefined' && TargetChains.includes(network.chainId)) {
+                setEthersProvider(providerSet);
+                setWalletType(selectedWalletType);
+                setUserAddress(_userAddress);
+                setUserETH(_userETH);
+                setUserENS(_userENS);
+                setUserAvatar(_userAvatar);
+                setChainId(network.chainId);
+            }
+            else {
+                setWrongChainState();
+                setWrongChainCallback();
+            }
+        });
+
+    }
 
     function getWalletInfo(selectedWalletType='basic', setWrongChainCallback=(() => {})) {
-
         if (selectedWalletType === 'basic' && walletType !== 'basic') {
             selectedWalletType = walletType;
         }
-        let providerSet;
+        console.log("selectedWalletType:walletType", selectedWalletType, walletType);
         if (selectedWalletType !== walletType) {
-            providerSet = getProvider(selectedWalletType);
-            if (providerSet !== null) {
-                let _userAddress = ADDRESS0;
-                let _userETH = '0';
-                let _userENS = null;
-                let _userAvatar = null;
-                let _chainId = -1;
-                let promiseArray = [
-                    providerSet.send("eth_requestAccounts", []).then(accounts => {
-                        if (accounts.length > 0) {
-                            _userAddress = accounts[0];
-                            let getETHpromise = providerSet.getBalance(accounts[0]);
-                            let ensPromise = providerSet.lookupAddress(accounts[0]).catch(err => null);
-                            let avatarPromise = providerSet.getAvatar(accounts[0]).catch(err => null);
-                            return Promise.all([getETHpromise, ensPromise, avatarPromise]).then(resArr => {
-                                _userETH = getDecimalString(resArr[0].toString(), 18, 4);
-                                _userENS = resArr[1];
-                                _userAvatar = resArr[2];
-                            });
-                        }
-                    }),
-                    providerSet.getNetwork()
-                ];
-                Promise.all(promiseArray).then(res => {
-                    let network = res[1];
-                    if (typeof(network) !== 'undefined' && TargetChains.includes(network.chainId)) {
-                        setEthersProvider(providerSet);
-                        setWalletType(selectedWalletType);
-                        setUserAddress(_userAddress);
-                        setUserETH(_userETH);
-                        setUserENS(_userENS);
-                        setUserAvatar(_userAvatar);
-                        setChainId(network.chainId);
-                    }
-                    else {
-                        setWrongChainState();
-                        setWrongChainCallback();
-                    }
-                });
-            }
+            getProvider(selectedWalletType).then(async (provider) => {
+                if (provider !== null) {
+                    updateWalletInfo(provider, selectedWalletType, setWrongChainCallback);
+                }
+            });
         }
-        let providerToReturn = walletType === selectedWalletType ? ethersProvider : providerSet;
-        return [providerToReturn, userAddress, userETH, userENS, userAvatar, chainId, walletType, user];
+        return [ethersProvider, userAddress, userETH, userENS, userAvatar, chainId, walletType, user];
     }
 
     function getBasicInfo() {
@@ -184,7 +197,7 @@ export default function EthersProvider({children}) {
     }
 
     return (
-        <EthersContext.Provider value={[getWalletInfo, getBasicInfo, updateBasicInfo, login, logout]}>
+        <EthersContext.Provider value={[getWalletInfo, getBasicInfo, updateBasicInfo, provider_disconnect]}>
             {children}
         </EthersContext.Provider>
     )

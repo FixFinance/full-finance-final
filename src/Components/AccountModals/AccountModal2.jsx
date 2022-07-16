@@ -8,27 +8,10 @@ import { EthersContext } from "../EthersProvider/EthersProvider";
 import { LoginContext } from "../../helper/userContext";
 import { ADDRESS0 } from "../../Utils/Consts";
 
-const AccountModal2 = ({ handleClose, ens, avatar }) => {
+const AccountModal2 = ({ handleClose, userAddress, ens, avatar, disconnect }) => {
   const [modalType, setModalType] = useState("basicColor");
 
-  const {loggedIn, setLoggedIn, signer, setSigner, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar} = useContext(LoginContext);
-
   let abbreviatedAddress = userAddress.substring(0, 10)+'...'+userAddress.substring(userAddress.length-9);
-
-  async function logout () {
-    try {
-        await Moralis.User.logOut();
-        setLoggedIn(false);
-        setSigner(null);
-        setUserAddress(ADDRESS0);
-        setUserETH('0');
-        setUserENS(null);
-        setUserAvatar(null);
-        handleClose();
-    } catch (err) {
-        console.log(err)
-    }
-}
 
   return (
     <div>
@@ -64,7 +47,7 @@ const AccountModal2 = ({ handleClose, ens, avatar }) => {
                   {" "}
                   <button
                     className="btn common_btn switch"
-                    onClick={logout}
+                    onClick={disconnect}
                   >
                     Disconnect wallet
                   </button>
@@ -75,7 +58,7 @@ const AccountModal2 = ({ handleClose, ens, avatar }) => {
         )}
         {modalType === "DhikaChikaColor" && (
           <>
-            <AccountModal1 address={userAddress}/>
+            <AccountModal1 address={userAddress} disconnect={disconnect}/>
           </>
         )}
       </div>

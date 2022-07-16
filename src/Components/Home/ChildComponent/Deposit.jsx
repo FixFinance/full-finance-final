@@ -54,7 +54,7 @@ const Deposit = () => {
           title:"Total Borrowed",
           price:valueBorrowedString,
           ButtonText:"Borrow Now",
-          CurrentDeposit:"Current Deposit Rate",
+          CurrentDeposit:"Current Borrow Rate",
           price1:annualBorrowRateString+"%",
           link: "/borrow"
       }

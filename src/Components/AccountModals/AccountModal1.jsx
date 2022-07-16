@@ -4,20 +4,10 @@ import ellipse1 from "../../assets/image/ellipse1.svg";
 import { EthersContext } from "../EthersProvider/EthersProvider";
 import Moralis from "moralis"
 import "./accountmodal.scss";
-const AccountModal1 = ({ handleClose, address }) => {
+const AccountModal1 = ({ handleClose, address, disconnect }) => {
   let abbreviatedAddress = address.substring(0, 9)+'...'+address.substring(address.length-4);
 
   const [getWalletInfo, setWrongChainState] = useContext(EthersContext);
-
-  async function logout () {
-    try {
-        await Moralis.User.logOut();
-        handleClose();
-    } catch (err) {
-        console.log(err)
-    }
-}
-
 
   return (
     <div className="connect-modal account-modal">
@@ -38,7 +28,7 @@ const AccountModal1 = ({ handleClose, address }) => {
           </div>
           <div className="text-center">
             {" "}
-            <button className="btn common_btn switch" onClick={logout}>
+            <button className="btn common_btn switch" onClick={disconnect}>
               Disconnect wallet
             </button>
           </div>

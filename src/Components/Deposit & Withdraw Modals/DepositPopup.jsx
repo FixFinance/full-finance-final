@@ -33,13 +33,14 @@ const DepositPopup = ({ handleClose }) => {
   const [balanceLendShares, setBalanceLendShares] = useState(null);
   const [lendShareValue, setLendShareValue] = useState(null);
 
-  const [updateBasicInfo] = useContext(EthersContext);
+  const [getWalletInfo, , updateBasicInfo] = useContext(EthersContext);
 
   const balanceString = getDecimalString(DAIbalance == null ? '0' : DAIbalance.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
   const lsValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
   const absoluteInput = BN.from(getAbsoluteString('0'+getPureInput(input), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
 
-  const {signer, userAddress} = useContext(LoginContext);
+  const [provider, userAddress] = getWalletInfo();
+  const signer = provider == null ? null : provider.getSigner();
 
   const handleClosesuccess = () => {
     setSuccess(false);

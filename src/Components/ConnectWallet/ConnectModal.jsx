@@ -27,50 +27,18 @@ const ConnectModal = ({ handleClose }) => {
 
   const handleClose2 = () => {
     setShowWrongNetwork(false);
-    // setXData('/');
   }
 
-  const Web3Api = useMoralisWeb3Api();
+  const [getWalletInfo, , , provider_disconnect] = useContext(EthersContext);
+  const [, userAddress, userETH, userENS, userAvatar, chainId, walletType] = getWalletInfo(selectedModal, handleSetWrongNetwork);
 
-  const {loggedIn, setLoggedIn, signer, setSigner, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar} = useContext(LoginContext);
-
-  const [getWalletInfo] = useContext(EthersContext);
-  const [chainId, walletType] = getWalletInfo(selectedModal, handleSetWrongNetwork);
+  const disconnect = () => {
+    provider_disconnect();
+    handleClose();
+  }
 
   let connectedToWallet = selectedModal !== 'basic' && selectedModal !== 'error';
   let onWrongChain = connectedToWallet && chainId !== -1 && !TargetChains.includes(chainId);
-
-  async function login () {
-    try {
-        const provider = await Moralis.enableWeb3();
-        const network = await provider.getNetwork();
-        if (Number(network.chainId) !== 1 && Number(network.chainId) !== 42) {
-          handleSetWrongNetwork();
-          setShow(false);
-          return;
-        }
-        await Moralis.authenticate();
-        setLoggedIn(true);
-        const currentUser = Moralis.User.current();
-        const balance = await Web3Api.account.getNativeBalance();
-        let rawBalance = (balance.balance / 10e17).toFixed(4);
-        setUserETH(rawBalance);
-        const ethAddress = await currentUser.get("ethAddress");
-        setUserAddress(ethAddress);
-        const signer = provider.getSigner(ethAddress);
-        setSigner(signer);
-        if (Number(network.chainId) === 1) {
-        const getEns = provider.lookupAddress(ethAddress);
-        setUserENS(getEns);
-        const getAvatar = await provider.getAvatar(ethAddress);
-        setUserAvatar(getAvatar);
-        }
-        console.log(currentUser)
-        handleClose();
-    } catch (error) {
-        console.log(error);
-    }
-  }
 
   return (
     <>
@@ -93,7 +61,7 @@ const ConnectModal = ({ handleClose }) => {
                 <div
                     className="d-flex form-field justify-content-between"
                     onClick={() => {
-                      login();
+                      setSelectedModal("metamask");
                     }}
                 >
                   <div className="field-text align-self-center">
@@ -144,7 +112,7 @@ const ConnectModal = ({ handleClose }) => {
           )}
 
           {selectedModal !== "error" && selectedModal !== "basic" && !showWrongNetwork &&
-            <AccountModal2 address={userAddress} ens={userENS} avatar={userAvatar}/>
+            <AccountModal2 userAddress={userAddress} ens={userENS} avatar={userAvatar} disconnect={disconnect}/>
           }
         </Modal.Body>
       </div>

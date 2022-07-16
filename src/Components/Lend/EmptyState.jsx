@@ -26,12 +26,10 @@ const EmptyState = () => {
   const [lendShareValue, setLendShareValue] = useState(null);
   const [lendShareUSDValue, setLendShareUSDValue] = useState(null);
 
-  const {loggedIn, setLoggedIn, signer, setSigner, userAddress, setUserAddress, userETH, setUserETH, userENS, setUserENS, userAvatar, setUserAvatar} = useContext(LoginContext);
-
-
   const [getWalletInfo, getBasicInfo, updateBasicInfo] = useContext(EthersContext);
   const { annualLendRateString } = getBasicInfo();
-  const [provider] = getWalletInfo();
+  const [provider, userAddress] = getWalletInfo();
+  const signer = provider == null ? null : provider.getSigner();
 
   if (annualLendRateString == '0') {
     updateBasicInfo();

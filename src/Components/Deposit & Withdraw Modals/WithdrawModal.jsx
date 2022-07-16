@@ -30,9 +30,9 @@ const WithdrawModal=({ handleClose2 })=> {
   const [balanceLendShares, setBalanceLendShares] = useState(null);
   const [lendShareValue, setLendShareValue] = useState(null);
 
-  const [updateBasicInfo] = useContext(EthersContext);
-
-  const {signer, userAddress} = useContext(LoginContext);
+  const [getWalletInfo, , updateBasicInfo] = useContext(EthersContext);
+  const [provider, userAddress] = getWalletInfo();
+  const signer = provider == null ? null : provider.getSigner();
 
 
   const lendShareBalanceString = getDecimalString(balanceLendShares == null ? '0' : balanceLendShares.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
