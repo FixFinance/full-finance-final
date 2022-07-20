@@ -27,11 +27,11 @@ const EmptyState = () => {
   const [lendShareUSDValue, setLendShareUSDValue] = useState(null);
 
   const [getWalletInfo, getBasicInfo, updateBasicInfo] = useContext(EthersContext);
-  const { annualLendRateString } = getBasicInfo();
+  const { annualLendRateString, supplyLentBN } = getBasicInfo();
   const [provider, userAddress] = getWalletInfo();
   const signer = provider == null ? null : provider.getSigner();
 
-  if (annualLendRateString == '0') {
+  if (annualLendRateString == '0' && supplyLentBN == null) {
     updateBasicInfo();
   }
 

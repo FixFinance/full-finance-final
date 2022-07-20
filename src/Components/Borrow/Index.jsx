@@ -14,7 +14,7 @@ import { EthersContext } from '../EthersProvider/EthersProvider';
 import { LoginContext } from "../../helper/userContext";
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate } from '../../Utils/RateMath';
-import { ADDRESS0, TOTAL_SBPS, _0, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS } from '../../Utils/Consts.js';
+import { ADDRESS0, TOTAL_SBPS, _0, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS, COLLATERAL_AGGREGATOR_ADDRESSES, COLLATERAL_AGGREGATOR_ADDRESSES_LCASE } from '../../Utils/Consts.js';
 import Header from "../../ShareModules/Layout/Header/Header";
 
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
@@ -34,8 +34,8 @@ function Index() {
   const [supplyBorrowShares, setSupplyBorrowShares] = useState(null);
   const [baseAggAnswer, setBaseAggAnswer] = useState(null);
   const [baseAggDecimals, setBaseAggDecimals] = useState(null);
-  const [collateralAggAnswer, setCollateralAggAnswer] = useState(null);
-  const [collateralAggDecimals, setCollateralAggDecimals] = useState(null);
+  const [collateralAggAnswerArr, setCollateralAggAnswerArr] = useState(null);
+  const [collateralAggDecimalsArr, setCollateralAggDecimalsArr] = useState(null);
 
   const [getWalletInfo, getBasicInfo, updateBasicInfo] = useContext(EthersContext);
   const {
@@ -101,11 +101,10 @@ function Index() {
   }
   const handleShow3 = () => setModal3(true);
 
-  let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
-  let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);  
-  let CASSET = signer == null || selectedVault == null ? null : new ethers.Contract(selectedVault.assetSupplied, IERC20ABI, signer);
-  let BaseAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
-  let CollateralAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_COLLATERAL_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
+  const CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
+  const DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);  
+  const CASSET = signer == null || selectedVault == null ? null : new ethers.Contract(selectedVault.assetSupplied, IERC20ABI, signer);
+  const BaseAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
 
   useEffect(() => {
     let asyncUseEffect = async () => {
@@ -114,8 +113,8 @@ function Index() {
             userVaults === null &&
             baseAggAnswer !== null &&
             baseAggDecimals !== null &&
-            collateralAggAnswer !== null &&
-            collateralAggDecimals !== null &&
+            collateralAggAnswerArr !== null &&
+            collateralAggDecimalsArr !== null &&
             supplyBorrowed !== null &&
             supplyBorrowShares !== null
         ) {
@@ -128,6 +127,9 @@ function Index() {
               .map((vault, i) => ({index: i, ...vault}))
               .filter(vault => vault.vaultOwner.toLowerCase() === userAddress.toLowerCase())
               .map(vault => {
+                let collateralIndex = COLLATERAL_ADDRESSES.indexOf(vault.assetSupplied);
+                let collateralAggAnswer = collateralAggAnswerArr[collateralIndex];
+                let collateralAggDecimals = collateralAggDecimalsArr[collateralIndex];
                 let borrowInflator = BN.from(10).pow(BN.from(process.env.REACT_APP_BASE_ASSET_DECIMALS));
                 let borrowAggInflator = BN.from(10).pow(baseAggDecimals);
                 let borrowObligation = vault.borrowSharesOwed.mul(supplyBorrowed).div(supplyBorrowShares);
@@ -161,11 +163,14 @@ function Index() {
         if (baseAggDecimals == null) {
           BaseAgg.decimals().then(res => setBaseAggDecimals(res));
         }
-        if (collateralAggAnswer == null) {
-          CollateralAgg.latestAnswer().then(res => setCollateralAggAnswer(res));
-        }
-        if (collateralAggDecimals == null) {
-          CollateralAgg.decimals().then(res => setCollateralAggDecimals(res));
+        if ((collateralAggAnswerArr == null || collateralAggDecimalsArr == null) && signer != null) {
+          const CollateralAggArr = COLLATERAL_AGGREGATOR_ADDRESSES.map(aggAddr => new ethers.Contract(aggAddr, IChainlinkAggregatorABI, signer));
+          if (collateralAggAnswerArr == null) {
+            Promise.all(CollateralAggArr.map(x => x.latestAnswer())).then(res => setCollateralAggAnswerArr(res));
+          }
+          if (collateralAggDecimalsArr == null) {
+            Promise.all(CollateralAggArr.map(x => x.decimals())).then(res => setCollateralAggDecimalsArr(res));
+          }
         }
       }
     };
@@ -177,6 +182,8 @@ function Index() {
       let collateralAsset = vault.assetSupplied;
       let collateralIndex = COLLATERAL_ADDRESSES.indexOf(collateralAsset);
       let collateralSymbol = COLLATERAL_SYMBOLS[collateralIndex];
+      let collateralAggAnswer = collateralAggAnswerArr == null ? null : collateralAggAnswerArr[collateralIndex];
+      let collateralAggDecimals = collateralAggDecimalsArr == null ? null : collateralAggDecimalsArr[collateralIndex];
       let collateralImage = collateralSymbol === "WETH" ? weth : wstETH;
       let borrowObligation = vault.borrowSharesOwed.mul(supplyBorrowed).div(supplyBorrowShares);
       let borrowUSDValue = baseAggAnswer == null || baseAggDecimals == null ? _0 : borrowObligation.mul(baseAggAnswer).div(BN.from(10).pow(baseAggDecimals));
@@ -319,8 +326,8 @@ function Index() {
             supplyBorrowShares={supplyBorrowShares}
             baseAggAnswer={baseAggAnswer}
             baseAggDecimals={baseAggDecimals}
-            collateralAggAnswer={collateralAggAnswer}
-            collateralAggDecimals={collateralAggDecimals}
+            collateralAggAnswerArr={collateralAggAnswerArr}
+            collateralAggDecimalsArr={collateralAggDecimalsArr}
             supplyLentBN={supplyLentBN}
             supplyBorrowedBN={supplyBorrowedBN}
           />

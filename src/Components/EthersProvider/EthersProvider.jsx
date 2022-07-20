@@ -2,7 +2,7 @@ import React, {createContext, useState} from 'react'
 import { useMoralis } from "react-moralis";
 import { ethers, BigNumber as BN } from 'ethers';
 import { ADDRESS0, TOTAL_SBPS, _0 } from '../../Utils/Consts.js';
-import { TargetChains } from '../../Utils/TargetChains';
+import { TargetChains, LocalhostChain } from '../../Utils/TargetChains';
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate } from '../../Utils/RateMath';
 import Moralis from "moralis";
@@ -100,8 +100,6 @@ export default function EthersProvider({children}) {
         let _userAvatar = null;
         let promiseArray = [
             providerSet.send("eth_requestAccounts", []).then(accounts => {
-                console.log("FETCHED ACCOUNTS", accounts);
-                console.log("PROVIDER SET", providerSet);
                 if (accounts.length > 0) {
                     _userAddress = accounts[0];
                     let getETHpromise = providerSet.getBalance(accounts[0]);
@@ -162,15 +160,14 @@ export default function EthersProvider({children}) {
     }
 
     function updateBasicInfo() {
-        console.log("updateBasicInfo",chainId);
-        const provider = infuraUp && chainId !== 278 ? new ethers.providers.InfuraProvider('kovan', process.env.REACT_APP_INFURA_API_KEY) : ethersProvider;
+        const provider = infuraUp && chainId !== LocalhostChain ? new ethers.providers.InfuraProvider('kovan', process.env.REACT_APP_INFURA_API_KEY) : ethersProvider;
         let CMM = provider == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, provider);
         let BaseAgg = provider == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, provider);
 
         let catchFunc = () => setInfuraUp(false);
 
         if (BaseAgg != null && CMM != null) {
-            BaseAgg.latestAnswer().then(answer => {
+             BaseAgg.latestAnswer().then(answer => {
                 CMM.getSupplyLent().then(supplyLent => {
                     setSupplyLentBN(supplyLent);
                     let valueBN = answer.mul(supplyLent).div(TOTAL_SBPS);

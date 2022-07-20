@@ -4,7 +4,7 @@ import "./managepopup.scss";
 import SuccessModal from "../../Success/SuccessModal";
 import ErrorModal from '../../ErrorModal/Errormodal';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../../Utils/StringAlteration.js';
-import { TOTAL_SBPS, _0, INF, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS } from '../../../Utils/Consts.js';
+import { TOTAL_SBPS, _0, INF, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS, COLLATERAL_ESCROW_ADDRESSES } from '../../../Utils/Consts.js';
 import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../../EthersProvider/EthersProvider';
 import { getNonce, getSendTx } from '../../../Utils/SendTx';
@@ -27,8 +27,8 @@ const ManagePositionPopup = ({
     supplyBorrowShares,
     baseAggAnswer,
     baseAggDecimals,
-    collateralAggAnswer,
-    collateralAggDecimals,
+    collateralAggAnswerArr,
+    collateralAggDecimalsArr,
     supplyBorrowedBN,
     supplyLentBN
 }) => {
@@ -54,17 +54,26 @@ const ManagePositionPopup = ({
     const [cInput, setCInput] = useState(null);
     const [dInput, setDInput] = useState(null);
     const [collateralAsset, setCollateralAsset] = useState(null);
-    const [collateralSymbol, setCollateralSymbol] = useState(null);
-    const [collateralAddress, setCollateralAddress] = useState("");
     const [borrowAsset, setBorrowAsset] = useState(null);
 
-    const [balanceCollateral, setBalanceCollateral] = useState(null);
-    const [wethBalance, setWETHBalance] = useState(null);
-    const [wSTETHBalance, setWSTETHBalance] = useState(null);
-    const [approvedCollateral, setApprovedCollateral] = useState(null);
+    const [collatBalances, setCollatBalances] = useState(null);
+    const [collatAllowances, setCollatAllowances] = useState(null);
     const [maxBorrowAmount, setMaxBorrowAmount] = useState(null);
 
     const [, , updateBasicInfo] = useContext(EthersContext);
+
+    const NumCollatAssets = COLLATERAL_ADDRESSES.length;
+    const CollateralIndex = COLLATERAL_SYMBOLS.indexOf(collateralAsset);
+    const IndexIsInvalid = signer == null || CollateralIndex === -1;
+    const CASSET_ARRAY = signer == null ? null : COLLATERAL_ADDRESSES.map(addr => new ethers.Contract(addr, IERC20ABI, signer));
+    const CASSET = IndexIsInvalid ? null : CASSET_ARRAY[CollateralIndex];
+    const collateralAggAnswer = IndexIsInvalid || collateralAggAnswerArr == null ? null : collateralAggAnswerArr[CollateralIndex];
+    const collateralAggDecimals = IndexIsInvalid || collateralAggDecimalsArr == null ? null : collateralAggDecimalsArr[CollateralIndex];
+
+    const balanceCollateral = IndexIsInvalid || collatBalances == null ? null : collatBalances[CollateralIndex];
+    const approvedCollateral = IndexIsInvalid || collatAllowances == null ? null : collatAllowances[CollateralIndex];
+    const collateralAddress = IndexIsInvalid ? "" : COLLATERAL_ADDRESSES[CollateralIndex];
+    const collateralSymbol = IndexIsInvalid ? null : COLLATERAL_SYMBOLS[CollateralIndex];
 
     //Borrow-Lend Supply Difference
     const BLSdiff = supplyBorrowedBN != null && supplyLentBN != null ? supplyLentBN.sub(supplyBorrowedBN) : _0;
@@ -74,14 +83,10 @@ const ManagePositionPopup = ({
     const collateralAmountInput = cInput == null ? _0 : BN.from(getAbsoluteString(cInput, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
     const debtAmountInput = dInput == null ? _0 : BN.from(getAbsoluteString(dInput, parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
 
-    const CASSET = signer == null ? null : new ethers.Contract(collateralAddress, IERC20ABI, signer);
-    const CASSET1 = signer == null ? null : new ethers.Contract(COLLATERAL_ADDRESSES[0], IERC20ABI, signer);
-    const CASSET2 = signer == null ? null : new ethers.Contract(COLLATERAL_ADDRESSES[1], IERC20ABI, signer);
-
 
     const handleClosesuccess = () => {
         if (success == SUCCESS_STATUS.APPROVAL_SUCCESS) {
-            setApprovedCollateral(null);
+            setCollatAllowances(null);
             setSuccess(SUCCESS_STATUS.BASE);
         }
         else {
@@ -91,7 +96,7 @@ const ManagePositionPopup = ({
 
     const handleErrorClose = () => {
         setSuccess(SUCCESS_STATUS.BASE);
-        setApprovedCollateral(null);
+        setCollatAllowances(null);
         handleClose();
     }
 
@@ -149,16 +154,16 @@ const ManagePositionPopup = ({
 
     async function approveOnClick() {
         try {
-            if (CASSET !== null && CMM !== null) {
+            if (CASSET !== null && CMM !== null && !IndexIsInvalid) {
                 setApproving(true);
                 setWaitConfirmation(true);
-                await SendTx(userAddress, CASSET, 'approve', [CMM.address, INF.toString()]);
+                await SendTx(userAddress, CASSET, 'approve', [COLLATERAL_ESCROW_ADDRESSES[CollateralIndex], INF.toString()]);
                 setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
                 setApproving(false);
                 setWasError(false);
                 setWaitConfirmation(false);
-                setBalanceCollateral(null);
-                setApprovedCollateral(null);
+                setCollatBalances(null);
+                setCollatAllowances(null);
             }
         } catch (err) {
             setSuccess(SUCCESS_STATUS.ERROR);
@@ -226,40 +231,32 @@ const ManagePositionPopup = ({
     const setCollateralAssetHandler = (asset) => {
         setMenu(false);
         setCollateralAsset(asset);
-        let collateralIndex = COLLATERAL_SYMBOLS.indexOf(asset);
-        setCollateralAddress(COLLATERAL_ADDRESSES[collateralIndex]);
-        setCollateralSymbol(COLLATERAL_SYMBOLS[collateralIndex]);
     }
 
 
     useEffect(() => {
-        if (balanceCollateral == null) {
-            CASSET.balanceOf(userAddress).then(res => {
-                setBalanceCollateral(res);
-            });
-            CASSET1.balanceOf(userAddress).then(res => {
-                setWETHBalance(res);
-            });
-            CASSET2.balanceOf(userAddress).then(res => {
-                setWSTETHBalance(res);
-            });
-        }
-        if (approvedCollateral == null) {
-            CASSET.allowance(userAddress, CMM.address).then(res => {
-                setApprovedCollateral(res);
-            });
+        if (CASSET_ARRAY != null) {
+            if (collatBalances == null) {
+                Promise.all(CASSET_ARRAY.map(casset => casset.balanceOf(userAddress))).then(res => {
+                    setCollatBalances(res);
+                })
+            }
+
+            if (collatAllowances == null) {
+                Promise.all(CASSET_ARRAY.map((casset, i) => casset.allowance(userAddress, COLLATERAL_ESCROW_ADDRESSES[i]))).then(res => {
+                    setCollatAllowances(res);
+                })
+            }
         }
 
         if (cInput === '' || Number(cInput) === 0) {
             setMenu2(false);
         }
 
-        collateralAsset === "WETH" ? setBalanceCollateral(wethBalance) : setBalanceCollateral(wSTETHBalance);
-
         collateralAsset === null ? setDisabled(true) : setDisabled(false);
         borrowAsset === null ? setDisabled2(true) : setDisabled2(false);
 
-    }, [balanceCollateral, approvedCollateral, cInput, collateralAsset, borrowAsset]);
+    }, [collatBalances, collatAllowances, cInput, collateralAsset, borrowAsset]);
 
     const CollateralInput = collateralAsset ? collateralAsset : "Choose Asset";
     const CollateralClass = collateralAsset === "WETH" ? "weth-asset-span" : "wsteth-asset-span";
@@ -359,8 +356,8 @@ const ManagePositionPopup = ({
     );
 
 
-    let sufficientWETHApproval = approvedCollateral == null || balanceCollateral == null || approvedCollateral.gte(balanceCollateral);
-    const txMessage = !sufficientWETHApproval ? "Approving WETH" : "Opening Position";
+    let sufficientApproval = approvedCollateral == null || balanceCollateral == null || approvedCollateral.gte(balanceCollateral);
+    const txMessage = !sufficientApproval ? "Approving "+collateralSymbol : "Opening Position";
 	const LoadingContents = sentState ? txMessage : "Waiting For Confirmation";
     const MoreInputContents = borrowAsset === null ? "Choose An Asset To Borrow" : "Enter An Amount To Borrow";
 	const InputContents = cInput === '' || cInput === null || Number(cInput) === 0 ? "Enter Collateral Amount" : MoreInputContents;
@@ -369,14 +366,14 @@ const ManagePositionPopup = ({
 
     let buttons = (
         <>
-            {!sufficientWETHApproval && <button className={!approving ? "btn activate" : "d-none"} onClick={approveOnClick}>Approve {collateralSymbol}</button>}
-            <>
+            {!sufficientApproval && <button className={!approving ? "btn activate" : "d-none"} onClick={approveOnClick}>Approve {collateralSymbol}</button>}
+            {sufficientApproval && <>
                 {Number(collateralBalanceString) < Number(cInput) ?
-                <button
-                    className="btn btn-deactive"
-                >
-                Insufficient Balance For Transaction
-                </button>
+                    <button
+                        className="btn btn-deactive"
+                    >
+                        Insufficient Balance For Transaction
+                    </button>
                 :
                     <>
                     {approving &&
@@ -402,31 +399,27 @@ const ManagePositionPopup = ({
                         :
                             <>
                             {!resultantCollatRatioSafe || Number(dInput) > Number(maxBorrowString) ?
-                                <button
-                                className="btn btn-deactive"
-                                >
-                                {BorrowCheck}
+                                <button className="btn btn-deactive">
+                                    {BorrowCheck}
                                 </button>
                             :
                                 <>
                                 {waitConfirmation ?
-                                <button
-                                className="btn btn-deactive"
-                                >
-                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    <span className="ms-3">{LoadingContents}</span>
-                                </button>
+                                    <button className="btn btn-deactive">
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        <span className="ms-3">{LoadingContents}</span>
+                                    </button>
                                 :
-                                    <button className={"btn "+(sufficientWETHApproval ? "" : "di")+"activate"} onClick={openVaultOnClick}>Open Vault, Borrow DAI</button>
+                                    <button className={"btn "+(sufficientApproval ? "" : "di")+"activate"} onClick={openVaultOnClick}>Open Vault, Borrow DAI</button>
                                 }
                                 </>
                             }
                             </>
                         }
                       </>
-                </>
-            }
-            </>
+                    </>
+                }
+            </>}
         </>
     );
 

@@ -1,5 +1,316 @@
 [
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "vaultIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "BackstopBVault",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "propositionIndex",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "vaultIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "BackstopperAcceptBVault",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "propositionIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "BackstopperProposesBVault",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "propositionIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "BackstopperRecantProposition",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "collateralAsset",
+        "type": "address"
+      }
+    ],
+    "name": "DelistCollateral",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "vaultIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "ModifyBVault",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "vaultIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "ModifyCVault",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "vaultIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "OpenCVault",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "propositionIndex",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "vaultIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "OwnerAcceptBVault",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "propositionIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "OwnerProposesBVault",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "propositionIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "OwnerRecantProposition",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "backstopper",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isWhitelisted",
+        "type": "bool"
+      }
+    ],
+    "name": "SetBackstopperWhitelistStatus",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "lowerUtilRate",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "upperUtilRate",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "mFactor",
+        "type": "uint256"
+      }
+    ],
+    "name": "SetCurveParams",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "coreFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "creditFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "SetFees",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "vaultIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "SiezeCVault",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "collateralAsset",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "aggregatorAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "collateralFactor",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "liquidatorBonus",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "protocolLiqFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpdateCollateralParams",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "base_sbps",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "exponent",
+        "type": "uint256"
+      }
+    ],
+    "name": "EXTERNAL_SBPS_POW",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -608,6 +919,25 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_collateralAsset",
+        "type": "address"
+      }
+    ],
+    "name": "getEscrowAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getFullLendTokenAddress",
     "outputs": [
@@ -672,6 +1002,19 @@
       {
         "internalType": "uint256",
         "name": "mSBPS",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getMaxSupplyLent",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
         "type": "uint256"
       }
     ],
@@ -850,6 +1193,44 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "_baseAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_baseAggregatorAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_delegate1",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_delegate2",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_delegate3",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxSupplyLent",
+        "type": "uint256"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "_assetSupplied",
         "type": "address"
       },
@@ -860,13 +1241,26 @@
       },
       {
         "internalType": "uint256",
-        "name": "_amountBorrowed",
+        "name": "_amountBorrowed_underlying",
         "type": "uint256"
       }
     ],
     "name": "openCVault",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -891,6 +1285,13 @@
       }
     ],
     "name": "recantVaultOwnerProposedBVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -927,7 +1328,7 @@
       },
       {
         "internalType": "bool",
-        "name": "_amountIsUnderlying",
+        "name": "_repayAmountIsUnderlying",
         "type": "bool"
       }
     ],
@@ -957,8 +1358,31 @@
   {
     "inputs": [
       {
+        "internalType": "bool",
+        "name": "_borrowingIsPaused",
+        "type": "bool"
+      }
+    ],
+    "name": "setBorrowingIsPaused",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_collateralAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_aggregatorAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_escrowAddress",
         "type": "address"
       },
       {
@@ -1008,6 +1432,19 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_fltAddress",
+        "type": "address"
+      }
+    ],
+    "name": "setFLT",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "_coreFee",
         "type": "uint256"
@@ -1019,6 +1456,32 @@
       }
     ],
     "name": "setFees",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_maxSupplyLent",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMaxSupplyLent",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_SIBOR",
+        "type": "uint256"
+      }
+    ],
+    "name": "setSIBOR",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1140,6 +1603,19 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "_index",
         "type": "uint256"
@@ -1202,7 +1678,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_annualBipsOverSIBOR",
+        "name": "_annualSBPSOverSIBOR",
         "type": "uint256"
       }
     ],
@@ -1221,6 +1697,11 @@
       {
         "internalType": "address",
         "name": "_aggregatorAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_escrowAddress",
         "type": "address"
       },
       {
