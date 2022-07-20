@@ -4,7 +4,7 @@ import { BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
-import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
+import { TOTAL_SBPS, INF, _0, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS } from '../../Utils/Consts';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
@@ -41,6 +41,9 @@ const WithdrawCollateral = ({
   let resultantCollatRatioSafe = impliedCollateralizationRatio.gte(MIN_SAFE_COLLAT_RATIO);
 
   const [, , updateBasicInfo] = useContext(EthersContext);
+
+  const CollateralIndex = COLLATERAL_ADDRESSES.indexOf(CASSET.address);
+  const CollateralSymbol = COLLATERAL_SYMBOLS[CollateralIndex];
 
   const handleInput = (param) => {
     let value = param.target.value;
@@ -115,7 +118,7 @@ const WithdrawCollateral = ({
             </div>
             <div className="d-flex justify-content-between text-part">
               <p style={{ color: "#7D8282" }}>Current Collateral</p>
-              <p style={{ color: "#7D8282" }}>{amtSuppliedStringAbbreviated} WETH</p>
+              <p style={{ color: "#7D8282" }}>{amtSuppliedStringAbbreviated} {CollateralSymbol}</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
               <p style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>Implied Coll. Ratio</p>
@@ -167,7 +170,7 @@ const WithdrawCollateral = ({
                 :
                   <button className="btn btn-deactive btn-active " onClick={handleClickWithdraw}>
                     {" "}
-                    Withdraw wETH
+                    Withdraw {CollateralSymbol}
                   </button>
                 }
                 </>

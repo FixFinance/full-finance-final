@@ -107,7 +107,7 @@ const ManagePopup = ({
       {modalType === "borrowMore" && hasGoodCollatRatio &&
         <BorrowMore handleClose={handleClose} userAddress={userAddress} CMM={CMM} DAI={DAI}  vault={vault} forceUpdateVault={forceUpdateVault} supplyBorrowedBN={supplyBorrowedBN} supplyLentBN={supplyLentBN}/>
       }
-      {modalType === "closePosition" && <ClosePosition handleClose={handleClose} userAddress={userAddress} CMM={CMM} DAI={DAI} vault={vault}/>}
+      {modalType === "closePosition" && <ClosePosition handleClose={handleClose} userAddress={userAddress} CMM={CMM} DAI={DAI} CASSET={CASSET} vault={vault}/>}
     </>
   );
 };

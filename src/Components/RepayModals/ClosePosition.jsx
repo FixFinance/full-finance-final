@@ -4,12 +4,12 @@ import { BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { hoodEncodeABI } from '../../Utils/HoodAbi';
-import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
+import { TOTAL_SBPS, INF, _0, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS } from '../../Utils/Consts';
 import { getDecimalString } from '../../Utils/StringAlteration';
 import SuccessModal from '../Success/SuccessModal';
 import ErrorModal from '../ErrorModal/Errormodal';
 
-const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
+const ClosePosition=({ handleClose, userAddress, CMM, DAI, CASSET, vault })=> {
 
   const [success, setSuccess] = useState(false);
 
@@ -22,6 +22,9 @@ const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
   const [, , updateBasicInfo] = useContext(EthersContext);
 
   const sufficientApproval = approval == null ? true : vault.borrowObligation.mul(BN.from(101)).div(BN.from(100)).lte(approval);
+
+  const CollateralIndex = COLLATERAL_ADDRESSES.indexOf(CASSET.address);
+  const CollateralSymbol = COLLATERAL_SYMBOLS[CollateralIndex];
 
   const handleClickApprove = async () => {
     if (approval != null) {
@@ -75,7 +78,7 @@ const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
     }
   }, [approval]);
 
-  const message = sufficientApproval ? "Close DAI/WETH Position" : "Approve DAI";
+  const message = sufficientApproval ? `Close DAI/${CollateralSymbol} Position` : "Approve DAI";
   const onClick = sufficientApproval ? handleClickClose : handleClickApprove;
   const LoadingContents = sentState ? "Closing Position" : 'Waiting For Confirmation';
 
@@ -84,7 +87,7 @@ const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
     <div className="deposite-withdraw">
     <div>
       <Modal.Header closeButton className={sentState || waitConfirmation ? "deposit-header": ""}>
-        <h5>Close Position (DAI/wETH)</h5>
+        <h5>Close Position (DAI/{CollateralSymbol})</h5>
       </Modal.Header>
       <Modal.Body>
         <div className="text-center middle_part mt-3">
@@ -109,7 +112,7 @@ const ClosePosition=({ handleClose, userAddress, CMM, DAI, vault })=> {
           }
           <div className="d-flex justify-content-between text-part">
             <p style={{ color: "#7D8282" }}>Current Collateral</p>
-            <p style={{ color: "#7D8282" }}>{getDecimalString(vault.amountSupplied.toString(), 18, 2)} WETH</p>
+            <p style={{ color: "#7D8282" }}>{getDecimalString(vault.amountSupplied.toString(), 18, 2)} {CollateralSymbol}</p>
           </div>
 
           <div className="d-flex justify-content-between text-part">

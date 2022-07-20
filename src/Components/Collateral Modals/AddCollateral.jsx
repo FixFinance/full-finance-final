@@ -4,7 +4,7 @@ import { BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
-import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
+import { TOTAL_SBPS, INF, _0, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS, COLLATERAL_ESCROW_ADDRESSES } from '../../Utils/Consts';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
@@ -37,12 +37,16 @@ const AddCollateral = ({
 
   const [, , updateBasicInfo] = useContext(EthersContext);
 
+  const CollateralIndex = COLLATERAL_ADDRESSES.indexOf(CASSET.address);
+  const CollateralSymbol = COLLATERAL_SYMBOLS[CollateralIndex];
+  const EscrowAddress = CollateralIndex === -1 ? null : COLLATERAL_ESCROW_ADDRESSES[CollateralIndex];
+
   useEffect(() => {
     if (walletBalance == null) {
       CASSET.balanceOf(userAddress).then(res => setWalletBalance(res));
     }
     if (collApproval == null) {
-      CASSET.allowance(userAddress, CMM.address).then(res => setCollApproval(res));
+      CASSET.allowance(userAddress, EscrowAddress).then(res => setCollApproval(res));
     }
   }, [walletBalance, collApproval]);
 
@@ -81,7 +85,7 @@ const AddCollateral = ({
       if (collApproval != null) {
         setWaitConfirmation(true);
         setDisabled(true);
-        await SendTx(userAddress, CASSET, 'approve', [CMM.address, INF.toString()]);
+        await SendTx(userAddress, CASSET, 'approve', [EscrowAddress, INF.toString()]);
         setCollApproval(null);
         setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
         setWasError(false);
@@ -133,7 +137,7 @@ const AddCollateral = ({
 
   const sufficientApproval = collApproval == null ? true : collApproval.gte(absInputAmt);
 
-  const buttonMessage = sufficientApproval ? "Add WETH" : "Approve WETH";
+  const buttonMessage = (sufficientApproval ? "Add " : "Approve ")+CollateralSymbol;
   const handleActionClick = sufficientApproval ? addCollateral : approveCollateral;
   const txMessage = sufficientApproval ? "Adding Collateral" : "Approving Collateral";
   const LoadingContents = sentState ? txMessage : 'Waiting For Confirmation';
@@ -148,7 +152,7 @@ const AddCollateral = ({
         </Modal.Header>
         <Modal.Body>
           <div className="text-center middle_part mt-3">
-            <p style={{ color: "#EDF0EB" }}>Collateral Amount WETH</p>
+            <p style={{ color: "#EDF0EB" }}>Collateral Amount {CollateralSymbol}</p>
             <div className="form-group mt-3">
             <div className="relative">
                 <input
@@ -171,7 +175,7 @@ const AddCollateral = ({
             </div>
             <div className="d-flex justify-content-between text-part">
               <p style={{ color: "#7D8282" }}>Wallet balance</p>
-              <p style={{ color: "#7D8282" }}>{walletBalString} wETH</p>
+              <p style={{ color: "#7D8282" }}>{walletBalString} {CollateralSymbol}</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
               <p style={{ color: "#7D8282" }}>Implied Coll. Ratio</p>
