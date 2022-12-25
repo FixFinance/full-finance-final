@@ -2,7 +2,6 @@ import React, { useState, useContext } from "react";
 import Modal from "react-bootstrap/Modal";
 import ellipse1 from "../../assets/image/ellipse1.svg";
 import { EthersContext } from "../EthersProvider/EthersProvider";
-import Moralis from "moralis"
 import "./accountmodal.scss";
 const AccountModal1 = ({ handleClose, address, disconnect }) => {
   let abbreviatedAddress = address.substring(0, 9)+'...'+address.substring(address.length-4);

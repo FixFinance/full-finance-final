@@ -7,7 +7,7 @@ import { filterInput, getDecimalString, getAbsoluteString } from '../../../Utils
 import { TOTAL_SBPS, _0, INF, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS, COLLATERAL_ESCROW_ADDRESSES } from '../../../Utils/Consts.js';
 import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../../EthersProvider/EthersProvider';
-import { getNonce, getSendTx } from '../../../Utils/SendTx';
+import { getSendTx } from '../../../Utils/SendTx';
 import { hoodEncodeABI } from '../../../Utils/HoodAbi';
 import { BNmin, BNmax } from '../../../Utils/BNtools';
 import dai_logo from '../../../assets/image/dai.svg';
@@ -263,8 +263,8 @@ const ManagePositionPopup = ({
 
     let selectCollateralAsset = (
         <div className="amount_section mb-4">
-        <h5>1/4</h5>
-        <h4>Choose An Asset For Collateral</h4>
+            <h5>1/4</h5>
+            <h4>Choose An Asset For Collateral</h4>
             <button className="btn dropdown-toggle" style={{ "height" : "44px", "padding" : "5px 0px"}} type="button" onClick={waitConfirmation === true || sentState === true ? "" : () => setMenu(!menu)} >
                     <span><img className={collateralAsset ? "asset-image" : "d-none"} src={collateralAsset === "WETH" ? weth_logo : steth_logo} alt="asset logo" /></span>
                     <span className={collateralAsset ? CollateralClass : "choose-asset-span"}>{CollateralInput}</span>

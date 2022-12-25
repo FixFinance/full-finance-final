@@ -3,7 +3,6 @@ import Modal from "react-bootstrap/Modal";
 import ellipse2 from "../../assets/image/ellipse2.svg"
 import "./accountmodal.scss";
 import AccountModal1 from "./AccountModal1";
-import Moralis from "moralis"
 import { EthersContext } from "../EthersProvider/EthersProvider";
 import { LoginContext } from "../../helper/userContext";
 import { ADDRESS0 } from "../../Utils/Consts";

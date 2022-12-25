@@ -1,0 +1,534 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_supplyLent",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_supplyBorrowed",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_supplyBorrowShares",
+        "type": "uint256"
+      }
+    ],
+    "name": "Enroll",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amountBorrowShares",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_roundUp",
+        "type": "bool"
+      }
+    ],
+    "name": "convertBorrowSharesToUnderlying",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amountLendShares",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_roundUp",
+        "type": "bool"
+      }
+    ],
+    "name": "convertLendSharesToUnderlying",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amountUnderlying",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_roundUp",
+        "type": "bool"
+      }
+    ],
+    "name": "convertUnderlyingToBorrowShares",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amountUnderlying",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_roundUp",
+        "type": "bool"
+      }
+    ],
+    "name": "convertUnderlyingToLendShares",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_supplyLent",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_supplyBorrowed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_supplyBorrowShares",
+        "type": "uint256"
+      }
+    ],
+    "name": "enroll",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "amountIsUnderlying",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "baselineBShares",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "editState",
+        "type": "bool"
+      }
+    ],
+    "name": "enterBorrow",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "underlyingEntered",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "borrowSharesEntered",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "newUnderlyingBorrowed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "prevTSBShares",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "amountIsUnderlying",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "baselineLShares",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "editState",
+        "type": "bool"
+      }
+    ],
+    "name": "enterLend",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "underlyingEntered",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lendSharesEntered",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "newUnderlyingLent",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "amountIsUnderlying",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "baselineBShares",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "editState",
+        "type": "bool"
+      }
+    ],
+    "name": "exitBorrow",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "underlyingExited",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "borrowSharesExited",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "newUnderlyingBorrowed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "prevTSBShares",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "amountIsUnderlying",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "baselineLShares",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "editState",
+        "type": "bool"
+      }
+    ],
+    "name": "exitLend",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "underlyingExited",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lendSharesExited",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "newUnderlyingLent",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "forceUpdateState",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getBaseAssetAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getBorrowAPY",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getBorrowScalar",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCoreFee",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getFullLendTokenAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getIsEnrolled",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getLendAPY",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getLendScalar",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getMMMAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getPreviousUpdateTimestamp",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getSupplyBorrowShares",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getSupplyBorrowed",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getSupplyLendShares",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getSupplyLent",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getUtilizationRate",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

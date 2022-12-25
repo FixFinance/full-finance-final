@@ -58,7 +58,31 @@ const Deposit = () => {
           price1:annualBorrowRateString+"%",
           link: "/borrow"
       }
-  ]
+  ];
+
+  const loopElements = loop.map((item,index)=>{
+  return(
+        <div className='col-md-6 m-auto mt-md-0 mt-3'>
+        <Card key={index} className="bg-dark text-center">
+        {/* <Card.Img variant="top" src={item.img} /> */}
+        <Card.Body>
+          <Card.Title >{item.title}</Card.Title>
+          <Card.Text>
+    <h3 className='mt-4'>${item.price}</h3>
+          </Card.Text>
+          <Link to={item.link}>
+            <button  className='button-text-one' onClick={item.click}>{item.ButtonText}</button>
+          </Link>
+          <Card.Text style={{ 'color': '#7d8282' }} className='p1'>
+            {item.CurrentDeposit} {item.price1}
+          </Card.Text>
+          <Card.Text className='item-price-one'>
+          </Card.Text>
+        </Card.Body>
+      </Card>
+      </div>
+    )
+  });
 
   return (
     <>
@@ -66,32 +90,7 @@ const Deposit = () => {
         <div className='deposit_section'>
         <div className='container deposit'>
             <div className='row'>
-
-
-            {loop.map((item,index)=>{
-                return(
-                    <div className='col-md-6 m-auto mt-md-0 mt-3'>
-                    <Card key={index} className="bg-dark text-center">
-                    {/* <Card.Img variant="top" src={item.img} /> */}
-                    <Card.Body>
-                      <Card.Title >{item.title}</Card.Title>
-                      <Card.Text>
-                <h3 className='mt-4'>${item.price}</h3>
-
-                      </Card.Text>
-                      <Link to={item.link}>
-                        <button  className='button-text-one' onClick={item.click}>{item.ButtonText}</button>
-                      </Link>
-                      <Card.Text style={{ 'color': '#7d8282' }} className='p1'>
-                        {item.CurrentDeposit} {item.price1}
-                      </Card.Text>
-                      <Card.Text className='item-price-one'>
-                      </Card.Text>
-                    </Card.Body>
-                  </Card>
-                  </div>
-                )
-            })}
+            {loopElements}
           </div>
         {/* *************** account pop up 1 ************** */}
         <Modal

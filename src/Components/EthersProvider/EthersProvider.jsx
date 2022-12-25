@@ -1,5 +1,4 @@
 import React, {createContext, useState} from 'react'
-import { useMoralis } from "react-moralis";
 import { ethers, BigNumber as BN } from 'ethers';
 import { ADDRESS0, TOTAL_SBPS, _0 } from '../../Utils/Consts.js';
 import { TargetChains, LocalhostChain } from '../../Utils/TargetChains';
@@ -7,9 +6,11 @@ import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate } from '../../Utils/RateMath';
 import Moralis from "moralis";
 
-const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
+const IMetaMoneyMarketABI = require('../../abi/IMetaMoneyMarket.json');
+const IFullLendTokenABI = require('../../abi/IFullLendToken.json');
 const IERC20ABI = require('../../abi/IERC20.json');
 const IChainlinkAggregatorABI = require('../../abi/IChainlinkAggregator.json');
+const IInterestRateModelABI = require('../../abi/IInterestRateModel.json');
 
 async function getProvider(walletType)  {
     if (walletType === 'metamask') {
@@ -28,12 +29,20 @@ export default function EthersProvider({children}) {
 
     const [walletType, setWalletType] = useState('basic');
     const [ethersProvider, setEthersProvider] = useState(null);
-    const [user, setUser] = useState(null);
     const [userAddress, setUserAddress] = useState(ADDRESS0);
     const [userETH, setUserETH] = useState('0');
     const [userENS, setUserENS] = useState(null);
     const [userAvatar, setUserAvatar] = useState(null);
     const [chainId, setChainId] = useState(-1);
+
+    const [vault, setVault] = useState(null);
+    const [vaultInFlight, setVaultInFlight] = useState(false);
+    const [fltBals, setFLTBals] = useState(null);
+    const [fltBalsInFlight, setFLTBalsInFlight] = useState(false);
+    const [irmInfo, setIRMInfo] = useState(null);
+    const [irmInfoInFlight, setIRMInfoInFlight] = useState(false);
+    const [aggInfo, setAggInfo] = useState(null);
+    const [aggInfoInFlight, setAggInfoInFlight] = useState(false);
 
     const [supplyLentBN, setSupplyLentBN] = useState(null);
     const [supplyBorrowedBN, setSupplyBorrowedBN] = useState(null);
@@ -62,35 +71,6 @@ export default function EthersProvider({children}) {
         setUserENS(null);
         setUserAvatar(null);
         setChainId(-1);
-        Moralis.User.logOut();
-    }
-
-    async function login () {
-        try {
-            const provider = await Moralis.enableWeb3();
-            await Moralis.authenticate();
-            setUser(true);
-            const currentUser = Moralis.User.current();
-            const ethAddress = currentUser.get("ethAddress");
-            setUserAddress(ethAddress);
-            const getAvatar = await provider.getAvatar(ethAddress);
-            setUserAvatar(getAvatar);
-            const signer = provider.getSigner(ethAddress);
-            const networkInfo = await provider.getNetwork();
-            const chainId = networkInfo.chainId.toString();
-            setChainId(chainId);
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    async function logout () {
-        try {
-            await Moralis.User.logOut();
-            setUser(null);
-        } catch (err) {
-            console.log(err)
-        }
     }
 
     function updateWalletInfo(providerSet, selectedWalletType, setWrongChainCallback) {
@@ -145,54 +125,100 @@ export default function EthersProvider({children}) {
                 }
             });
         }
-        return [ethersProvider, userAddress, userETH, userENS, userAvatar, chainId, walletType, user];
+        return [ethersProvider, userAddress, userETH, userENS, userAvatar, chainId, walletType];
     }
 
     function getBasicInfo() {
         return {
-            annualLendRateString,
-            annualBorrowRateString,
-            valueLentString,
-            valueBorrowedString,
-            supplyLentBN,
-            supplyBorrowedBN
+            vault,
+            fltBals,
+            irmInfo,
+            aggInfo
         };
     }
 
+    function updateVault(MMM) {
+        if (MMM !== null) {
+            setVaultInFlight(true);
+            MMM.getConnectedVault(userAddress).then(res => {
+                setVault(res);
+                setVaultInFlight(false);
+            });
+        }
+    }
+
+    function getFLTbal(arr, index, flt) {
+        if (flt === null) return;
+        return flt.balanceOf(userAddress).then(res => {
+            arr[index] = res;
+        }).catch(err => {
+            console.error("ERROR WHILE UPDATING FLT BAL");
+            console.error(err);
+        });
+    }
+
+    function updateFLTbals(provider) {
+        if (provider === null) return;
+        setFLTBalsInFlight(true);
+        let FLTs = JSON.parse(process.env.REACT_APP_FLTS)
+            .map(x => new ethers.Contract(x, IFullLendTokenABI, provider));
+        let ret = new Array(FLTs.length);
+        ret.fill(_0);
+        Promise.all(FLTs.map((x, i) => getFLTbal(ret, i, x))).then(() => {
+            setFLTBals(ret)
+            setFLTBalsInFlight(false);
+        });
+    }
+
+    function getIRMInfo(arr, index, irm) {
+        return Promise.all([
+            irm.getLendAPY().then(x => arr[index].annualLendRateString = getDecimalString(x.sub(TOTAL_SBPS).toString(), 16, 3)),
+            irm.getBorrowAPY().then(x => arr[index].annualBorrowRateString = getDecimalString(x.sub(TOTAL_SBPS).toString(), 16, 3)),
+            irm.getSupplyLent().then(x => arr[index].supplyLent = x),
+            irm.getSupplyBorrowed().then(x => arr[index].supplyBorrowed = x),
+            irm.getSupplyLendShares().then(x => arr[index].supplyLendShares = x),
+            irm.getSupplyBorrowShares().then(x => arr[index].supplyBorrowShares = x)
+        ]);
+    }
+
+    function updateIrmInfo(provider) {
+        if (provider === null) return;
+        setIRMInfoInFlight(true);
+        let IRMs = JSON.parse(process.env.REACT_APP_IRMS)
+            .map(x => new ethers.Contract(x, IInterestRateModelABI, provider));
+        let ret = IRMs.map(() => ({
+            supplyLent: _0,
+            supplyBorrowed: _0,
+            supplyLendShares: _0,
+            supplyBorrowShares: _0,
+            annualLendRateString: '0',
+            annualBorrowRateString: '0',
+        }));
+        Promise.all(IRMs.map((x, i) => getIRMInfo(ret, i, x))).then(() => {
+            setIRMInfo(ret);
+            setIRMInfoInFlight(false);
+        });
+
+    }
+
     function updateBasicInfo() {
-        const provider = infuraUp && chainId !== LocalhostChain ? new ethers.providers.InfuraProvider('kovan', process.env.REACT_APP_INFURA_API_KEY) : ethersProvider;
-        let CMM = provider == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, provider);
-        let BaseAgg = provider == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, provider);
+        const DEFAULT_VIEW_CHAIN = 'kovan';
+        const provider = ethersProvider == null && infuraUp ? new ethers.providers.InfuraProvider(DEFAULT_VIEW_CHAIN, process.env.REACT_APP_INFURA_API_KEY) : ethersProvider;
 
-        let catchFunc = () => setInfuraUp(false);
+        let MMM = provider == null ? null : new ethers.Contract(process.env.REACT_APP_MMM_ADDRESS, IMetaMoneyMarketABI, provider);
 
-        if (BaseAgg != null && CMM != null) {
-             BaseAgg.latestAnswer().then(answer => {
-                CMM.getSupplyLent().then(supplyLent => {
-                    setSupplyLentBN(supplyLent);
-                    let valueBN = answer.mul(supplyLent).div(TOTAL_SBPS);
-                    setValueLentString(getDecimalString(valueBN.toString(), 18, 0));
-                });
-                CMM.getSupplyBorrowed().then(supplyBorrowed => {
-                    setSupplyBorrowedBN(supplyBorrowed);
-                    let valueBN = answer.mul(supplyBorrowed).div(TOTAL_SBPS);
-                    setValueBorrowedString(getDecimalString(valueBN.toString(), 18, 0));
-                });
-            }).catch(catchFunc);
+        if (chainId === LocalhostChain) {
+            if (vault === null && !vaultInFlight) {
+                updateVault(MMM);
+            }
 
-            CMM.getPrevSILOR().then(silor => {
-                let annualized = getAnnualizedRate(silor);
-                let pct = annualized.sub(TOTAL_SBPS);
-                let rateString = getDecimalString(pct.toString(), 16, 3);
-                setAnnualLendRateString(rateString);
-            }).catch(catchFunc);
+            if (fltBals === null && !fltBalsInFlight) {
+                updateFLTbals(provider);
+            }
 
-            CMM.getPrevSIBOR().then(sibor => {
-                let annualized = getAnnualizedRate(sibor);
-                let pct = annualized.sub(TOTAL_SBPS);
-                let rateString = getDecimalString(pct.toString(), 16, 3);
-                setAnnualBorrowRateString(rateString);
-            }).catch(catchFunc);
+            if (irmInfo === null && !irmInfoInFlight) {
+                updateIrmInfo(provider);
+            }
         }
     }
 

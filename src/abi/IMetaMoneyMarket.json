@@ -1,0 +1,994 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_asset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_fltDeployerAddress",
+        "type": "address"
+      }
+    ],
+    "name": "attachFLT",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_debtAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_amountIsUnderlying",
+        "type": "bool"
+      }
+    ],
+    "name": "borrowFromSegmentedVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_asset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_IRMaddress",
+        "type": "address"
+      }
+    ],
+    "name": "enrollNewIRM",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_asset",
+        "type": "address"
+      }
+    ],
+    "name": "getAggregator",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAllConnectedLiqInfo",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "vaultOwner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "adjOvercollatRatio",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidatorBonusPct",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address[]",
+            "name": "collateralAssets",
+            "type": "address[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "collateralUnderlying",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "address[]",
+            "name": "debtAssets",
+            "type": "address[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "debtUnderlying",
+            "type": "uint256[]"
+          }
+        ],
+        "internalType": "struct MetaMoneyMarketData.ConnectedVaultLiqInfo[]",
+        "name": "ret",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_asset",
+        "type": "address"
+      }
+    ],
+    "name": "getAssetStatus",
+    "outputs": [
+      {
+        "internalType": "enum MetaMoneyMarketData.ASSET_STATUS",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_asset",
+        "type": "address"
+      }
+    ],
+    "name": "getBorrowCap",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_borrowAsset",
+        "type": "address"
+      }
+    ],
+    "name": "getBorrowFactor",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      }
+    ],
+    "name": "getConnectedVault",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address[]",
+            "name": "collateralAssets",
+            "type": "address[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "collateralLendShareAmounts",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "address[]",
+            "name": "debtAssets",
+            "type": "address[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "debtShareAmounts",
+            "type": "uint256[]"
+          }
+        ],
+        "internalType": "struct MetaMoneyMarketData.ConnectedVault",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      }
+    ],
+    "name": "getDelegatedController",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_lentAsset",
+        "type": "address"
+      }
+    ],
+    "name": "getFullLendTokenAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_lentAsset",
+        "type": "address"
+      }
+    ],
+    "name": "getIRMAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_collateralAsset",
+        "type": "address"
+      }
+    ],
+    "name": "getLTV",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_asset",
+        "type": "address"
+      }
+    ],
+    "name": "getLendCap",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getLiquidatorBonusFactor",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getProtocolLiquidationFeeFactor",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      }
+    ],
+    "name": "getSegmentedVault",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "vaultOwner",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "collateralAsset",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collateralLendShareAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "debtAsset",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "debtShareAmount",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct MetaMoneyMarketData.SegmentedVault",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getSegmentedVaultsLength",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_delegate1",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_delegate2",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_delegate3",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_delegate4",
+        "type": "address"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_amountIsUnderlying",
+        "type": "bool"
+      }
+    ],
+    "name": "lend",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_vaultOwner",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "newCollateralAssets",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "newCollateralLendShareAmounts",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "newDebtAssets",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "newDebtShareAmounts",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "manageConnectedVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_collateralAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_collateralAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_cAmtIsUnderlying",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "_mintCollateral",
+        "type": "bool"
+      },
+      {
+        "internalType": "address",
+        "name": "_debtAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_debtAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_dAmtIsUnderlying",
+        "type": "bool"
+      }
+    ],
+    "name": "openSegmentedVault",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_debtAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_amountIsUnderlying",
+        "type": "bool"
+      }
+    ],
+    "name": "repaySegmentedVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_borrowCap",
+        "type": "uint256"
+      }
+    ],
+    "name": "setBorrowCap",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_controller",
+        "type": "address"
+      }
+    ],
+    "name": "setDelegatedController",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_lendCap",
+        "type": "uint256"
+      }
+    ],
+    "name": "setLendCap",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_liquidatorBonusFactor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_protocolLiquidationFeeFactor",
+        "type": "uint256"
+      }
+    ],
+    "name": "setLiqParams",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_vaultOwner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_percentageToSieze",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_expectedCollateralAssets",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_minUnderlyingOut",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_expectedDebtAssets",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_maxUnderlyingIn",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "address",
+        "name": "cbAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "cbData",
+        "type": "bytes"
+      }
+    ],
+    "name": "siezeConnectedVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_collateralAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_debtAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amountCollateralOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxCollateralDebtPrice",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_receiveLendShares",
+        "type": "bool"
+      }
+    ],
+    "name": "siezeSegVaultSpecificCollateral",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "debtUnderlyingIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "collateralOut",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_collateralAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_debtAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_debtToCover",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxCollateralDebtPrice",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_receiveLendShares",
+        "type": "bool"
+      }
+    ],
+    "name": "siezeSegVaultSpecificDebt",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "debtUnderlyingIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "collateralOut",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_collateralAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_amountIsUnderlying",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "_mintCollateral",
+        "type": "bool"
+      }
+    ],
+    "name": "supplyToSegmentedVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      }
+    ],
+    "name": "transferVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_asset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_aggregator",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_ltv",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_borrowFactor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_IRMaddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_escrowAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "enum MetaMoneyMarketData.ASSET_STATUS",
+        "name": "_status",
+        "type": "uint8"
+      }
+    ],
+    "name": "whitelist",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_amountIsUnderlying",
+        "type": "bool"
+      }
+    ],
+    "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_collateralAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_amountIsUnderlying",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "_receiveUnderlying",
+        "type": "bool"
+      }
+    ],
+    "name": "withdrawFromSegmentedVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
