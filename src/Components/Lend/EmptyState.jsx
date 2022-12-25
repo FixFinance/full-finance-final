@@ -37,19 +37,15 @@ const EmptyState = () => {
   const [show2, setShow2] = useState(false);
   const [show3, setShow3] = useState(false);
 
-  const [balanceLendShares, setBalanceLendShares] = useState(null);
-  const [lendShareValue, setLendShareValue] = useState(null);
-  const [lendShareUSDValue, setLendShareUSDValue] = useState(null);
-
   const [getWalletInfo, getBasicInfo, updateBasicInfo] = useContext(EthersContext);
-  const { fltBals, irmInfo } = getBasicInfo();
+  const { fltBals, irmInfo, aggInfo } = getBasicInfo();
   const [provider, userAddress] = getWalletInfo();
   const signer = provider == null ? null : provider.getSigner();
 
   const [selectedAsset, setSelectedAsset] = useState("DAI");
   const [menu, setMenu] = useState(false);
 
-  if (fltBals == null ) {
+  if (fltBals === null || irmInfo === null || aggInfo === null) {
     updateBasicInfo();
   }
 
@@ -60,15 +56,11 @@ const EmptyState = () => {
 
   const handleClose = () => {
     setShow(false);
-    setBalanceLendShares(null);
-    setLendShareValue(null);
   }
   const handleShow = () => setShow(true);
 
   const handleClose2 = () => {
     setShow2(false);
-    setBalanceLendShares(null);
-    setLendShareValue(null);
   }
   const handleShow2 = () => setShow2(true);
 
@@ -78,42 +70,8 @@ const EmptyState = () => {
   const handleShow3 = () => setShow3(true);
 
 
-  const lendShareValueString = getDecimalString(lendShareValue == null ? '0.0000' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
-  const lendShareUSDValueString = getDecimalString(lendShareUSDValue == null ? '0.0000' : lendShareUSDValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
-
 
   const  ENV_INDEX = ENV_TICKERS.indexOf(selectedAsset);
-  // selected asset contract
-//  let SAC = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
-  let FLT = signer == null ? null : new ethers.Contract(process.env.REACT_APP_FLT_ADDRESS, IERC20ABI, signer);
-  let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
-  let BaseAgg = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_AGGREGATOR_ADDRESS, IChainlinkAggregatorABI, signer);
-
-  useEffect(() => {
-    let asyncUseEffect = async () => {
-      if (signer != null && balanceLendShares == null) {
-        let promiseArray = [
-          FLT.balanceOf(userAddress).then(res => {
-            setBalanceLendShares(res);
-            return res;
-          }),
-          FLT.totalSupply(),
-          CMM.getSupplyLent(),
-          BaseAgg.latestAnswer(),
-          BaseAgg.decimals()
-        ];
-
-        let [_FLTbalance, tsFLT, supplyLent, baseAnswer, baseAggDecimals] = await Promise.all(promiseArray);
-        let _lendShareValue = _FLTbalance.mul(supplyLent).div(tsFLT);
-        let denominator = BN.from(10).pow(BN.from(baseAggDecimals.toString()));
-        let _lendShareUSDValue = _lendShareValue.mul(baseAnswer).div(denominator);
-        setLendShareValue(_lendShareValue);
-        setLendShareUSDValue(_lendShareUSDValue);
-      }
-    }
-    asyncUseEffect();
-  }, [provider, balanceLendShares]);
-
 
   const CollateralInput = selectedAsset ? selectedAsset : "Choose Asset";
   const CollateralClass = selectedAsset.toLowerCase()+"-asset-span";
@@ -154,18 +112,18 @@ const EmptyState = () => {
       <div className="d-flex">
         <div className="d-block">
           <img src={SelectedLogo} alt="img" className="dai_img" />
-          <p className="lend-share-value">$ {lendShareUSDValueString}</p>
+          <p className="lend-share-value">$ {'0.0000'}</p>
         </div>
-        <h5 className="lend-share-value-bold">{lendShareValueString}</h5>
+        <h5 className="lend-share-value-bold">{'0.0000'}</h5>
         <h5>{selectedAsset}</h5>
       </div>
-      <p className="lend-share-value-mobile">$ {lendShareUSDValueString}</p>
+      <p className="lend-share-value-mobile">$ {'0.0000'}</p>
       <div className="deposit-container">
-        <h5 className="m-0">{irmInfo[ENV_INDEX].annualLendRateString} %</h5>
+        <h5 className="m-0">{irmInfo === null ? '0' : irmInfo[ENV_INDEX].annualLendRateString} %</h5>
         <p className="text-white ">Lend APY</p>
       </div>
       <div className="deposit-container">
-        <h5 className="m-0">{irmInfo[ENV_INDEX].annualBorrowRateString} %</h5>
+        <h5 className="m-0">{irmInfo === null ? '0' : irmInfo[ENV_INDEX].annualBorrowRateString} %</h5>
         <p className="text-white ">Borrow APR</p>
       </div>
 

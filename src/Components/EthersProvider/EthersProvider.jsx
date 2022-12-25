@@ -4,6 +4,13 @@ import { ADDRESS0, TOTAL_SBPS, _0 } from '../../Utils/Consts.js';
 import { TargetChains, LocalhostChain } from '../../Utils/TargetChains';
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate } from '../../Utils/RateMath';
+import {
+    updateVault,
+    updateFLTbals,
+    updateIRMInfo,
+    updateAggInfo,
+    processUpdates
+} from './StateUpdates';
 import Moralis from "moralis";
 
 const IMetaMoneyMarketABI = require('../../abi/IMetaMoneyMarket.json');
@@ -137,88 +144,19 @@ export default function EthersProvider({children}) {
         };
     }
 
-    function updateVault(MMM) {
-        if (MMM !== null) {
-            setVaultInFlight(true);
-            MMM.getConnectedVault(userAddress).then(res => {
-                setVault(res);
-                setVaultInFlight(false);
-            });
-        }
-    }
-
-    function getFLTbal(arr, index, flt) {
-        if (flt === null) return;
-        return flt.balanceOf(userAddress).then(res => {
-            arr[index] = res;
-        }).catch(err => {
-            console.error("ERROR WHILE UPDATING FLT BAL");
-            console.error(err);
-        });
-    }
-
-    function updateFLTbals(provider) {
-        if (provider === null) return;
-        setFLTBalsInFlight(true);
-        let FLTs = JSON.parse(process.env.REACT_APP_FLTS)
-            .map(x => new ethers.Contract(x, IFullLendTokenABI, provider));
-        let ret = new Array(FLTs.length);
-        ret.fill(_0);
-        Promise.all(FLTs.map((x, i) => getFLTbal(ret, i, x))).then(() => {
-            setFLTBals(ret)
-            setFLTBalsInFlight(false);
-        });
-    }
-
-    function getIRMInfo(arr, index, irm) {
-        return Promise.all([
-            irm.getLendAPY().then(x => arr[index].annualLendRateString = getDecimalString(x.sub(TOTAL_SBPS).toString(), 16, 3)),
-            irm.getBorrowAPY().then(x => arr[index].annualBorrowRateString = getDecimalString(x.sub(TOTAL_SBPS).toString(), 16, 3)),
-            irm.getSupplyLent().then(x => arr[index].supplyLent = x),
-            irm.getSupplyBorrowed().then(x => arr[index].supplyBorrowed = x),
-            irm.getSupplyLendShares().then(x => arr[index].supplyLendShares = x),
-            irm.getSupplyBorrowShares().then(x => arr[index].supplyBorrowShares = x)
-        ]);
-    }
-
-    function updateIrmInfo(provider) {
-        if (provider === null) return;
-        setIRMInfoInFlight(true);
-        let IRMs = JSON.parse(process.env.REACT_APP_IRMS)
-            .map(x => new ethers.Contract(x, IInterestRateModelABI, provider));
-        let ret = IRMs.map(() => ({
-            supplyLent: _0,
-            supplyBorrowed: _0,
-            supplyLendShares: _0,
-            supplyBorrowShares: _0,
-            annualLendRateString: '0',
-            annualBorrowRateString: '0',
-        }));
-        Promise.all(IRMs.map((x, i) => getIRMInfo(ret, i, x))).then(() => {
-            setIRMInfo(ret);
-            setIRMInfoInFlight(false);
-        });
-
-    }
-
     function updateBasicInfo() {
         const DEFAULT_VIEW_CHAIN = 'kovan';
         const provider = ethersProvider == null && infuraUp ? new ethers.providers.InfuraProvider(DEFAULT_VIEW_CHAIN, process.env.REACT_APP_INFURA_API_KEY) : ethersProvider;
 
-        let MMM = provider == null ? null : new ethers.Contract(process.env.REACT_APP_MMM_ADDRESS, IMetaMoneyMarketABI, provider);
-
         if (chainId === LocalhostChain) {
-            if (vault === null && !vaultInFlight) {
-                updateVault(MMM);
-            }
-
-            if (fltBals === null && !fltBalsInFlight) {
-                updateFLTbals(provider);
-            }
-
-            if (irmInfo === null && !irmInfoInFlight) {
-                updateIrmInfo(provider);
-            }
+            const MakeUpdateObj = (val, inFlight, updateFunction, setState, setInFlight) => ({val, inFlight, updateFunction, setState, setInFlight});
+            const UpdateArr = [
+                MakeUpdateObj(vault, vaultInFlight, updateVault, setVault, setVaultInFlight),
+                MakeUpdateObj(fltBals, fltBalsInFlight, updateFLTbals, setFLTBals, setFLTBalsInFlight),
+                MakeUpdateObj(irmInfo, irmInfoInFlight, updateIRMInfo, setIRMInfo, setIRMInfoInFlight),
+                MakeUpdateObj(aggInfo, aggInfoInFlight, updateAggInfo, setAggInfo, setAggInfoInFlight)
+            ];
+            processUpdates(UpdateArr, provider, userAddress);
         }
     }
 
