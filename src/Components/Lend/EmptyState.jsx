@@ -9,19 +9,11 @@ import { EthersContext } from '../EthersProvider/EthersProvider';
 import { LoginContext } from "../../helper/userContext";
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate, TOTAL_SBPS } from '../../Utils/RateMath';
+import { getFLTUnderlyingValueString, getFLTUSDValueString } from '../../Utils/EthersStateProcessing';
+import { LOGO_MAP } from '../../Utils/LogoMap';
 import Header from "../../ShareModules/Layout/Header/Header";
-import dai_logo from '../../assets/image/dai.svg';
-import weth_logo from '../../assets/image/weth.svg'
-import uni_logo from '../../assets/image/uni.svg';
-import link_logo from '../../assets/image/link.svg';
 import dropdown_button from '../../assets/image/dropdown-button.svg';
 import dropdown_deactive from '../../assets/image/dropdown_deactive.svg'
-
-const LOGO_MAP = {};
-LOGO_MAP["DAI"] = dai_logo;
-LOGO_MAP["UNI"] = uni_logo;
-LOGO_MAP["WETH"] = weth_logo;
-LOGO_MAP["LINK"] = link_logo;
 
 const IERC20ABI = require('../../abi/IERC20.json');
 const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
@@ -38,16 +30,13 @@ const EmptyState = () => {
   const [show3, setShow3] = useState(false);
 
   const [getWalletInfo, getBasicInfo, updateBasicInfo] = useContext(EthersContext);
-  const { fltBals, irmInfo, aggInfo } = getBasicInfo();
+  const BasicInfo = getBasicInfo();
+  const { fltBals, irmInfo, aggInfo, assetBals, assetAllowances } = BasicInfo;
   const [provider, userAddress] = getWalletInfo();
   const signer = provider == null ? null : provider.getSigner();
 
   const [selectedAsset, setSelectedAsset] = useState("DAI");
   const [menu, setMenu] = useState(false);
-
-  if (fltBals === null || irmInfo === null || aggInfo === null) {
-    updateBasicInfo();
-  }
 
   const setSelectedAssetHandler = (asset) => {
       setMenu(false);
@@ -107,27 +96,35 @@ const EmptyState = () => {
     </div>
   );
 
-  let info = (
-    <div className="flex_class margin_small">
-      <div className="d-flex">
-        <div className="d-block">
-          <img src={SelectedLogo} alt="img" className="dai_img" />
-          <p className="lend-share-value">$ {'0.0000'}</p>
-        </div>
-        <h5 className="lend-share-value-bold">{'0.0000'}</h5>
-        <h5>{selectedAsset}</h5>
-      </div>
-      <p className="lend-share-value-mobile">$ {'0.0000'}</p>
-      <div className="deposit-container">
-        <h5 className="m-0">{irmInfo === null ? '0' : irmInfo[ENV_INDEX].annualLendRateString} %</h5>
-        <p className="text-white ">Lend APY</p>
-      </div>
-      <div className="deposit-container">
-        <h5 className="m-0">{irmInfo === null ? '0' : irmInfo[ENV_INDEX].annualBorrowRateString} %</h5>
-        <p className="text-white ">Borrow APR</p>
-      </div>
+  let underlyingValString = getFLTUnderlyingValueString(fltBals, irmInfo, ENV_INDEX);
+  let usdValString = getFLTUSDValueString(fltBals, irmInfo, aggInfo, ENV_INDEX);
 
-    </div>
+  let info = (
+    <>
+      <div className="flex_class margin_small">
+        <div className="d-flex">
+          <div className="d-block">
+            <img src={SelectedLogo} alt="img" className="dai_img" />
+            <p className="lend-share-value">$ {usdValString}</p>
+          </div>
+          <h5 className="lend-share-value-bold">{underlyingValString}</h5>
+          <h5>{selectedAsset}</h5>
+        </div>
+        <p className="lend-share-value-mobile">$ {usdValString}</p>
+
+      </div>
+      <div className="flex_class margin_small">
+        <div className="deposit-container">
+          <h5 className="m-0">{irmInfo === null ? '0' : irmInfo[ENV_INDEX].annualLendRateString} %</h5>
+          <p className="text-white ">Lend APY</p>
+        </div>
+        <div className="deposit-container">
+          <h5 className="m-0">{irmInfo === null ? '0' : irmInfo[ENV_INDEX].annualBorrowRateString} %</h5>
+          <p className="text-white ">Borrow APR</p>
+        </div>
+
+      </div>
+    </>
   );
 
   return (
@@ -160,7 +157,7 @@ const EmptyState = () => {
           animation={false}
           className="deposit-modal"
         >
-          <DepositPopup handleClose={handleClose} />
+          <DepositPopup handleClose={handleClose} assetEnvIndex={ENV_INDEX} basicInfo={BasicInfo} />
         </Modal>
         <Modal
           show={show2}
@@ -169,7 +166,7 @@ const EmptyState = () => {
           animation={false}
           className="deposit-modal"
         >
-          <WithdrawModal handleClose2={handleClose2} />
+          <WithdrawModal handleClose2={handleClose2} assetEnvIndex={ENV_INDEX} basicInfo={BasicInfo} />
         </Modal>
         <Modal
           show={show3}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import Modal from "react-bootstrap/Modal";
 import { ethers, BigNumber as BN } from 'ethers';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
@@ -9,16 +9,21 @@ import { EthersContext } from '../EthersProvider/EthersProvider';
 import { LoginContext } from "../../helper/userContext";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
-import { INF } from '../../Utils/Consts';
+import { _0, INF } from '../../Utils/Consts';
+import { getAssetBalanceString, getFLTUnderlyingValue, getFLTUnderlyingValueString } from '../../Utils/EthersStateProcessing';
 import { ControlledInput } from '../ControlledInput/ControlledInput';
 // import { TxComponent } from "../../ShareModules/TxComponent/TxComponent";
 
 const IERC20ABI = require('../../abi/IERC20.json');
-const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
+const IMetaMoneyMarketABI = require('../../abi/IMetaMoneyMarket.json');
+
+const ENV_TICKERS = JSON.parse(process.env.REACT_APP_TICKERS);
+const ENV_ASSETS = JSON.parse(process.env.REACT_APP_LISTED_ASSETS);
+const ENV_ESCROWS = JSON.parse(process.env.REACT_APP_ESCROWS);
 
 const getPureInput = (input) => input.substring(0, input.length-4);
 
-const DepositPopup = ({ handleClose }) => {
+const DepositPopup = ({ handleClose, basicInfo, assetEnvIndex }) => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [wasError, setWasError] = useState(false);
@@ -28,53 +33,48 @@ const DepositPopup = ({ handleClose }) => {
 
   const [input, setInput] = useState('');
 
-  const [DAIbalance, setDAIbalance] = useState(null);
-  const [DAIapproval, setDAIapproval] = useState(null);
-  const [balanceLendShares, setBalanceLendShares] = useState(null);
-  const [lendShareValue, setLendShareValue] = useState(null);
-
   const [getWalletInfo, , updateBasicInfo] = useContext(EthersContext);
 
-  const balanceString = getDecimalString(DAIbalance == null ? '0' : DAIbalance.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
-  const lsValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
+  const assetBalance = basicInfo.assetBals === null ? null : basicInfo.assetBals[assetEnvIndex];
+  const assetApproval = basicInfo.assetAllowances === null ? null : basicInfo.assetAllowances[assetEnvIndex];
+  const balanceLendShares = basicInfo.fltBals === null ? null : basicInfo.fltBals[assetEnvIndex];
+  const lendShareValue = getFLTUnderlyingValue(basicInfo.fltBals, basicInfo.irmInfo, assetEnvIndex);
+
+  const balanceString = getAssetBalanceString(basicInfo.assetBals, assetEnvIndex);
+  const lsValueString = getFLTUnderlyingValueString(basicInfo.fltBals, basicInfo.irmInfo, assetEnvIndex);
   const absoluteInput = BN.from(getAbsoluteString('0'+getPureInput(input), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
 
   const [provider, userAddress] = getWalletInfo();
   const signer = provider == null ? null : provider.getSigner();
 
+  const TICKER = ENV_TICKERS[assetEnvIndex];
+
+  const updateRelevantInfo = () => {
+    updateBasicInfo({assetBals: true, assetAllowances: true, fltBals: true, irmInfo: true});
+  };
+
   const handleClosesuccess = () => {
     setSuccess(false);
-    // force reload everything
-    setDAIbalance(null);
-    setDAIapproval(null);
-    setBalanceLendShares(null);
-    setLendShareValue(null);
     setInput('');
   }
   const handleErrorClose = () => {
     setError(false);
     // force reload everything
-    setDAIbalance(null);
-    setDAIapproval(null);
-    setBalanceLendShares(null);
-    setLendShareValue(null);
+    updateRelevantInfo();
     setInput('');
   }
 
   const handleInput = (param) => {
     let value = param.target.value;
-    let filteredValue = filterInput(value)+' DAI';
+    let filteredValue = filterInput(value)+' '+TICKER;
     setInput(filteredValue);
   }
   const handleClickMax = () => {
-    if (DAIbalance != null && balanceString != null) {
-      setInput(balanceString+' DAI');
-    }
+    setInput(balanceString+' '+TICKER);
   }
 
-  let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
-  let FLT = signer == null ? null : new ethers.Contract(process.env.REACT_APP_FLT_ADDRESS, IERC20ABI, signer);
-  let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
+  let ASSET = signer == null ? null : new ethers.Contract(ENV_ASSETS[assetEnvIndex], IERC20ABI, signer);
+  let MMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_MMM_ADDRESS, IMetaMoneyMarketABI, signer);
 
   const TxCallback0 = async () => {
     setSentState(true);
@@ -83,25 +83,26 @@ const DepositPopup = ({ handleClose }) => {
   const TxCallback1 = async () => {
     setSentState(false);
     setDisabled(false);
-    updateBasicInfo();
+    updateRelevantInfo();
   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);
 
   const depositOnClick = async () => {
     try {
-      if (DAIbalance === null || DAIapproval === null || balanceLendShares === null) {
+      if (assetBalance === null || assetApproval === null || balanceLendShares === null) {
         return;
       }
-      if (absoluteInput.gt(DAIapproval) || DAIapproval.eq(BN.from(0))) {
+      if (absoluteInput.gt(assetApproval) || assetApproval.eq(BN.from(0))) {
+        console.log("CASE A");
         setWaitConfirmation(true);
         setDisabled(true);
-        await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
+        await SendTx(userAddress, ASSET, 'approve', [ENV_ESCROWS[assetEnvIndex], INF.toString()]);
       }
       else {
         setWaitConfirmation(true);
         setDisabled(true);
-        await SendTx(userAddress, CMM, 'depositSpecificUnderlying', [userAddress, absoluteInput.toString()]);
+        await SendTx(userAddress, MMM, 'lend', [ENV_ASSETS[assetEnvIndex], absoluteInput.toString(), true]);
       }
       setSuccess(true);
       setWasError(false);
@@ -145,43 +146,18 @@ const DepositPopup = ({ handleClose }) => {
   const handleDeposit = async () => {};
   const handleApprove = async () => {};
 
-  useEffect(() => {
-    let asyncUseEffect = async () => {
-      if (signer != null && DAIbalance == null) {
-        let promise0 = DAI.balanceOf(userAddress).then(res => {
-          setDAIbalance(res);
-          return res;
-        });
-        let promise1 = DAI.allowance(userAddress, CMM.address).then(res => {
-          setDAIapproval(res);
-          return res;
-        });
-        let promise2 = FLT.balanceOf(userAddress).then(res => {
-          setBalanceLendShares(res);
-          return res;
-        });
-        let promise3 = FLT.totalSupply();
-        let promise4 = CMM.getSupplyLent();
-
-        let promiseArray = [promise0, promise1, promise2, promise3, promise4];
-        let [ , , _FLTbalance, tsFLT, supplyLent] = await Promise.all(promiseArray);
-        let _lendShareValue = _FLTbalance.mul(supplyLent).div(tsFLT);
-        setLendShareValue(_lendShareValue);
-      }
-    }
-    asyncUseEffect();
-  }, [DAIbalance, signer, input]);
-
-  const ButtonContents = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? 'Approve DAI' : 'Deposit DAI';
-  const txMessage = ![DAIbalance, DAIapproval].includes(null) && DAIapproval.lt(absoluteInput) ? "Approving DAI" : "Depositing DAI";
+  const ButtonContents = (![assetBalance, assetApproval].includes(null) && assetApproval.lt(absoluteInput) ? 'Approve ' : 'Deposit ')+TICKER;
+  const txMessage = (![assetBalance, assetApproval].includes(null) && assetApproval.lt(absoluteInput) ? "Approving " : "Depositing ")+TICKER;
 	const LoadingContents = sentState ? txMessage : 'Waiting For Confirmation';
+
+  const placeholder = ' '.repeat(14-TICKER.length)+'0.00 '+TICKER+' ';
 
   return (
     <div className="deposite-withdraw">
       {success || error ? null : (
         <div>
           <Modal.Header closeButton className={sentState || waitConfirmation ? "deposit-header" : ""}>
-            <h5>Deposit DAI</h5>
+            <h5>Deposit {TICKER}</h5>
           </Modal.Header>
           <Modal.Body>
             <div className="text-center middle_part mt-3">
@@ -195,7 +171,7 @@ const DepositPopup = ({ handleClose }) => {
                     id="exampleInput1"
                     aria-describedby="textHelp"
                     onChange={handleInput}
-                    placeholder="           0.00 DAI "
+                    placeholder={placeholder}
                     value={input}
                     disabled={disabled}
                   />
@@ -206,12 +182,12 @@ const DepositPopup = ({ handleClose }) => {
               </div>
               <div className="d-flex justify-content-between text-part">
                 <p style={{ color: "#7D8282" }}>Wallet Balance</p>
-                <p style={{ color: "#7D8282" }}>{balanceString} DAI</p>
+                <p style={{ color: "#7D8282" }}>{balanceString} {TICKER}</p>
               </div>
 
               <div className="d-flex justify-content-between text-part">
                 <p style={{ color: "#7D8282" }}>Deposit Balance</p>
-                <p style={{ color: "#7D8282" }}>{lsValueString} DAI</p>
+                <p style={{ color: "#7D8282" }}>{lsValueString} {TICKER}</p>
               </div>
 
             </div>

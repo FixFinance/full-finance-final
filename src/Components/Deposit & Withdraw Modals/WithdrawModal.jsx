@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useContext} from "react";
 import Modal from "react-bootstrap/Modal";
 import { ethers, BigNumber as BN } from 'ethers';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
@@ -7,17 +7,21 @@ import SuccessModal from "../Success/SuccessModal";
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import { LoginContext } from "../../helper/userContext";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
-import { getNonce, getSendTx } from '../../Utils/SendTx';
+import { getSendTx } from '../../Utils/SendTx';
+import { getFLTBalanceString, getFLTUnderlyingValue, getFLTUnderlyingValueString } from '../../Utils/EthersStateProcessing';
 import { ControlledInput } from '../ControlledInput/ControlledInput';
 import ErrorModal from "../ErrorModal/Errormodal";
 
 
 const IERC20ABI = require('../../abi/IERC20.json');
-const ICoreMoneyMarketABI = require('../../abi/ICoreMoneyMarket.json');
+const IMetaMoneyMarketABI = require('../../abi/IMetaMoneyMarket.json');
+
+const ENV_TICKERS = JSON.parse(process.env.REACT_APP_TICKERS);
+const ENV_ASSETS = JSON.parse(process.env.REACT_APP_LISTED_ASSETS);
 
 const getPureInput = (input) => input.substring(0, input.length-4);
 
-const WithdrawModal=({ handleClose2 })=> {
+const WithdrawModal=({ handleClose2, basicInfo, assetEnvIndex })=> {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [wasError, setWasError] = useState(false);
@@ -27,30 +31,28 @@ const WithdrawModal=({ handleClose2 })=> {
   const [disabled, setDisabled] = useState(false);
 
 
-  const [balanceLendShares, setBalanceLendShares] = useState(null);
-  const [lendShareValue, setLendShareValue] = useState(null);
-
   const [getWalletInfo, , updateBasicInfo] = useContext(EthersContext);
   const [provider, userAddress] = getWalletInfo();
   const signer = provider == null ? null : provider.getSigner();
 
+  const lendShareBalanceString = getFLTBalanceString(basicInfo.fltBals, assetEnvIndex);
+  const lendShareValueString = getFLTUnderlyingValueString(basicInfo.fltBals, basicInfo.irmInfo, assetEnvIndex);
+  const absoluteInput = BN.from(getAbsoluteString('0'+getPureInput(input), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
 
-  const lendShareBalanceString = getDecimalString(balanceLendShares == null ? '0' : balanceLendShares.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
-  const lendShareValueString = getDecimalString(lendShareValue == null ? '0' : lendShareValue.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 4);
-  const absoluteInput = BN.from(getAbsoluteString('0'+getPureInput(input), process.env.REACT_APP_BASE_ASSET_DECIMALS));
+  const TICKER = ENV_TICKERS[assetEnvIndex];
+
+  const updateRelevantInfo = () => {
+    updateBasicInfo({assetBals: true, fltBals: true, irmInfo: true});
+  };
 
   const handleClosesuccess = () => {
     setSuccess(false);
-    // force reload everything
-    setBalanceLendShares(null);
-    setLendShareValue(null);
     setInput('');
   }
   const handleErrorClose = () => {
     setError(false);
     // force reload everything
-    setBalanceLendShares(null);
-    setLendShareValue(null);
+    updateRelevantInfo();
     setInput('');
   }
   const handleShow = () => setSuccess(true);
@@ -60,14 +62,10 @@ const WithdrawModal=({ handleClose2 })=> {
     setInput(filteredValue);
   }
   const handleClickMax = () => {
-    if (balanceLendShares != null && lendShareBalanceString != null) {
-      setInput(lendShareBalanceString+' FLT');
-    }
+    setInput(lendShareBalanceString+' FLT');
   }
 
-  let DAI = signer == null ? null : new ethers.Contract(process.env.REACT_APP_BASE_ASSET_ADDRESS, IERC20ABI, signer);
-  let FLT = signer == null ? null : new ethers.Contract(process.env.REACT_APP_FLT_ADDRESS, IERC20ABI, signer);
-  let CMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_CMM_ADDRESS, ICoreMoneyMarketABI, signer);
+  let MMM = signer == null ? null : new ethers.Contract(process.env.REACT_APP_MMM_ADDRESS, IMetaMoneyMarketABI, signer);
 
   const TxCallback0 = async () => {
     setSentState(true);
@@ -76,23 +74,24 @@ const WithdrawModal=({ handleClose2 })=> {
   const TxCallback1 = async () => {
     setSentState(false);
     setDisabled(false);
-    updateBasicInfo();
-  }
+    updateRelevantInfo();
+   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);
 
   const withdrawOnClick = async () => {
     try {
-      if (balanceLendShares === null || lendShareValue === null) {
+      if ([basicInfo.fltBals, basicInfo.irmInfo].includes(null)) {
         return;
       }
       setWaitConfirmation(true);
       setDisabled(true);
-      await SendTx(userAddress, CMM, 'withdrawSpecificShares', [userAddress, absoluteInput.toString()]);
+      await SendTx(userAddress, MMM, 'withdraw', [userAddress, ENV_ASSETS[assetEnvIndex], absoluteInput.toString(), false]);
       setWaitConfirmation(false);
       setSuccess(true);
       setWasError(false);
     } catch (err) {
+      console.error(err);
       setError(true);
       setDisabled(false);
       setWasError(true);
@@ -100,26 +99,53 @@ const WithdrawModal=({ handleClose2 })=> {
     }
   }
 
-  useEffect(() => {
-    let asyncUseEffect = async () => {
-      if (signer != null && balanceLendShares == null) {
-        let promise0 = FLT.balanceOf(userAddress).then(res => {
-          setBalanceLendShares(res);
-          return res;
-        });
-        let promise1 = FLT.totalSupply();
-        let promise2 = CMM.getSupplyLent();
-
-        let promiseArray = [promise0, promise1, promise2];
-        let [_FLTbalance, tsFLT, supplyLent] = await Promise.all(promiseArray);
-        let _lendShareValue = _FLTbalance.mul(supplyLent).div(tsFLT);
-        setLendShareValue(_lendShareValue);
-      }
-    }
-    asyncUseEffect();
-  }, [balanceLendShares, signer]);
-
   const LoadingContents = sentState ? "Withdrawing" : 'Waiting For Confirmation';
+
+  const Button = (
+    <>
+      {Number(lendShareBalanceString) < getPureInput(input) ?
+          <button
+            className="btn btn-deactive"
+          >
+          Insufficient Balance For Transaction
+          </button>
+        :
+          <>
+          {input === '' || Number(getPureInput(input)) === 0 ?
+          <>
+            {wasError &&
+              <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>
+            }
+              <button
+                className={wasError ? "btn btn-deactive mt-0":"btn btn-deactive"}
+              >
+              Enter an amount
+              </button>
+            </>
+          :
+            <>
+            {waitConfirmation ?
+              <button
+              className="btn btn-deactive"
+              >
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span className="ms-3">{LoadingContents}</span>
+              </button>
+            :
+            <button
+              className="btn btn-deactive btn-active "
+              onClick={withdrawOnClick}
+            >
+              {" "}
+              Withdraw {TICKER}
+            </button>
+            }
+            </>
+          }
+          </>
+      }
+    </>
+  );
 
   return (
     <div>
@@ -127,7 +153,7 @@ const WithdrawModal=({ handleClose2 })=> {
     {success || error ? null : (
       <div>
         <Modal.Header closeButton className={sentState || waitConfirmation ? "deposit-header": ""}>
-          <h5>Redeem FLT for DAI</h5>
+          <h5>Redeem FLT for {TICKER}</h5>
         </Modal.Header>
         <Modal.Body>
           <div className="text-center middle_part mt-3">
@@ -154,51 +180,11 @@ const WithdrawModal=({ handleClose2 })=> {
 
             <div className="d-flex justify-content-between text-part">
               <p style={{ color: "#7D8282" }}>FLT Value</p>
-              <p style={{ color: "#7D8282" }}>{lendShareValueString} DAI</p>
+              <p style={{ color: "#7D8282" }}>{lendShareValueString} {TICKER}</p>
             </div>
           </div>
           <div className="text-center mb-4">
-          {Number(lendShareBalanceString) < getPureInput(input) ?
-              <button
-                className="btn btn-deactive"
-              >
-              Insufficient Balance For Transaction
-              </button>
-            :
-              <>
-              {input === '' || Number(getPureInput(input)) === 0 ?
-              <>
-                {wasError &&
-                  <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>
-                }
-                  <button
-                    className={wasError ? "btn btn-deactive mt-0":"btn btn-deactive"}
-                  >
-                  Enter an amount
-                  </button>
-                </>
-              :
-                <>
-                {waitConfirmation ?
-                  <button
-                  className="btn btn-deactive"
-                  >
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span className="ms-3">{LoadingContents}</span>
-                  </button>
-                :
-                <button
-                  className="btn btn-deactive btn-active "
-                  onClick={withdrawOnClick}
-                >
-                  {" "}
-                  Withdraw FLT
-                </button>
-                }
-                </>
-              }
-              </>
-            }
+            {Button}
           </div>
         </Modal.Body>
       </div>

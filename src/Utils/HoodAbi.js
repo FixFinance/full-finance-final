@@ -1,6 +1,5 @@
-import { ethers } from 'ethers';
-const BN = ethers.BigNumber;
-const _0 = BN.from(0);
+import { ethers, BigNumber as BN } from 'ethers';
+import { _0, _2 } from './Consts';
 
 const BYTES_PER_WORD = 32;
 const HEX_CHARS_PER_BYTE = 2;
@@ -22,36 +21,39 @@ export function getFunctionSelector(contractInstance, functionName) {
 
 function isAddressString(str) {
 	if (typeof(str) !== 'string') {
-		throw "isAddressString() expected a string to be passed";
+		throw Error("isAddressString() expected a string to be passed");
 	}
 	return str.length === 42 && str.substring(0,2) === '0x';
 }
 
 function addressToWord(addrString) {
 	if (!isAddressString(addrString)) {
-		throw addrString+" is not a valid address string";
+		throw Error(addrString+" is not a valid address string");
 	}
 	return "0".repeat(24) + addrString.substring(2);
 }
 
 function numToWord(num) {
 	if (typeof(num) !== 'string' && typeof(num) !== 'number') {
-		throw "numToWord() expected a string or number string to be passed";
+		throw Error("numToWord() expected a string or number string to be passed");
 	}
 	let bn = BN.from(num);
 	if (bn.lt(_0)) {
-		throw "negative numbers not supported by numToWord()";
+		bn = bn.add(_2.pow(BN.from(256)));
+		if (bn.lt(_0)) {
+			throw Error("negative numbers falls below range of int256");
+		}
 	}
 	let hexStr = bn.toHexString().substring(2);
 	if (hexStr.length > HEX_CHARS_PER_WORD) {
-		throw "cannot encode number greater than 2**256 - 1";
+		throw Error("cannot encode number greater than 2**256 - 1");
 	}
 	return "0".repeat(HEX_CHARS_PER_WORD-hexStr.length) + hexStr;
 }
 
 function processArray(arr) {
 	if (!Array.isArray(arr)) {
-		throw "processArray() expected an array";
+		throw Error("processArray() expected an array");
 	}
 	let str = numToWord(arr.length.toString());
 	for (let i = 0; i < arr.length; i++) {
@@ -65,7 +67,7 @@ function processObject(obj) {
 		return processArray(obj);
 	}
 	if (typeof(obj) !== 'object') {
-		throw "processObject() expected an object";
+		throw Error("processObject() expected an object");
 	}
 	let paramOrder = obj.paramOrder;
 	let str = '';
@@ -73,7 +75,7 @@ function processObject(obj) {
 	for (let i = 0; i < paramOrder.length; i++) {
 		let encodedArg = processArg(obj[paramOrder[i]], bytesWritten, i !== 0);
 		if (encodedArg.length % HEX_CHARS_PER_WORD !== 0) {
-			throw "encoded hex string was of uneven length";
+			throw Error("encoded hex string was of uneven length");
 		}
 		str += encodedArg;
 		let newBytes = encodedArg.length/HEX_CHARS_PER_BYTE;
@@ -119,7 +121,7 @@ function encodeAllParentArgs(args, bytesWritten=0) {
 	for (let i = 0; i < args.length; i++) {
 		let encodedArg = processArg(args[i], bytesWritten, argContainsObj(args[i]));
 		if (encodedArg.length % HEX_CHARS_PER_WORD !== 0) {
-			throw "encoded hex string was of uneven length";
+			throw Error("encoded hex string was of uneven length");
 		}
 		data += encodedArg;
 		let newBytes = encodedArg.length/HEX_CHARS_PER_BYTE;

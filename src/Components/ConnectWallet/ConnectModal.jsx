@@ -12,8 +12,6 @@ import WrongNetworkModal from "./WrongNetworkModal";
 import AccountModal2 from "../AccountModals/AccountModal2";
 import { EthersContext } from "../EthersProvider/EthersProvider";
 import { LoginContext } from "../../helper/userContext";
-import Moralis from "moralis";
-import { useMoralis, useMoralisWeb3Api } from "react-moralis";
 
 import { TargetChains } from '../../Utils/TargetChains.js';
 

@@ -20,9 +20,7 @@ export function updateVault(provider, userAddress, setState, setInFlight) {
 
 function getFLTbal(arr, index, flt, userAddress) {
     if (flt === null) return;
-    console.log("GETTING BALANCE", flt.address);
     return flt.balanceOf(userAddress).then(res => {
-        console.log("GOT BALANCE", flt.address);
         arr[index] = res;
     }).catch(err => {
         console.error("ERROR WHILE UPDATING FLT BAL");
@@ -73,9 +71,6 @@ export function updateIRMInfo(provider, userAddress, setState, setInFlight) {
 
 }
 
-function getAggInfo(arr, index, agg) {
-    return agg.latestAnswer().then(res => arr[index] = res)
-}
 
 export function updateAggInfo(provider, userAddress, setState, setInFlight) {
     if (provider === null) return;
@@ -83,16 +78,44 @@ export function updateAggInfo(provider, userAddress, setState, setInFlight) {
     let Aggs = JSON.parse(process.env.REACT_APP_AGGREGATORS)
         .map(x => new ethers.Contract(x, IChainlinkAggregatorABI, provider));
     let ret = new Array(Aggs.length); ret.fill(_0);
-    Promise.all(Aggs.map((x, i) => getAggInfo(ret, i, x))).then(() => {
+    Promise.all(Aggs.map( (x, i) => x.latestAnswer().then(res => ret[i] = res) )).then(() => {
         setState(ret);
         setInFlight(false);
     });
 }
 
-export function processUpdates(updateArr, provider, userAddress) {
+export function updateAssetBals(provider, userAddress, setState, setInFlight) {
+    if (provider === null) return;
+    setInFlight(true);
+    let ASSETS = JSON.parse(process.env.REACT_APP_LISTED_ASSETS)
+        .map(x => new ethers.Contract(x, IERC20ABI, provider));
+    let ret = ASSETS.map(() => _0);
+    Promise.all(ASSETS.map( (x, i) => x.balanceOf(userAddress).then(res => ret[i] = res) )).then(() => {
+        setState(ret);
+        setInFlight(false);
+    })
+}
+
+export function updateAssetAllowances(provider, userAddress, setState, setInFlight) {
+    if (provider === null) return;
+    setInFlight(true);
+    let ASSETS = JSON.parse(process.env.REACT_APP_LISTED_ASSETS)
+        .map(x => new ethers.Contract(x, IERC20ABI, provider));
+    let ESCROW_ADDRESSES = JSON.parse(process.env.REACT_APP_ESCROWS);
+    let ret = ASSETS.map(() => _0);
+    Promise.all(ASSETS.map( (x, i) => x.allowance(userAddress, ESCROW_ADDRESSES[i]).then(res => ret[i] = res) )).then(() => {
+        setState(ret);
+        setInFlight(false);
+    })
+}
+
+
+export function processUpdates(forceUpdateObj, updateArr, provider, userAddress) {
     for (let i = 0; i < updateArr.length; i++) {
-        if (updateArr[i].val === null && !updateArr[i].inFlight) {
-            updateArr[i].updateFunction(provider, userAddress, updateArr[i].setState, updateArr[i].setInFlight);
+        let update = updateArr[i];
+        if ((forceUpdateObj[update.name] || update.val === null) && !update.inFlight) {
+            console.log("UPDATING", update.name);
+            update.updateFunction(provider, userAddress, update.setState, update.setInFlight);
         }
     }
 }

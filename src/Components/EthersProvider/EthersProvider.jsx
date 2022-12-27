@@ -3,15 +3,15 @@ import { ethers, BigNumber as BN } from 'ethers';
 import { ADDRESS0, TOTAL_SBPS, _0 } from '../../Utils/Consts.js';
 import { TargetChains, LocalhostChain } from '../../Utils/TargetChains';
 import { getDecimalString } from '../../Utils/StringAlteration';
-import { getAnnualizedRate } from '../../Utils/RateMath';
 import {
     updateVault,
     updateFLTbals,
     updateIRMInfo,
     updateAggInfo,
+    updateAssetBals,
+    updateAssetAllowances,
     processUpdates
 } from './StateUpdates';
-import Moralis from "moralis";
 
 const IMetaMoneyMarketABI = require('../../abi/IMetaMoneyMarket.json');
 const IFullLendTokenABI = require('../../abi/IFullLendToken.json');
@@ -22,7 +22,7 @@ const IInterestRateModelABI = require('../../abi/IInterestRateModel.json');
 async function getProvider(walletType)  {
     if (walletType === 'metamask') {
         if (typeof(window.ethereum) !== 'undefined') {
-            const provider = await Moralis.enableWeb3({provider: 'metamask'});
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
             return provider;
         }
         return null;
@@ -50,6 +50,10 @@ export default function EthersProvider({children}) {
     const [irmInfoInFlight, setIRMInfoInFlight] = useState(false);
     const [aggInfo, setAggInfo] = useState(null);
     const [aggInfoInFlight, setAggInfoInFlight] = useState(false);
+    const [assetBals, setAssetBals] = useState(null);
+    const [assetBalsInFlight, setAssetBalsInFlight] = useState(false);
+    const [assetAllowances, setAssetAllowances] = useState(null);
+    const [assetAllowancesInFlight, setAssetAllowancesInFlight] = useState(false);
 
     const [supplyLentBN, setSupplyLentBN] = useState(null);
     const [supplyBorrowedBN, setSupplyBorrowedBN] = useState(null);
@@ -58,6 +62,13 @@ export default function EthersProvider({children}) {
     const [valueLentString, setValueLentString] = useState('0');
     const [valueBorrowedString, setValueBorrowedString] = useState('0');
     const [infuraUp, setInfuraUp] = useState(true);
+
+    function resetEthersState() {
+        setVault(null); setVaultInFlight(false);
+        setFLTBals(null); setFLTBalsInFlight(false);
+        setIRMInfo(null); setIRMInfoInFlight(false);
+        setAggInfo(null); setAggInfoInFlight(false);
+    }
 
     function setWrongChainState() {
         console.log(`Logging out`);
@@ -68,6 +79,8 @@ export default function EthersProvider({children}) {
         setUserENS(null);
         setUserAvatar(null);
         setChainId(-1);
+        setVault(null);
+        resetEthersState();
     }
 
     function provider_disconnect() {
@@ -78,6 +91,7 @@ export default function EthersProvider({children}) {
         setUserENS(null);
         setUserAvatar(null);
         setChainId(-1);
+        resetEthersState();
     }
 
     function updateWalletInfo(providerSet, selectedWalletType, setWrongChainCallback) {
@@ -104,6 +118,7 @@ export default function EthersProvider({children}) {
         Promise.all(promiseArray).then(res => {
             let network = res[1];
             if (typeof(network) !== 'undefined' && TargetChains.includes(network.chainId)) {
+                updateBasicInfo({}, providerSet, network.chainId, _userAddress);
                 setEthersProvider(providerSet);
                 setWalletType(selectedWalletType);
                 setUserAddress(_userAddress);
@@ -117,7 +132,6 @@ export default function EthersProvider({children}) {
                 setWrongChainCallback();
             }
         });
-
     }
 
     function getWalletInfo(selectedWalletType='basic', setWrongChainCallback=(() => {})) {
@@ -140,23 +154,27 @@ export default function EthersProvider({children}) {
             vault,
             fltBals,
             irmInfo,
-            aggInfo
+            aggInfo,
+            assetBals,
+            assetAllowances
         };
     }
 
-    function updateBasicInfo() {
+    function updateBasicInfo(forceUpdateObj={}, inputProvider=ethersProvider, chid=chainId, userAddr=userAddress) {
         const DEFAULT_VIEW_CHAIN = 'kovan';
-        const provider = ethersProvider == null && infuraUp ? new ethers.providers.InfuraProvider(DEFAULT_VIEW_CHAIN, process.env.REACT_APP_INFURA_API_KEY) : ethersProvider;
+        const provider = inputProvider == null && infuraUp ? new ethers.providers.InfuraProvider(DEFAULT_VIEW_CHAIN, process.env.REACT_APP_INFURA_API_KEY) : inputProvider;
 
-        if (chainId === LocalhostChain) {
-            const MakeUpdateObj = (val, inFlight, updateFunction, setState, setInFlight) => ({val, inFlight, updateFunction, setState, setInFlight});
+        if (chid === LocalhostChain) {
+            const UpdateObj = (name, val, inFlight, updateFunction, setState, setInFlight) => ({name, val, inFlight, updateFunction, setState, setInFlight});
             const UpdateArr = [
-                MakeUpdateObj(vault, vaultInFlight, updateVault, setVault, setVaultInFlight),
-                MakeUpdateObj(fltBals, fltBalsInFlight, updateFLTbals, setFLTBals, setFLTBalsInFlight),
-                MakeUpdateObj(irmInfo, irmInfoInFlight, updateIRMInfo, setIRMInfo, setIRMInfoInFlight),
-                MakeUpdateObj(aggInfo, aggInfoInFlight, updateAggInfo, setAggInfo, setAggInfoInFlight)
+                UpdateObj('vault', vault, vaultInFlight, updateVault, setVault, setVaultInFlight),
+                UpdateObj('fltBals', fltBals, fltBalsInFlight, updateFLTbals, setFLTBals, setFLTBalsInFlight),
+                UpdateObj('irmInfo', irmInfo, irmInfoInFlight, updateIRMInfo, setIRMInfo, setIRMInfoInFlight),
+                UpdateObj('aggInfo', aggInfo, aggInfoInFlight, updateAggInfo, setAggInfo, setAggInfoInFlight),
+                UpdateObj('assetBals', assetBals, assetBalsInFlight, updateAssetBals, setAssetBals, setAssetBalsInFlight),
+                UpdateObj('assetAllowances', assetAllowances, assetAllowancesInFlight, updateAssetAllowances, setAssetAllowances, setAssetAllowancesInFlight)
             ];
-            processUpdates(UpdateArr, provider, userAddress);
+            processUpdates(forceUpdateObj, UpdateArr, provider, userAddr);
         }
     }
 

@@ -51,7 +51,7 @@ export async function SendTx(userAddress, contractInstance, functionName, argArr
 export function getSendTx(callback0=DEFAULT_CALLBACK, callback1=DEFAULT_CALLBACK) {
 	return async function(userAddress, contractInstance, functionName, argArray, overrides={}, cb0=callback0, cb1=callback1) {
 		if (contractInstance == null) {
-			throw "SendTx2 Attempted to Accept Null Contract";
+			throw Error("SendTx2 Attempted to Accept Null Contract");
 		}
 
 		const signer = contractInstance.signer;
