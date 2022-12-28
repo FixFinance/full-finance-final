@@ -22,7 +22,7 @@ const GetStartedCon = () => {
       key_no: "2",
       heading: "Will I be charged fees?",
       description:
-        "A small percentage of interest paid by borrowers may be collected by the protocol the rest is distributed evenly amongst all lenders. All fees are accounted for in the rates presented on this website.",
+        "A small percentage of interest paid by borrowers may be collected by the protocol the rest is distributed pro rata amongst all lenders. All fees are accounted for in the rates presented on this website.",
     },
     {
       key_no: "3",

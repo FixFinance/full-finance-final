@@ -11,6 +11,7 @@ import { EthersContext } from '../../EthersProvider/EthersProvider';
 import { getDecimalString } from '../../../Utils/StringAlteration';
 import { getAnnualizedRate } from '../../../Utils/RateMath';
 import { ADDRESS0, TOTAL_SBPS, _0 } from '../../../Utils/Consts.js';
+import { getProtocolUSDVanityMetricsStrings } from '../../../Utils/EthersStateProcessing.js';
 
 const ICoreMoneyMarketABI = require('../../../abi/ICoreMoneyMarket.json');
 const IERC20ABI = require('../../../abi/IERC20.json');
@@ -22,40 +23,29 @@ const Deposit = () => {
 
   const [getWalletInfo, getBasicInfo, updateBasicInfo] = useContext(EthersContext);
   const [provider, userAddress] = getWalletInfo();
-  const {
-    annualLendRateString,
-    annualBorrowRateString,
-    valueLentString,
-    valueBorrowedString
-  } = getBasicInfo();
-
-  if (
-    annualLendRateString === '0' &&
-    annualBorrowRateString === '0' &&
-    valueLentString === '0' &&
-    valueBorrowedString === '0'
-  ) {
-    updateBasicInfo();
-  }
+  const BasicInfo = getBasicInfo();
+  const { irmInfo, aggInfo } = BasicInfo;
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const { totalLendValueString, totalBorrowValueString } = getProtocolUSDVanityMetricsStrings(irmInfo, aggInfo);
+
   const loop = [
       {
           title:"Total Deposits",
-          price:valueLentString,
+          price:totalLendValueString,
           ButtonText:"Lend Now",
           CurrentDeposit:"Current Deposit Rate",
-          price1:annualLendRateString+"%",
+          rate: "? %",
           link: "/lend",
       },
       {
           title:"Total Borrowed",
-          price:valueBorrowedString,
+          price:totalBorrowValueString,
           ButtonText:"Borrow Now",
           CurrentDeposit:"Current Borrow Rate",
-          price1:annualBorrowRateString+"%",
+          rate: "? %",
           link: "/borrow"
       }
   ];
@@ -74,7 +64,7 @@ const Deposit = () => {
             <button  className='button-text-one' onClick={item.click}>{item.ButtonText}</button>
           </Link>
           <Card.Text style={{ 'color': '#7d8282' }} className='p1'>
-            {item.CurrentDeposit} {item.price1}
+            {item.CurrentDeposit} {item.rate}
           </Card.Text>
           <Card.Text className='item-price-one'>
           </Card.Text>

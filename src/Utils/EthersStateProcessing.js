@@ -47,3 +47,28 @@ export function getFLTBalanceString(fltBals, envIndex, maxDecimalsShown=4) {
 export function getAssetInfApprovalAmount(envIndex) {
 	_2.pow(BN.from(ENV_ASSET_INF_BITS[envIndex])).sub(_1);
 }
+
+export function getProtocolUSDVanityMetrics(irmInfo, aggInfo) {
+	let totalLendValue = _0;
+	let totalBorrowValue = _0;
+	if (irmInfo !== null && aggInfo !== null) {
+		for (let i = 0; i < irmInfo.length; i++) {
+			let decimalsToInflate = 18-ENV_ASSET_DECIMALS[i]-ENV_AGG_DECIMALS[i];
+			let decimalsScalar = BN.from(10).pow(BN.from(Math.abs(decimalsToInflate)));
+			let lendValue = irmInfo[i].supplyLent.mul(aggInfo[i])
+				[decimalsToInflate > 0 ? 'mul' : 'div'](decimalsScalar);
+			let borrowValue = irmInfo[i].supplyBorrowed.mul(aggInfo[i])
+				[decimalsToInflate > 0 ? 'mul' : 'div'](decimalsScalar);
+			totalLendValue = totalLendValue.add(lendValue);
+			totalBorrowValue = totalBorrowValue.add(borrowValue);
+		}
+	}
+	return { totalLendValue, totalBorrowValue };
+}
+
+export function getProtocolUSDVanityMetricsStrings(irmInfo, aggInfo) {
+	let { totalLendValue, totalBorrowValue } = getProtocolUSDVanityMetrics(irmInfo, aggInfo);
+	let totalLendValueString = getDecimalString(totalLendValue.toString(), 18, 2);
+	let totalBorrowValueString = getDecimalString(totalBorrowValue.toString(), 18, 2);
+	return { totalLendValueString, totalBorrowValueString };
+}
