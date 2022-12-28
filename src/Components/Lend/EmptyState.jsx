@@ -71,7 +71,7 @@ const EmptyState = () => {
     i = i === 0 ? "" : i+1;
     let containerClassName = "list-element"+i+"-container";
     return (
-      <li onClick={() => setSelectedAssetHandler(ticker)}>
+      <li onClick={() => setSelectedAssetHandler(ticker)} key={i}>
         <div className={containerClassName}>
           <span><img className="dropdown-asset-image" src={LOGO_MAP[ticker]} alt={tickerLower+" logo"} /></span>
           <span className={tickerLower+"-asset-span"}>{ticker}</span>

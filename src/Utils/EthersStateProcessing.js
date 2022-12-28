@@ -6,6 +6,8 @@ const ENV_ASSETS = JSON.parse(process.env.REACT_APP_LISTED_ASSETS);
 const ENV_ASSET_DECIMALS = JSON.parse(process.env.REACT_APP_ASSET_DECIMALS);
 const ENV_AGG_DECIMALS = JSON.parse(process.env.REACT_APP_AGGREGATOR_DECIMALS);
 const ENV_ASSET_INF_BITS = JSON.parse(process.env.REACT_APP_ASSET_INF_BITS);
+const ENV_LTVS = JSON.parse(process.env.REACT_APP_LTVS);
+const ENV_BFACS = JSON.parse(process.env.REACT_APP_BFACS);
 
 export function getFLTUnderlyingValue(fltBals, irmInfo, envIndex) {
 	if (fltBals === null || irmInfo === null) return _0;
@@ -80,32 +82,54 @@ export function getAssetInfoFromVault(vault, irmInfo, aggInfo, envIndex) {
 	let indBorrowed = vault.debtAssets.indexOf(asset);
 	let isSupplied = indSupplied !== -1;
 	let isBorrowed = indBorrowed !== -1;
+	let suppliedUnderlying = _0;
+	let borrowedUnderlying = _0;
+	let suppliedUSDValue = _0;
+	let borrowedUSDValue = _0;
+	let adjSuppliedUSDValue = _0;
+	let adjBorrowedUSDValue = _0;
 	let suppliedUnderlyingString = '0';
 	let borrowedUnderlyingString = '0';
-	let suppliedUnderlyingUSDValueString = '0';
-	let borrowedUnderlyingUSDValueString = '0';
+	let suppliedUSDValueString = '0';
+	let borrowedUSDValueString = '0';
 	if (isSupplied || isBorrowed) {
-		const USDDecimals = 2;
+		const USDDecimals = 18;
 		let decimalsToInflate = USDDecimals-ENV_ASSET_DECIMALS[envIndex]-ENV_AGG_DECIMALS[envIndex];
 		let decimalsScalar = BN.from(10).pow(BN.from(Math.abs(decimalsToInflate)));
 		if (isSupplied) {
-			let suppliedUnderlying = vault.collateralLendShareAmounts[indSupplied].mul(irmInfo[envIndex].supplyLent).div(irmInfo[envIndex].supplyLendShares);
-			let suppliedUnderlyingUSDValue = suppliedUnderlying.mul(aggInfo[envIndex])
+			suppliedUnderlying = vault.collateralLendShareAmounts[indSupplied].mul(irmInfo[envIndex].supplyLent).div(irmInfo[envIndex].supplyLendShares);
+			suppliedUSDValue = suppliedUnderlying.mul(aggInfo[envIndex])
 				[decimalsToInflate > 0 ? 'mul' : 'div'](decimalsScalar);
+			adjSuppliedUSDValue = suppliedUSDValue.mul(BN.from(ENV_LTVS[envIndex])).div(BN.from(100));
 			suppliedUnderlyingString = getDecimalString(suppliedUnderlying.toString(), ENV_ASSET_DECIMALS[envIndex], 4);
-			suppliedUnderlyingUSDValueString = getDecimalString(suppliedUnderlyingUSDValue.toString(), USDDecimals);
+			suppliedUSDValueString = getDecimalString(suppliedUSDValue.toString(), USDDecimals, 2);
 		}
 		if (isBorrowed) {
-			let borrowedUnderlying = vault.debtShareAmounts[indBorrowed].mul(irmInfo[envIndex].supplyBorrowed).div(irmInfo[envIndex].supplyBorrowShares);
-			let borrowedUnderlyingUSDValue = borrowedUnderlying.mul(aggInfo[envIndex])
+			borrowedUnderlying = vault.debtShareAmounts[indBorrowed].mul(irmInfo[envIndex].supplyBorrowed).div(irmInfo[envIndex].supplyBorrowShares);
+			borrowedUSDValue = borrowedUnderlying.mul(aggInfo[envIndex])
 				[decimalsToInflate > 0 ? 'mul' : 'div'](decimalsScalar);
+			adjBorrowedUSDValue = borrowedUSDValue.mul(BN.from(ENV_BFACS[envIndex])).div(BN.from(100));
 			borrowedUnderlyingString = getDecimalString(borrowedUnderlying.toString(), ENV_ASSET_DECIMALS[envIndex], 4);
-			borrowedUnderlyingUSDValueString = getDecimalString(borrowedUnderlyingUSDValue.toString(), USDDecimals);
+			borrowedUSDValueString = getDecimalString(borrowedUSDValue.toString(), USDDecimals, 2);
 		}
 	}
 
 	return {
-      isSupplied, suppliedUnderlyingString, suppliedUnderlyingUSDValueString,
-      isBorrowed, borrowedUnderlyingString, borrowedUnderlyingUSDValueString
+      isSupplied, suppliedUnderlying, suppliedUSDValue, adjSuppliedUSDValue, suppliedUnderlyingString, suppliedUSDValueString,
+      isBorrowed, borrowedUnderlying, borrowedUSDValue, adjBorrowedUSDValue, borrowedUnderlyingString, borrowedUSDValueString
 	};
+}
+
+export function getAssetInfoFromVaultDetails(vaultDetails, envIndex) {
+	if (vaultDetails === null) {
+		return {
+			isSupplied: false,
+			isBorrowed: false,
+			suppliedUnderlyingString: '0',
+			borrowedUnderlyingString: '0',
+			suppliedUSDValueString: '0',
+			borrowedUSDValueString: '0'
+		};
+	}
+	return vaultDetails[ENV_ASSETS[envIndex]];
 }

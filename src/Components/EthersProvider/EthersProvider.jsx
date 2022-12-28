@@ -10,7 +10,9 @@ import {
     updateAggInfo,
     updateAssetBals,
     updateAssetAllowances,
-    processUpdates
+    processPrimaryUpdates,
+    updateVaultDetails,
+    processSecondaryUpdates
 } from './StateUpdates';
 
 const IMetaMoneyMarketABI = require('../../abi/IMetaMoneyMarket.json');
@@ -47,19 +49,24 @@ export default function EthersProvider({children}) {
 
     // InFlight + GlobalInFlight, system prevents excess remote resource calls
     const [globalInFlight, setGlobalInFlight] = useState(false);
+
+    // primary state, request intensive to find
     const [vault, setVault] = useState(null);
-    const [vaultInFlight, setVaultInFlight] = useState(false);
     const [fltBals, setFLTBals] = useState(null);
-    const [fltBalsInFlight, setFLTBalsInFlight] = useState(false);
     const [irmInfo, setIRMInfo] = useState(null);
-    const [irmInfoInFlight, setIRMInfoInFlight] = useState(false);
     const [aggInfo, setAggInfo] = useState(null);
-    const [aggInfoInFlight, setAggInfoInFlight] = useState(false);
     const [assetBals, setAssetBals] = useState(null);
-    const [assetBalsInFlight, setAssetBalsInFlight] = useState(false);
     const [assetAllowances, setAssetAllowances] = useState(null);
+
+    // in flight status for primary state
+    const [vaultInFlight, setVaultInFlight] = useState(false);
+    const [fltBalsInFlight, setFLTBalsInFlight] = useState(false);
+    const [irmInfoInFlight, setIRMInfoInFlight] = useState(false);
+    const [aggInfoInFlight, setAggInfoInFlight] = useState(false);
+    const [assetBalsInFlight, setAssetBalsInFlight] = useState(false);
     const [assetAllowancesInFlight, setAssetAllowancesInFlight] = useState(false);
 
+    // seconday state, compute intensivve *these do not have in flight status*
     const [vaultDetails, setVaultDetails] = useState(null);
 
 
@@ -157,11 +164,12 @@ export default function EthersProvider({children}) {
             irmInfo,
             aggInfo,
             assetBals,
-            assetAllowances
+            assetAllowances,
+            vaultDetails
         };
     }
 
-    function updateBasicInfo(forceUpdateObj={}, inputProvider=ethersProvider, chid=chainId, userAddr=userAddress) {
+    async function updateBasicInfo(forceUpdateObj={}, inputProvider=ethersProvider, chid=chainId, userAddr=userAddress) {
         const DEFAULT_VIEW_CHAIN = 'kovan';
         const USE_INFURA = inputProvider === null && infuraUp;
         const provider = USE_INFURA ? new ethers.providers.InfuraProvider(DEFAULT_VIEW_CHAIN, process.env.REACT_APP_INFURA_API_KEY) : inputProvider;
@@ -170,17 +178,27 @@ export default function EthersProvider({children}) {
         console.log("USE BASIC INFO CALL#", callNum);
 
         if (chid === LocalhostChain) {
-            const UpdateObj = (name, val, inFlight, updateFunction, setState, setInFlight) => ({name, val, inFlight, updateFunction, setState, setInFlight});
-            const UpdateArr = [
-                UpdateObj('vault', vault, vaultInFlight, updateVault, setVault, setVaultInFlight),
-                UpdateObj('fltBals', fltBals, fltBalsInFlight, updateFLTbals, setFLTBals, setFLTBalsInFlight),
-                UpdateObj('irmInfo', irmInfo, irmInfoInFlight, updateIRMInfo, setIRMInfo, setIRMInfoInFlight),
-                UpdateObj('aggInfo', aggInfo, aggInfoInFlight, updateAggInfo, setAggInfo, setAggInfoInFlight),
-                UpdateObj('assetBals', assetBals, assetBalsInFlight, updateAssetBals, setAssetBals, setAssetBalsInFlight),
-                UpdateObj('assetAllowances', assetAllowances, assetAllowancesInFlight, updateAssetAllowances, setAssetAllowances, setAssetAllowancesInFlight)
+            const PrimaryUpdateObj = (name, val, inFlight, updateFunction, setState, setInFlight) => ({name, val, inFlight, updateFunction, setState, setInFlight});
+            const PrimaryUpdateArr = [
+                PrimaryUpdateObj('vault', vault, vaultInFlight, updateVault, setVault, setVaultInFlight),
+                PrimaryUpdateObj('fltBals', fltBals, fltBalsInFlight, updateFLTbals, setFLTBals, setFLTBalsInFlight),
+                PrimaryUpdateObj('irmInfo', irmInfo, irmInfoInFlight, updateIRMInfo, setIRMInfo, setIRMInfoInFlight),
+                PrimaryUpdateObj('aggInfo', aggInfo, aggInfoInFlight, updateAggInfo, setAggInfo, setAggInfoInFlight),
+                PrimaryUpdateObj('assetBals', assetBals, assetBalsInFlight, updateAssetBals, setAssetBals, setAssetBalsInFlight),
+                PrimaryUpdateObj('assetAllowances', assetAllowances, assetAllowancesInFlight, updateAssetAllowances, setAssetAllowances, setAssetAllowancesInFlight)
             ];
             const catchFunc = err => {console.error(err); if (USE_INFURA) setInfuraUp(false);};
-            processUpdates(forceUpdateObj, UpdateArr, provider, userAddr, globalInFlight, setGlobalInFlight, catchFunc).then(res => console.log("PROCESSED UPDATES", callNum, Object.keys(res), Object.keys(forceUpdateObj)));
+            let primaryUpdateMap = await processPrimaryUpdates(forceUpdateObj, PrimaryUpdateArr, provider, userAddr, globalInFlight, setGlobalInFlight, catchFunc);
+
+            console.log("PROCESSED UPDATES", callNum, Object.keys(primaryUpdateMap), Object.keys(forceUpdateObj));
+            let effectivePrimaryState = { vault, fltBals, irmInfo, aggInfo, assetBals, assetAllowances, ...primaryUpdateMap };
+
+            const SecondaryUpdateObj = (name, updateFunction, setState, deps) => ({name, updateFunction, setState, deps});
+            const SecondaryUpdateArr = [
+                SecondaryUpdateObj('vaultDetails', updateVaultDetails, setVaultDetails, ['vault', 'aggInfo', 'irmInfo']),
+            ]
+            let secondaryUpdateMap = processSecondaryUpdates(Object.keys(primaryUpdateMap), SecondaryUpdateArr, effectivePrimaryState);
+            console.log("SECONDARY UPDATES", callNum, Object.keys(secondaryUpdateMap), Object.keys(primaryUpdateMap));
         }
     }
 

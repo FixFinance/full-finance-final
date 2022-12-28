@@ -15,7 +15,7 @@ import { EthersContext } from '../EthersProvider/EthersProvider';
 import { LoginContext } from "../../helper/userContext";
 import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate } from '../../Utils/RateMath';
-import { getAssetInfoFromVault } from '../../Utils/EthersStateProcessing';
+import { getAssetInfoFromVaultDetails } from '../../Utils/EthersStateProcessing';
 import { ADDRESS0, TOTAL_SBPS, _0, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS, COLLATERAL_AGGREGATOR_ADDRESSES, COLLATERAL_AGGREGATOR_ADDRESSES_LCASE } from '../../Utils/Consts.js';
 import Header from "../../ShareModules/Layout/Header/Header";
 
@@ -33,12 +33,9 @@ function Index() {
   const {
     vault,
     irmInfo,
-    aggInfo
+    aggInfo,
+    vaultDetails
   } = BasicInfo;
-  const annualLendRateString = '0';
-  const annualBorrowRateString = '0';
-  const supplyLentBN = _0;
-  const supplyBorrowedBN = _0;
 
   const [provider, userAddress] = getWalletInfo();
   const signer = provider == null ? null : provider.getSigner();
@@ -71,9 +68,9 @@ function Index() {
   const listedAssetComponents = [irmInfo, aggInfo, vault].includes(null) ? [] : irmInfo.map((x, i) => {
     let TICKER = ENV_TICKERS[i];
     let {
-      isSupplied, suppliedUnderlyingString, suppliedUnderlyingUSDValueString,
-      isBorrowed, borrowedUnderlyingString, borrowedUnderlyingUSDValueString
-    } = getAssetInfoFromVault(vault, irmInfo, aggInfo, i);
+      isSupplied, suppliedUnderlyingString, suppliedUSDValueString,
+      isBorrowed, borrowedUnderlyingString, borrowedUSDValueString
+    } = getAssetInfoFromVaultDetails(vaultDetails, i);
     return (
       <div className="row borrow_position_wrap">
         <h4>{TICKER}</h4>
@@ -81,14 +78,14 @@ function Index() {
           <div className="borrow_position_box">
             <h5>Supplied</h5>
             <h2><img src={LOGO_MAP[TICKER]} alt={TICKER + ' image'} className="vault_icon"/> {suppliedUnderlyingString} {TICKER}</h2>
-            <p>~ $ {suppliedUnderlyingUSDValueString}</p>
+            <p>~ $ {suppliedUSDValueString}</p>
           </div>
         </div>
         <div className="col-lg-4 col-md-4">
           <div className="borrow_position_box">
             <h5>Borrowed</h5>
             <h2><img src={LOGO_MAP[TICKER]} alt={TICKER + ' image'} className="vault_icon"/> {borrowedUnderlyingString} {TICKER}</h2>
-            <p>~ $ {borrowedUnderlyingUSDValueString}</p>
+            <p>~ $ {borrowedUSDValueString}</p>
           </div>
         </div>
         <div className="col-lg-4 col-md-4">
@@ -99,9 +96,21 @@ function Index() {
           </div>
         </div>
         <div className="mx-auto">
-          <div onClick={clickManagePositionFactory(i)} className="borrow_position_box total_debt_box">
-            <button><h5>Manage position</h5></button>
-          </div>
+          {isSupplied || isBorrowed ? 
+            <>
+              <div onClick={clickManagePositionFactory(i)} className="borrow_position_box total_debt_box">
+                <button><h5>Manage {isSupplied?'Collateral':''}{isBorrowed?'Debt':''}</h5></button>
+              </div>
+            </> :
+            <>
+              <div onClick={clickManagePositionFactory(i)} className="borrow_position_box total_debt_box">
+                <button><h5>Borrow</h5></button>
+              </div>
+              <div onClick={clickManagePositionFactory(i)} className="borrow_position_box total_debt_box">
+                <button><h5>Lend + Supply As Collateral</h5></button>
+              </div>
+            </>
+          }
         </div>
       </div>
     );
@@ -116,28 +125,28 @@ function Index() {
         <div className="row">
           <div className="col-lg-4 col-md-4">
             <div className="borrow_box">
-              <h5>Lend Rate</h5>
+              <h5>Your Collateral Value</h5>
               <div className="borrow_box_text">
-                <h2>{annualLendRateString} %</h2>
-                <p>Lend Variable APR</p>
+                <h2>$ {vaultDetails === null ? '0' : vaultDetails.totalSuppliedUSDValueString}</h2>
+                <p>Adjusted Collateral Value $ {vaultDetails === null ? '0' : vaultDetails.totalAdjSuppliedUSDValueString}</p>
               </div>
             </div>
           </div>
           <div className="col-lg-4 col-md-4">
             <div className="borrow_box">
-              <h5>Borrow Rate</h5>
+              <h5>Your Debt Value</h5>
               <div className="borrow_box_text">
-                <h2>{annualBorrowRateString} %</h2>
-                <p>Borrow Variable APR</p>
+                <h2>$ {vaultDetails === null ? '0' : vaultDetails.totalBorrowedUSDValueString}</h2>
+                <p>Adjusted Debt Vault $ {vaultDetails === null ? '0' : vaultDetails.totalAdjBorrowedUSDValueString}</p>
               </div>
             </div>
           </div>
           <div className="col-lg-4 col-md-4">
-            <div className="borrow_box_add" onClick={() => handleShow2()}>
-              <div className="plus_added"
-              >
-                <div style={{ "font-size" : "45px"}}>+</div>
-                <p>Open Borrowing Positions</p>
+            <div className="borrow_box">
+              <h5>Collateralization Ratio</h5>
+              <div className="borrow_box_text">
+                <h2>{vaultDetails === null ? '0' : vaultDetails.effCollateralizationRatioString} %</h2>
+                <p>Required Collateralization Ratio: {vaultDetails === null ? '0' : vaultDetails.requiredCollateralizationRatioString}%</p>
               </div>
             </div>
           </div>
