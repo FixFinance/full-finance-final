@@ -3,9 +3,14 @@ import weth_logo from '../assets/image/weth.svg'
 import uni_logo from '../assets/image/uni.svg';
 import link_logo from '../assets/image/link.svg';
 
+export const DAI =  dai_logo;
+export const WETH = weth_logo;
+export const UNI = uni_logo;
+export const LINK = link_logo;
+
 export const LOGO_MAP = {
-	DAI: dai_logo,
-	WETH: weth_logo,
-	UNI: uni_logo,
-	LINK: link_logo
+	DAI,
+	WETH,
+	UNI,
+	LINK
 };

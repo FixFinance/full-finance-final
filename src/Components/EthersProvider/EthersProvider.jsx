@@ -32,6 +32,8 @@ async function getProvider(walletType)  {
 
 export const EthersContext = createContext();
 
+let CALL = 0;
+
 export default function EthersProvider({children}) {
 
     const [walletType, setWalletType] = useState('basic');
@@ -41,7 +43,10 @@ export default function EthersProvider({children}) {
     const [userENS, setUserENS] = useState(null);
     const [userAvatar, setUserAvatar] = useState(null);
     const [chainId, setChainId] = useState(-1);
+    const [infuraUp, setInfuraUp] = useState(true);
 
+    // InFlight + GlobalInFlight, system prevents excess remote resource calls
+    const [globalInFlight, setGlobalInFlight] = useState(false);
     const [vault, setVault] = useState(null);
     const [vaultInFlight, setVaultInFlight] = useState(false);
     const [fltBals, setFLTBals] = useState(null);
@@ -55,13 +60,8 @@ export default function EthersProvider({children}) {
     const [assetAllowances, setAssetAllowances] = useState(null);
     const [assetAllowancesInFlight, setAssetAllowancesInFlight] = useState(false);
 
-    const [supplyLentBN, setSupplyLentBN] = useState(null);
-    const [supplyBorrowedBN, setSupplyBorrowedBN] = useState(null);
-    const [annualLendRateString, setAnnualLendRateString] = useState('0');
-    const [annualBorrowRateString, setAnnualBorrowRateString] = useState('0');
-    const [valueLentString, setValueLentString] = useState('0');
-    const [valueBorrowedString, setValueBorrowedString] = useState('0');
-    const [infuraUp, setInfuraUp] = useState(true);
+    const [vaultDetails, setVaultDetails] = useState(null);
+
 
     function resetEthersState() {
         setVault(null); setVaultInFlight(false);
@@ -118,6 +118,7 @@ export default function EthersProvider({children}) {
         Promise.all(promiseArray).then(res => {
             let network = res[1];
             if (typeof(network) !== 'undefined' && TargetChains.includes(network.chainId)) {
+                console.log("Calling from updateWalletInfo");
                 updateBasicInfo({}, providerSet, network.chainId, _userAddress);
                 setEthersProvider(providerSet);
                 setWalletType(selectedWalletType);
@@ -162,7 +163,11 @@ export default function EthersProvider({children}) {
 
     function updateBasicInfo(forceUpdateObj={}, inputProvider=ethersProvider, chid=chainId, userAddr=userAddress) {
         const DEFAULT_VIEW_CHAIN = 'kovan';
-        const provider = inputProvider == null && infuraUp ? new ethers.providers.InfuraProvider(DEFAULT_VIEW_CHAIN, process.env.REACT_APP_INFURA_API_KEY) : inputProvider;
+        const USE_INFURA = inputProvider === null && infuraUp;
+        const provider = USE_INFURA ? new ethers.providers.InfuraProvider(DEFAULT_VIEW_CHAIN, process.env.REACT_APP_INFURA_API_KEY) : inputProvider;
+
+        let callNum = ++CALL;
+        console.log("USE BASIC INFO CALL#", callNum);
 
         if (chid === LocalhostChain) {
             const UpdateObj = (name, val, inFlight, updateFunction, setState, setInFlight) => ({name, val, inFlight, updateFunction, setState, setInFlight});
@@ -174,7 +179,8 @@ export default function EthersProvider({children}) {
                 UpdateObj('assetBals', assetBals, assetBalsInFlight, updateAssetBals, setAssetBals, setAssetBalsInFlight),
                 UpdateObj('assetAllowances', assetAllowances, assetAllowancesInFlight, updateAssetAllowances, setAssetAllowances, setAssetAllowancesInFlight)
             ];
-            processUpdates(forceUpdateObj, UpdateArr, provider, userAddr);
+            const catchFunc = err => {console.error(err); if (USE_INFURA) setInfuraUp(false);};
+            processUpdates(forceUpdateObj, UpdateArr, provider, userAddr, globalInFlight, setGlobalInFlight, catchFunc).then(res => console.log("PROCESSED UPDATES", callNum, Object.keys(res), Object.keys(forceUpdateObj)));
         }
     }
 
