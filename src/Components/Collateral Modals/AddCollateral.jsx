@@ -35,8 +35,6 @@ const AddCollateral = ({
   basicInfo
 }) => {
 
-  console.log("RENDER ADD COLLATERAL ", envIndex);
-
   const [success, setSuccess] = useState(SUCCESS_STATUS.BASE);
   const [wasError, setWasError] = useState(false);
   const [waitConfirmation, setWaitConfirmation] = useState(false);
@@ -70,7 +68,6 @@ const AddCollateral = ({
     implReqCollatRatioString
   } = getImplCollatRatioStrings(vaultDetails, aggInfo, false, absInputAmt, envIndex);
 
-  let CASSET = signer == null ? null : new ethers.Contract(ENV_ASSETS[envIndex], IERC20ABI, signer);
   let MMM = signer == null ? null : new ethers.Contract(ENV_MMM_ADDRESS, IMetaMoneyMarketABI, signer);
 
   const handleInput = (param) => {
@@ -100,6 +97,7 @@ const AddCollateral = ({
       if (collApproval != null) {
         setWaitConfirmation(true);
         setDisabled(true);
+        const CASSET = signer == null ? null : new ethers.Contract(ENV_ASSETS[envIndex], IERC20ABI, signer);
         await SendTx(userAddress, CASSET, 'approve', [ENV_ESCROWS[envIndex], getAssetInfApprovalAmount(envIndex).toString()]);
         setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
         setWasError(false);
@@ -115,10 +113,19 @@ const AddCollateral = ({
 
   const addCollateral = async () => {
     try {
-      if (collApproval != null && walletBalance != null && !absInputAmt.eq(_0) && absInputAmt.lte(walletBalance)) {
+      if (![vault, walletBalance, collApproval].includes(null) && !absInputAmt.eq(_0) && absInputAmt.lte(walletBalance)) {
         setWaitConfirmation(true);
         setDisabled(true);
-        await SendTx(userAddress, MMM, 'supplyToCVault', [envIndex, absInputAmt.toString()]);
+        let asset = ENV_ASSETS[envIndex];
+        if (vault.collateralAssets.indexOf(asset) === -1) {
+          let expectedIndex = 0;
+          for (; expectedIndex < vault.collateralAssets.length && BN.from(vault.collateralAssets[expectedIndex]).lt(BN.from(asset)); expectedIndex++) {}
+          await SendTx(userAddress, MMM, 'supplyNewCollateral', [userAddress, expectedIndex, asset, absInputAmt.toString(), true]);
+        }
+        else {
+          let index = vault.collateralAssets.indexOf(asset);
+          await SendTx(userAddress, MMM, 'supplyExistingCollateral', [userAddress, index, absInputAmt.toString(), true]);
+        }
         setSuccess(SUCCESS_STATUS.ADD_SUCCESS);
         setWasError(false);
         setWaitConfirmation(false);
