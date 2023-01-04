@@ -1,5 +1,5 @@
 import { BigNumber as BN } from 'ethers';
-import { _0, _1, _2 } from './Consts.js';
+import { _0, _1, _2, TOTAL_SBPS, INF, INF_CHAR } from './Consts.js';
 import { getDecimalString } from './StringAlteration';
 
 const ENV_ASSETS = JSON.parse(process.env.REACT_APP_LISTED_ASSETS);
@@ -8,6 +8,14 @@ const ENV_AGG_DECIMALS = JSON.parse(process.env.REACT_APP_AGGREGATOR_DECIMALS);
 const ENV_ASSET_INF_BITS = JSON.parse(process.env.REACT_APP_ASSET_INF_BITS);
 const ENV_LTVS = JSON.parse(process.env.REACT_APP_LTVS);
 const ENV_BFACS = JSON.parse(process.env.REACT_APP_BFACS);
+
+function getUSDValue(amount, aggInfo, envIndex) {
+	let aggDecimals = ENV_AGG_DECIMALS[envIndex];
+	let assetDecimals = ENV_ASSET_DECIMALS[envIndex];
+	let decimalsToInflate = 18-aggDecimals-assetDecimals;
+	let decimalsScalar = BN.from(10).pow(Math.abs(decimalsToInflate));
+	return amount.mul(aggInfo[envIndex])[decimalsToInflate > 0 ? 'mul':'div'](decimalsScalar);
+}
 
 export function getFLTUnderlyingValue(fltBals, irmInfo, envIndex) {
 	if (fltBals === null || irmInfo === null) return _0;
@@ -132,4 +140,67 @@ export function getAssetInfoFromVaultDetails(vaultDetails, envIndex) {
 		};
 	}
 	return vaultDetails[ENV_ASSETS[envIndex]];
+}
+
+
+export function getImplCollatRatioStrings(vaultDetails, aggInfo, isDebt, changeUnderlying, envIndex) {
+	let implEffCollatRatioString = '0';
+	let implReqCollatRatioString = '0';
+
+	if (![vaultDetails, aggInfo].includes(null)) {
+		let valueChange = getUSDValue(changeUnderlying, aggInfo, envIndex);
+		let adjValueChange = valueChange.mul(BN.from((isDebt ? ENV_BFACS : ENV_LTVS)[envIndex])).div(BN.from(100));
+
+		let {
+			totalSuppliedUSDValue,
+			totalBorrowedUSDValue,
+			totalAdjSuppliedUSDValue,
+			totalAdjBorrowedUSDValue
+		} = vaultDetails;
+
+		if (isDebt) {
+			totalBorrowedUSDValue = totalBorrowedUSDValue.add(valueChange);
+			totalAdjBorrowedUSDValue = totalAdjBorrowedUSDValue.add(adjValueChange);
+		}
+		else {
+			totalSuppliedUSDValue = totalSuppliedUSDValue.add(valueChange);
+			totalAdjSuppliedUSDValue = totalAdjSuppliedUSDValue.add(adjValueChange);
+		}
+
+		let effCollatRatio = totalBorrowedUSDValue.lte(_0) ? INF : totalSuppliedUSDValue.mul(TOTAL_SBPS).div(totalBorrowedUSDValue);
+		let adjCollatRatio = totalAdjBorrowedUSDValue.lte(_0) ? INF : totalAdjSuppliedUSDValue.mul(TOTAL_SBPS).div(totalAdjBorrowedUSDValue);
+		let reqCollatRatio = effCollatRatio.mul(TOTAL_SBPS).div(adjCollatRatio);
+		
+		implEffCollatRatioString = effCollatRatio.gte(INF) ? INF_CHAR : getDecimalString(effCollatRatio.toString(), 16, 2);
+		implReqCollatRatioString = getDecimalString(reqCollatRatio.toString(), 16, 2);
+
+	}
+
+	return {
+		implEffCollatRatioString,
+		implReqCollatRatioString
+	};
+}
+
+export function getResultantVaultState(vault, irmInfo, isDebt, changeUnderlying, envIndex) {
+	let {
+		collateralAssets,
+		collateralLendShareAmounts,
+		debtAssets,
+		debtShareAmounts,
+	} = vault;
+	let ASSET = ENV_ASSETS[envIndex];
+	if (isDebt) {
+		let ind = debtAssets.indexOf(ASSET);
+		if (ind === -1) {
+			//insert into list
+		}
+		else {
+
+		}
+	}
+	else {
+		let ind = collateralAssets.indexOf(ASSET);
+
+	}
 }

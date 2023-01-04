@@ -4,11 +4,14 @@ import { BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
-import { TOTAL_SBPS, INF, _0, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS } from '../../Utils/Consts';
+import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
 import './add-withdraw.scss';
+
+let COLLATERAL_ADDRESSES = [];
+let COLLATERAL_SYMBOLS = [];
 
 const WithdrawCollateral = ({
   handleClose,

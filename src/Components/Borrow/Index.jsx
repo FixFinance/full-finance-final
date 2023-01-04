@@ -17,9 +17,8 @@ import { getDecimalString } from '../../Utils/StringAlteration';
 import { getAnnualizedRate } from '../../Utils/RateMath';
 import { getAssetInfoFromVaultDetails } from '../../Utils/EthersStateProcessing';
 import { ADDRESS0, TOTAL_SBPS, _0, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS, COLLATERAL_AGGREGATOR_ADDRESSES, COLLATERAL_AGGREGATOR_ADDRESSES_LCASE } from '../../Utils/Consts.js';
+import { ENV_TICKERS } from '../../Utils/Env';
 import Header from "../../ShareModules/Layout/Header/Header";
-
-const ENV_TICKERS = JSON.parse(process.env.REACT_APP_TICKERS);
 
 function Index() {
   const [modal1, setModal1] = useState(false);
@@ -96,20 +95,10 @@ function Index() {
           </div>
         </div>
         <div className="mx-auto">
-          {isSupplied || isBorrowed ? 
-            <>
-              <div onClick={clickManagePositionFactory(i)} className="borrow_position_box total_debt_box">
-                <button><h5>Manage {isSupplied?'Collateral':''}{isBorrowed?'Debt':''}</h5></button>
-              </div>
-            </> :
-            <>
-              <div onClick={clickManagePositionFactory(i)} className="borrow_position_box total_debt_box">
-                <button><h5>Borrow</h5></button>
-              </div>
-              <div onClick={clickManagePositionFactory(i)} className="borrow_position_box total_debt_box">
-                <button><h5>Lend + Supply As Collateral</h5></button>
-              </div>
-            </>
+          {
+            <div onClick={clickManagePositionFactory(i)} className="borrow_position_box total_debt_box">
+              <button><h5>{isSupplied || isBorrowed ? 'Manage' : 'Open Position'} {isSupplied?'Collateral':''}{isBorrowed?'Debt':''}</h5></button>
+            </div>
           }
         </div>
       </div>
@@ -146,7 +135,7 @@ function Index() {
               <h5>Collateralization Ratio</h5>
               <div className="borrow_box_text">
                 <h2>{vaultDetails === null ? '0' : vaultDetails.effCollateralizationRatioString} %</h2>
-                <p>Required Collateralization Ratio: {vaultDetails === null ? '0' : vaultDetails.requiredCollateralizationRatioString}%</p>
+                <p>Liquidation Threshold: {vaultDetails === null ? '0' : vaultDetails.requiredCollateralizationRatioString}%</p>
               </div>
             </div>
           </div>
@@ -185,7 +174,8 @@ function Index() {
             handleClose={closeManagePosition}
             signer={signer}
             userAddress={userAddress}
-            vault={vault}
+            envIndex={selectedAssetEnvIndex}
+            basicInfo={BasicInfo}
           />
         </Modal>
 
@@ -200,6 +190,8 @@ function Index() {
             handleClose={handleClose2}
             signer={signer}
             userAddress={userAddress}
+            envIndex={selectedAssetEnvIndex}
+            basicInfo={BasicInfo}
           />
         </Modal>
 

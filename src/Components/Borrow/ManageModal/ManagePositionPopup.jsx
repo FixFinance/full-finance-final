@@ -4,7 +4,7 @@ import "./managepopup.scss";
 import SuccessModal from "../../Success/SuccessModal";
 import ErrorModal from '../../ErrorModal/Errormodal';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../../Utils/StringAlteration.js';
-import { TOTAL_SBPS, _0, INF, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS, COLLATERAL_ESCROW_ADDRESSES } from '../../../Utils/Consts.js';
+import { TOTAL_SBPS, _0, INF } from '../../../Utils/Consts.js';
 import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../../EthersProvider/EthersProvider';
 import { getSendTx } from '../../../Utils/SendTx';
@@ -15,6 +15,10 @@ import weth_logo from '../../../assets/image/weth.svg'
 import steth_logo from '../../../assets/image/lidosteth.png';
 import dropdown_button from '../../../assets/image/dropdown-button.svg';
 import dropdown_deactive from '../../../assets/image/dropdown_deactive.svg'
+
+let COLLATERAL_ADDRESSES = [];
+let COLLATERAL_SYMBOLS = [];
+let COLLATERAL_ESCROW_ADDRESSES = [];
 
 const ManagePositionPopup = ({
     handleClose,

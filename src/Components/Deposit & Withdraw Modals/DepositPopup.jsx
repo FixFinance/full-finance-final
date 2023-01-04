@@ -10,9 +10,9 @@ import { LoginContext } from "../../helper/userContext";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration.js';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { _0, INF } from '../../Utils/Consts';
+import { ENV_ASSET_DECIMALS } from '../../Utils/Env';
 import { getAssetBalanceString, getFLTUnderlyingValue, getFLTUnderlyingValueString } from '../../Utils/EthersStateProcessing';
 import { ControlledInput } from '../ControlledInput/ControlledInput';
-// import { TxComponent } from "../../ShareModules/TxComponent/TxComponent";
 
 const IERC20ABI = require('../../abi/IERC20.json');
 const IMetaMoneyMarketABI = require('../../abi/IMetaMoneyMarket.json');
@@ -21,7 +21,7 @@ const ENV_TICKERS = JSON.parse(process.env.REACT_APP_TICKERS);
 const ENV_ASSETS = JSON.parse(process.env.REACT_APP_LISTED_ASSETS);
 const ENV_ESCROWS = JSON.parse(process.env.REACT_APP_ESCROWS);
 
-const getPureInput = (input) => input.substring(0, input.length-4);
+const getPureInput = (input, ticker) => input.substring(0, input.length-1-ticker.length);
 
 const DepositPopup = ({ handleClose, basicInfo, assetEnvIndex }) => {
   const [success, setSuccess] = useState(false);
@@ -42,12 +42,14 @@ const DepositPopup = ({ handleClose, basicInfo, assetEnvIndex }) => {
 
   const balanceString = getAssetBalanceString(basicInfo.assetBals, assetEnvIndex);
   const lsValueString = getFLTUnderlyingValueString(basicInfo.fltBals, basicInfo.irmInfo, assetEnvIndex);
-  const absoluteInput = BN.from(getAbsoluteString('0'+getPureInput(input), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
+
+  const TICKER = ENV_TICKERS[assetEnvIndex];
+
+  const absoluteInput = BN.from(getAbsoluteString('0'+getPureInput(input, TICKER), ENV_ASSET_DECIMALS[assetEnvIndex]));
 
   const [provider, userAddress] = getWalletInfo();
   const signer = provider == null ? null : provider.getSigner();
 
-  const TICKER = ENV_TICKERS[assetEnvIndex];
 
   const updateRelevantInfo = () => {
     updateBasicInfo({assetBals: true, assetAllowances: true, fltBals: true, irmInfo: true});
@@ -94,7 +96,6 @@ const DepositPopup = ({ handleClose, basicInfo, assetEnvIndex }) => {
         return;
       }
       if (absoluteInput.gt(assetApproval) || assetApproval.eq(BN.from(0))) {
-        console.log("CASE A");
         setWaitConfirmation(true);
         setDisabled(true);
         await SendTx(userAddress, ASSET, 'approve', [ENV_ESCROWS[assetEnvIndex], INF.toString()]);
@@ -192,7 +193,7 @@ const DepositPopup = ({ handleClose, basicInfo, assetEnvIndex }) => {
 
             </div>
             <div className="text-center mb-4">
-            {Number(balanceString) < getPureInput(input) ?
+            {Number(balanceString) < getPureInput(input, TICKER) ?
               <button
                 className="btn btn-deactive"
               >
@@ -200,7 +201,7 @@ const DepositPopup = ({ handleClose, basicInfo, assetEnvIndex }) => {
               </button>
             :
               <>
-              {input === '' || Number(getPureInput(input)) === 0 ?
+              {input === '' || Number(getPureInput(input, TICKER)) === 0 ?
                 <>
                 {wasError &&
                   <p className="text-center error-text" style={{ color: '#ef767a'}}>Something went wrong. Try again later.</p>

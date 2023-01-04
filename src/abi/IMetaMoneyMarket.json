@@ -39,6 +39,34 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "vaultOwner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "index",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "amountIsUnderlying",
+        "type": "bool"
+      }
+    ],
+    "name": "borrowExistingDebt",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "_index",
         "type": "uint256"
@@ -60,6 +88,39 @@
       }
     ],
     "name": "borrowFromSegmentedVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vaultOwner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "expectedIndex",
+        "type": "uint8"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "amountIsUnderlying",
+        "type": "bool"
+      }
+    ],
+    "name": "borrowNewDebt",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -242,7 +303,7 @@
           }
         ],
         "internalType": "struct MetaMoneyMarketData.ConnectedVault",
-        "name": "",
+        "name": "vault",
         "type": "tuple"
       }
     ],
@@ -494,7 +555,7 @@
       },
       {
         "internalType": "uint256[]",
-        "name": "newCollateralLendShareAmounts",
+        "name": "newCollateralAmounts",
         "type": "uint256[]"
       },
       {
@@ -504,7 +565,7 @@
       },
       {
         "internalType": "uint256[]",
-        "name": "newDebtShareAmounts",
+        "name": "newDebtAmounts",
         "type": "uint256[]"
       }
     ],
@@ -578,6 +639,34 @@
   {
     "inputs": [],
     "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vaultOwner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "index",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "amountIsUnderlying",
+        "type": "bool"
+      }
+    ],
+    "name": "repayDebt",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -826,6 +915,67 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "vaultOwner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "index",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "amountIsUnderlying",
+        "type": "bool"
+      }
+    ],
+    "name": "supplyExistingCollateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vaultOwner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "expectedIndex",
+        "type": "uint8"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "amountIsUnderlying",
+        "type": "bool"
+      }
+    ],
+    "name": "supplyNewCollateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "_index",
         "type": "uint256"
@@ -954,6 +1104,34 @@
       }
     ],
     "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vaultOwner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "index",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "amountIsUnderlying",
+        "type": "bool"
+      }
+    ],
+    "name": "withdrawCollateral",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

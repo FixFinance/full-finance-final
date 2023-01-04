@@ -162,11 +162,14 @@ export function updateVaultDetails(effectivePrimaryState, setState) {
     let totalAdjSuppliedUSDValueString = getDecimalString(totalAdjSuppliedUSDValue.toString(), 18, 2);
     let totalAdjBorrowedUSDValueString = getDecimalString(totalAdjBorrowedUSDValue.toString(), 18, 2);
 
-
     let effCollateralizationRatioString = effCollateralizationRatio.gte(INF) ? INF_CHAR : getDecimalString(effCollateralizationRatio.toString(), 16, 2);
     let requiredCollateralizationRatioString = getDecimalString(requiredCollateralizationRatio.toString(), 16, 2);
 
     vaultDetails = {
+        totalSuppliedUSDValue,
+        totalBorrowedUSDValue,
+        totalAdjSuppliedUSDValue,
+        totalAdjBorrowedUSDValue,
         totalSuppliedUSDValueString,
         totalBorrowedUSDValueString,
         totalAdjSuppliedUSDValueString,

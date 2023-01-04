@@ -1,62 +1,77 @@
 import React, { useState, useContext, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
-import { BigNumber as BN } from 'ethers';
+import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
-import { TOTAL_SBPS, INF, _0, COLLATERAL_ADDRESSES, COLLATERAL_SYMBOLS, COLLATERAL_ESCROW_ADDRESSES } from '../../Utils/Consts';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
+import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
+import { ENV_TICKERS, ENV_ESCROWS, ENV_ASSETS, ENV_MMM_ADDRESS } from '../../Utils/Env';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
+import { getAssetInfApprovalAmount, getAssetBalanceString, getImplCollatRatioStrings } from '../../Utils/EthersStateProcessing';
 import './add-withdraw.scss';
+
+const IERC20ABI = require('../../abi/IERC20.json');
+const IMetaMoneyMarketABI = require('../../abi/IMetaMoneyMarket.json');
+
+let COLLATERAL_ADDRESSES = [];
+let COLLATERAL_SYMBOLS = [];
+let COLLATERAL_ESCROW_ADDRESSES = [];
+
+const SUCCESS_STATUS = {
+  BASE: 0,
+  APPROVAL_SUCCESS: 1,
+  ADD_SUCCESS: 2,
+  ERROR: 3
+}
+
 
 const AddCollateral = ({
   handleClose,
   userAddress,
-  CMM,
-  CASSET,
-  vault,
-  forceUpdateVault
+  signer,
+  envIndex,
+  basicInfo
 }) => {
-  const SUCCESS_STATUS = {
-    BASE: 0,
-    APPROVAL_SUCCESS: 1,
-    ADD_SUCCESS: 2,
-    ERROR: 3
-  }
+
+  console.log("RENDER ADD COLLATERAL ", envIndex);
+
   const [success, setSuccess] = useState(SUCCESS_STATUS.BASE);
   const [wasError, setWasError] = useState(false);
   const [waitConfirmation, setWaitConfirmation] = useState(false);
   const [sentState, setSentState] = useState(false);
   const [disabled, setDisabled] = useState(false);
 
-
   const [input, setInput] = useState('');
-  const [walletBalance, setWalletBalance] = useState(null);
-  const [collApproval, setCollApproval] = useState(null);
 
   const [, , updateBasicInfo] = useContext(EthersContext);
 
-  const CollateralIndex = COLLATERAL_ADDRESSES.indexOf(CASSET.address);
-  const CollateralSymbol = COLLATERAL_SYMBOLS[CollateralIndex];
-  const EscrowAddress = CollateralIndex === -1 ? null : COLLATERAL_ESCROW_ADDRESSES[CollateralIndex];
+  const {
+    assetBals,
+    assetAllowances,
+    aggInfo,
+    irmInfo,
+    vault,
+    vaultDetails
+  } = basicInfo;
 
-  useEffect(() => {
-    if (walletBalance == null) {
-      CASSET.balanceOf(userAddress).then(res => setWalletBalance(res));
-    }
-    if (collApproval == null) {
-      CASSET.allowance(userAddress, EscrowAddress).then(res => setCollApproval(res));
-    }
-  }, [walletBalance, collApproval]);
+  const walletBalance = assetBals === null ? null : assetBals[envIndex];
+  const collApproval = assetAllowances === null ? null : assetAllowances[envIndex];
+
+  const TICKER = ENV_TICKERS[envIndex];
 
   const absInputAmt = BN.from(getAbsoluteString(input, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
-  const impliedAmountSupplied = vault.amountSupplied.add(absInputAmt);
-  const impliedCollateralizationRatio = vault.collateralizationRatio.mul(impliedAmountSupplied).div(vault.amountSupplied);
 
-  const walletBalString = walletBalance == null ? '0' : getDecimalString(walletBalance.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
-  const currentCollRatioString = vault.collateralizationRatio == null ? '0' : getDecimalString(vault.collateralizationRatio.toString(), 16, 2);
-  const impliedCollRatioString = getDecimalString(impliedCollateralizationRatio.toString(), 16, 2);
+  const walletBalString = getAssetBalanceString(assetBals, envIndex);
+  const currentCollRatioString = vaultDetails === null ? '0' : vaultDetails.effCollateralizationRatioString;
+  const {
+    implEffCollatRatioString,
+    implReqCollatRatioString
+  } = getImplCollatRatioStrings(vaultDetails, aggInfo, false, absInputAmt, envIndex);
+
+  let CASSET = signer == null ? null : new ethers.Contract(ENV_ASSETS[envIndex], IERC20ABI, signer);
+  let MMM = signer == null ? null : new ethers.Contract(ENV_MMM_ADDRESS, IMetaMoneyMarketABI, signer);
 
   const handleInput = (param) => {
     let value = param.target.value;
@@ -75,7 +90,7 @@ const AddCollateral = ({
   const TxCallback1 = async () => {
     setSentState(false);
     setDisabled(false);
-    updateBasicInfo();
+    updateBasicInfo({vault: true, assetBals: true, assetAllowances: true});
   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);
@@ -85,8 +100,7 @@ const AddCollateral = ({
       if (collApproval != null) {
         setWaitConfirmation(true);
         setDisabled(true);
-        await SendTx(userAddress, CASSET, 'approve', [EscrowAddress, INF.toString()]);
-        setCollApproval(null);
+        await SendTx(userAddress, CASSET, 'approve', [ENV_ESCROWS[envIndex], getAssetInfApprovalAmount(envIndex).toString()]);
         setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
         setWasError(false);
         setWaitConfirmation(false);
@@ -104,7 +118,7 @@ const AddCollateral = ({
       if (collApproval != null && walletBalance != null && !absInputAmt.eq(_0) && absInputAmt.lte(walletBalance)) {
         setWaitConfirmation(true);
         setDisabled(true);
-        await SendTx(userAddress, CMM, 'supplyToCVault', [vault.index, absInputAmt.toString()]);
+        await SendTx(userAddress, MMM, 'supplyToCVault', [envIndex, absInputAmt.toString()]);
         setSuccess(SUCCESS_STATUS.ADD_SUCCESS);
         setWasError(false);
         setWaitConfirmation(false);
@@ -119,7 +133,6 @@ const AddCollateral = ({
 
   const handleClosesuccess = () => {
       if (success == SUCCESS_STATUS.APPROVAL_SUCCESS) {
-          setCollApproval(null);
           setSuccess(SUCCESS_STATUS.BASE);
       }
       else {
@@ -130,14 +143,13 @@ const AddCollateral = ({
   const handleErrorClose = () => {
     setSuccess(SUCCESS_STATUS.BASE);
     // force reload
-    setCollApproval(null);
     setInput('');
     handleClose();
   }
 
   const sufficientApproval = collApproval == null ? true : collApproval.gte(absInputAmt);
 
-  const buttonMessage = (sufficientApproval ? "Add " : "Approve ")+CollateralSymbol;
+  const buttonMessage = (sufficientApproval ? "Add " : "Approve ")+TICKER;
   const handleActionClick = sufficientApproval ? addCollateral : approveCollateral;
   const txMessage = sufficientApproval ? "Adding Collateral" : "Approving Collateral";
   const LoadingContents = sentState ? txMessage : 'Waiting For Confirmation';
@@ -152,7 +164,7 @@ const AddCollateral = ({
         </Modal.Header>
         <Modal.Body>
           <div className="text-center middle_part mt-3">
-            <p style={{ color: "#EDF0EB" }}>Collateral Amount {CollateralSymbol}</p>
+            <p style={{ color: "#EDF0EB" }}>Collateral Amount {TICKER}</p>
             <div className="form-group mt-3">
             <div className="relative">
                 <input
@@ -175,11 +187,11 @@ const AddCollateral = ({
             </div>
             <div className="d-flex justify-content-between text-part">
               <p style={{ color: "#7D8282" }}>Wallet balance</p>
-              <p style={{ color: "#7D8282" }}>{walletBalString} {CollateralSymbol}</p>
+              <p style={{ color: "#7D8282" }}>{walletBalString} {TICKER}</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
               <p style={{ color: "#7D8282" }}>Implied Coll. Ratio</p>
-              <p style={{ color: "#7D8282" }}>{impliedCollRatioString}%</p>
+              <p style={{ color: "#7D8282" }}>{implEffCollatRatioString}%</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
               <p style={{ color: "#7D8282" }}>Current Coll. Ratio</p>
@@ -187,7 +199,7 @@ const AddCollateral = ({
             </div>
             <div className="d-flex justify-content-between text-part mt-2">
               <p style={{ color: "#7D8282" }}>Minimum Coll. Ratio</p>
-              <p style={{ color: "#7D8282" }}>{process.env.REACT_APP_COLLATERALIZATION_FACTOR}%</p>
+              <p style={{ color: "#7D8282" }}>{implReqCollatRatioString}%</p>
             </div>
           </div>
 
