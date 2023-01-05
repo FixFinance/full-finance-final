@@ -1,25 +1,37 @@
 import React, { useState, useContext, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
-import { BigNumber as BN } from 'ethers';
+import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
-import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
+import { neg } from '../../Utils/BNtools';
+import { TOTAL_SBPS, INF, _0, GOOD_COLLAT_RATIO_MULTIPLIER } from '../../Utils/Consts';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
+import { ENV_MMM_ADDRESS, ENV_TICKERS, ENV_ASSETS, ENV_ASSET_DECIMALS } from '../../Utils/Env';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
+import { getImplCollatRatioStrings, isGoodCollatRatio } from '../../Utils/EthersStateProcessing';
 import './add-withdraw.scss';
 
-let COLLATERAL_ADDRESSES = [];
-let COLLATERAL_SYMBOLS = [];
+const IMetaMoneyMarketABI = require('../../abi/IMetaMoneyMarket.json');
+
+const toTrimmedString = x => {
+  let str = x.toString();
+  let halves = str.split('.');
+  if (halves.length < 2) {
+    return str;
+  }
+  else {
+    return halves[0] + '.' + halves[1].substring(0, 2);
+  }
+};
 
 const WithdrawCollateral = ({
   handleClose,
   userAddress,
-  CMM,
-  CASSET,
-  vault,
-  forceUpdateVault
+  signer,
+  envIndex,
+  basicInfo
 }) => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
@@ -29,24 +41,34 @@ const WithdrawCollateral = ({
   const [sentState, setSentState] = useState(false);
   const [disabled, setDisabled] = useState(false);
 
-
-  const minCollatRatioBN = BN.from(parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5).mul(BN.from(10).pow(BN.from(16)));
-  const minimumCollateral = BN.from(vault.amountSupplied).mul(minCollatRatioBN).div(vault.collateralizationRatio);
-  const absInputAmt = BN.from(getAbsoluteString(input, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
-  const impliedAmountSupplied = vault.amountSupplied.sub(absInputAmt);
-  const impliedCollateralizationRatio = vault.collateralizationRatio.mul(impliedAmountSupplied).div(vault.amountSupplied);
-
-  const amtSuppliedStringAbbreviated = getDecimalString(vault.amountSupplied.toString(), parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS), 5);
-  const currentCollRatioString = vault.collateralizationRatio == null ? '0' : getDecimalString(vault.collateralizationRatio.toString(), 16, 2);
-  const impliedCollRatioString = getDecimalString(impliedCollateralizationRatio.toString(), 16, 2);
-
-  const MIN_SAFE_COLLAT_RATIO = BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)).mul(BN.from(10).pow(BN.from(16)));
-  let resultantCollatRatioSafe = impliedCollateralizationRatio.gte(MIN_SAFE_COLLAT_RATIO);
-
   const [, , updateBasicInfo] = useContext(EthersContext);
 
-  const CollateralIndex = COLLATERAL_ADDRESSES.indexOf(CASSET.address);
-  const CollateralSymbol = COLLATERAL_SYMBOLS[CollateralIndex];
+  const {
+    assetBals,
+    assetAllowances,
+    aggInfo,
+    irmInfo,
+    vault,
+    vaultDetails
+  } = basicInfo;
+
+
+  const asset = ENV_ASSETS[envIndex];
+  const TICKER = ENV_TICKERS[envIndex];
+
+  const amountSupplied = vaultDetails === null ? null : vaultDetails[asset].suppliedUnderlying;
+  const absInputAmt = BN.from(getAbsoluteString(input, ENV_ASSET_DECIMALS[envIndex]));
+  const impliedAmountSupplied = amountSupplied === null ? null : amountSupplied.sub(absInputAmt);
+
+  const {
+    implEffCollatRatioString,
+    implReqCollatRatioString
+  } = getImplCollatRatioStrings(vaultDetails, aggInfo, false, neg(absInputAmt), envIndex);
+
+
+  const amtSuppliedStringAbbreviated = amountSupplied === null ? '0' : getDecimalString(amountSupplied.toString(), ENV_ASSET_DECIMALS[envIndex], 5);
+  const currentCollRatioString = vaultDetails === null ? '0' : vaultDetails.effCollateralizationRatioString;
+  const resultantCollatRatioSafe = isGoodCollatRatio(implEffCollatRatioString, implReqCollatRatioString);
 
   const handleInput = (param) => {
     let value = param.target.value;
@@ -61,17 +83,19 @@ const WithdrawCollateral = ({
   const TxCallback1 = async () => {
     setSentState(false);
     setDisabled(false);
-    updateBasicInfo();
+    updateBasicInfo({vault: true, assetBals: true, irmInfo: true});
   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);
 
   const handleClickWithdraw = async () => {
     try {
-      if (absInputAmt.gt(_0) && impliedAmountSupplied.gte(minimumCollateral)) {
+      if (absInputAmt.gt(_0) && resultantCollatRatioSafe) {
         setWaitConfirmation(true);
         setDisabled(true);
-        await SendTx(userAddress, CMM, 'withdrawFromCVault', [vault.index, absInputAmt.toString()]);
+        let MMM = new ethers.Contract(ENV_MMM_ADDRESS, IMetaMoneyMarketABI, signer);
+        const collatAssetIndex = vault.collateralAssets.indexOf(asset);
+        await SendTx(userAddress, MMM, 'withdrawCollateral', [userAddress, collatAssetIndex, absInputAmt.toString(), true]);
         setSuccess(true);
         setWasError(false);
         setWaitConfirmation(false);
@@ -121,11 +145,11 @@ const WithdrawCollateral = ({
             </div>
             <div className="d-flex justify-content-between text-part">
               <p style={{ color: "#7D8282" }}>Current Collateral</p>
-              <p style={{ color: "#7D8282" }}>{amtSuppliedStringAbbreviated} {CollateralSymbol}</p>
+              <p style={{ color: "#7D8282" }}>{amtSuppliedStringAbbreviated} {TICKER}</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
               <p style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>Implied Coll. Ratio</p>
-              <p style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>{impliedCollRatioString}%</p>
+              <p style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>{implEffCollatRatioString}%</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
               <p style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>Current Coll. Ratio</p>
@@ -133,11 +157,11 @@ const WithdrawCollateral = ({
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
               <p style={{ color: "#7D8282" }}>Min. Coll. Ratio</p>
-              <p style={{ color: "#7D8282" }}>{parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5}%</p>
+              <p style={{ color: "#7D8282" }}>{toTrimmedString(implReqCollatRatioString * GOOD_COLLAT_RATIO_MULTIPLIER)}%</p>
             </div>
             <div className="d-flex justify-content-between text-part mt-2">
               <p style={{ color: "#7D8282" }}>Liquidation Coll. Ratio</p>
-              <p style={{ color: "#7D8282" }}>{process.env.REACT_APP_COLLATERALIZATION_FACTOR}%</p>
+              <p style={{ color: "#7D8282" }}>{implReqCollatRatioString}%</p>
             </div>
           </div>
 
@@ -173,7 +197,7 @@ const WithdrawCollateral = ({
                 :
                   <button className="btn btn-deactive btn-active " onClick={handleClickWithdraw}>
                     {" "}
-                    Withdraw {CollateralSymbol}
+                    Withdraw {TICKER}
                   </button>
                 }
                 </>

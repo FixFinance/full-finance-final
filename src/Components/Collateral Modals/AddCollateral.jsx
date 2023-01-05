@@ -6,7 +6,7 @@ import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
-import { ENV_TICKERS, ENV_ESCROWS, ENV_ASSETS, ENV_MMM_ADDRESS } from '../../Utils/Env';
+import { ENV_TICKERS, ENV_ESCROWS, ENV_ASSETS, ENV_ASSET_DECIMALS, ENV_MMM_ADDRESS } from '../../Utils/Env';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
 import { getAssetInfApprovalAmount, getAssetBalanceString, getImplCollatRatioStrings } from '../../Utils/EthersStateProcessing';
@@ -59,7 +59,7 @@ const AddCollateral = ({
 
   const TICKER = ENV_TICKERS[envIndex];
 
-  const absInputAmt = BN.from(getAbsoluteString(input, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
+  const absInputAmt = BN.from(getAbsoluteString(input, ENV_ASSET_DECIMALS[envIndex]));
 
   const walletBalString = getAssetBalanceString(assetBals, envIndex);
   const currentCollRatioString = vaultDetails === null ? '0' : vaultDetails.effCollateralizationRatioString;
@@ -87,7 +87,7 @@ const AddCollateral = ({
   const TxCallback1 = async () => {
     setSentState(false);
     setDisabled(false);
-    updateBasicInfo({vault: true, assetBals: true, assetAllowances: true});
+    updateBasicInfo({vault: true, assetBals: true, assetAllowances: true, irmInfo: true});
   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);

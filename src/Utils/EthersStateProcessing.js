@@ -1,5 +1,8 @@
 import { BigNumber as BN } from 'ethers';
-import { _0, _1, _2, TOTAL_SBPS, INF, INF_CHAR } from './Consts.js';
+import {
+	_0, _1, _2, TOTAL_SBPS, INF, INF_CHAR,
+	GOOD_COLLAT_RATIO_MULTIPLIER
+} from './Consts.js';
 import { getDecimalString } from './StringAlteration';
 
 const ENV_ASSETS = JSON.parse(process.env.REACT_APP_LISTED_ASSETS);
@@ -182,25 +185,6 @@ export function getImplCollatRatioStrings(vaultDetails, aggInfo, isDebt, changeU
 	};
 }
 
-export function getResultantVaultState(vault, irmInfo, isDebt, changeUnderlying, envIndex) {
-	let {
-		collateralAssets,
-		collateralLendShareAmounts,
-		debtAssets,
-		debtShareAmounts,
-	} = vault;
-	let ASSET = ENV_ASSETS[envIndex];
-	if (isDebt) {
-		let ind = debtAssets.indexOf(ASSET);
-		if (ind === -1) {
-			//insert into list
-		}
-		else {
-
-		}
-	}
-	else {
-		let ind = collateralAssets.indexOf(ASSET);
-
-	}
+export function isGoodCollatRatio(effCollatRatioString, requiredCollatRatioString) {
+	return parseFloat(effCollatRatioString)-1 > (parseFloat(requiredCollatRatioString)-1) * GOOD_COLLAT_RATIO_MULTIPLIER;
 }
