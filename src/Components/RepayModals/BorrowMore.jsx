@@ -1,30 +1,30 @@
 import React, {useState, useContext, useEffect} from "react";
 import Modal from "react-bootstrap/Modal";
-import { BigNumber as BN } from 'ethers';
+import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
-import { TOTAL_SBPS, INF, _0 } from '../../Utils/Consts';
+import { ENV_MMM_ADDRESS, ENV_TICKERS, ENV_ASSETS, ENV_ASSET_DECIMALS } from '../../Utils/Env';
+import { TOTAL_SBPS, INF, _0, GOOD_COLLAT_RATIO_MULTIPLIER } from '../../Utils/Consts';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
-import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
+import { getAssetBalanceString, getImplCollatRatioStrings, isGoodCollatRatio } from '../../Utils/EthersStateProcessing';
+import { toTrimmedString, filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
 import './collateral-ratio.scss';
 import { BNmin, BNmax } from '../../Utils/BNtools';
+
+const IMetaMoneyMarketABI = require('../../abi/IMetaMoneyMarket.json');
 
 const BorrowMore=({
   handleClose,
   userAddress,
-  CMM,
-  DAI,
-  vault,
-  forceUpdateVault,
-  supplyBorrowedBN,
-  supplyLentBN
+  signer,
+  envIndex,
+  basicInfo
 })=> {
 
   const [success, setSuccess] = useState(false);
   const [input, setInput] = useState('');
-  const [balanceDASSET, setBalanceDASSET] = useState(null);
 
   const [error, setError] = useState(false);
   const [wasError, setWasError] = useState(false);
@@ -34,29 +34,33 @@ const BorrowMore=({
 
   const [, , updateBasicInfo] = useContext(EthersContext);
 
-  useEffect(() => {
-    if (balanceDASSET == null) {
-      DAI.balanceOf(userAddress).then(res => setBalanceDASSET(res));
-    }
-  }, [balanceDASSET]);
+  const {
+    assetBals,
+    aggInfo,
+    irmInfo,
+    vault,
+    vaultDetails
+  } = basicInfo;
 
-  const absInputAmt = BN.from(getAbsoluteString(input, parseInt(process.env.REACT_APP_COLLATERAL_DECIMALS)));
+  const asset = ENV_ASSETS[envIndex];
+  const TICKER = ENV_TICKERS[envIndex];
+
+  const absInputAmt = BN.from(getAbsoluteString(input, ENV_ASSET_DECIMALS[envIndex]));
 
   //Borrow-Lend Supply Difference
-  const BLSdiff = supplyBorrowedBN != null && supplyLentBN != null ? supplyLentBN.sub(supplyBorrowedBN) : _0;
+  const BLSdiff = irmInfo === null ? _0 : irmInfo[envIndex].supplyLent.sub(irmInfo[envIndex].supplyBorrowed);
 
-  const minCollatRatioBN = BN.from(parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5).mul(BN.from(10).pow(BN.from(16)));
-  const maxBorrowObligation = BNmin(vault.borrowObligation.mul(vault.collateralizationRatio).div(minCollatRatioBN), BLSdiff.add(vault.borrowObligation));
-  const resultantBorrowObligation = vault.borrowObligation.add(absInputAmt);
-  const resultantCollateralizationRatio = vault.collateralizationRatio.mul(vault.borrowObligation).div(resultantBorrowObligation);
+  const startingBorrowObligation = (vaultDetails === null || vaultDetails[asset] === undefined ? _0 : vaultDetails[asset].borrowedUnderlying);
+  const resultantBorrowObligation = startingBorrowObligation.add(absInputAmt);
+  const {
+    implEffCollatRatioString,
+    implReqCollatRatioString
+  } = getImplCollatRatioStrings(vaultDetails, aggInfo, true, absInputAmt, envIndex);
 
-  const borrowObligationString = getDecimalString(vault.borrowObligation.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 3);
-  const balanceDASSETString = balanceDASSET == null ? '0' : getDecimalString(balanceDASSET.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 3);
-  const currentCollRatioString = getDecimalString(vault.collateralizationRatio.toString(), 16, 2);
-  const resultantCollRatioString = getDecimalString(resultantCollateralizationRatio.toString(), 16, 2);
+  const borrowObligationString = getDecimalString(startingBorrowObligation.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 3);
+  const balanceDebtString = getAssetBalanceString(assetBals, envIndex, 5);
 
-  const MIN_SAFE_COLLAT_RATIO = BN.from(process.env.REACT_APP_COLLATERALIZATION_FACTOR).add(BN.from(5)).mul(BN.from(10).pow(BN.from(16)));
-  let resultantCollatRatioSafe = resultantCollateralizationRatio.gte(MIN_SAFE_COLLAT_RATIO);
+  const resultantCollatRatioSafe = isGoodCollatRatio(implEffCollatRatioString, implReqCollatRatioString);
 
   const TxCallback0 = async () => {
     setSentState(true);
@@ -65,7 +69,7 @@ const BorrowMore=({
   const TxCallback1 = async () => {
     setSentState(false);
     setDisabled(false);
-    updateBasicInfo();
+    updateBasicInfo({assetBals: true, vault: true, irmInfo: true});
   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);
@@ -78,10 +82,19 @@ const BorrowMore=({
 
   const handleClickBorrow = async () => {
     try {
-      if (resultantBorrowObligation.lte(maxBorrowObligation)) {
+      if (resultantCollatRatioSafe && absInputAmt.lte(BLSdiff) && vault !== null) {
         setWaitConfirmation(true);
         setDisabled(true);
-        await SendTx(userAddress, CMM, 'borrowFromCVault', [vault.index, absInputAmt.toString(), true]);
+        const MMM = new ethers.Contract(ENV_MMM_ADDRESS, IMetaMoneyMarketABI, signer);
+        if (vault.debtAssets.indexOf(asset) === -1) {
+          let expectedIndex = 0;
+          for (;expectedIndex<vault.debtAssets.length && BN.from(vault.debtAssets[expectedIndex]).lt(BN.from(asset)); expectedIndex++) {}
+          await SendTx(userAddress, MMM, 'borrowNewDebt', [userAddress, expectedIndex, asset, absInputAmt.toString(), true]);
+        }
+        else {
+          let index = vault.debtAssets.indexOf(asset);
+          await SendTx(userAddress, MMM, 'borrowExistingDebt', [userAddress, index, absInputAmt.toString(), true])
+        }
         setSuccess(true);
         setWaitConfirmation(false);
         setWasError(false);
@@ -103,7 +116,7 @@ const BorrowMore=({
     handleClose();
   }
 
-  const LoadingContents = sentState ? "Borrowing DAI" : 'Waiting For Confirmation';
+  const LoadingContents = sentState ? "Borrowing "+TICKER : 'Waiting For Confirmation';
 
   const BaseContents = (
     !success && !error &&
@@ -130,36 +143,36 @@ const BorrowMore=({
                 </div>
           </div>
           <div className="d-flex justify-content-between text-part">
-            <p style={{ color: "#7D8282" }}>DAI Balance</p>
-            <p style={{ color: "#7D8282" }}>{balanceDASSETString} DAI</p>
+            <p style={{ color: "#7D8282" }}>{TICKER} Balance</p>
+            <p style={{ color: "#7D8282" }}>{balanceDebtString} {TICKER}</p>
           </div>
           <div className="d-flex justify-content-between text-part border_bottom">
             <p style={{ color: "#7D8282" }}>Debt amount</p>
             <div>
-              <p style={{ color: "#7D8282" }}>{borrowObligationString} DAI</p>
-              {/* <p style={{ color: "#7D8282" }}>→ 500.00 DAI</p> */}
+              <p style={{ color: "#7D8282" }}>{borrowObligationString} {TICKER}</p>
+              {/* <p style={{ color: "#7D8282" }}>→ 500.00 {TICKER}</p> */}
             </div>
           </div>
           <div className={"d-flex justify-content-between text-part mt-2 border_bottom"} style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>
             <p>Current Coll. Ratio</p>
-            <p>{currentCollRatioString}%</p>
+            <p>{vaultDetails === null ? '0' : vaultDetails.effCollateralizationRatioString}%</p>
           </div>
           <div className={"d-flex justify-content-between text-part mt-2 border_bottom"} style={resultantCollatRatioSafe ? { color: "#7D8282" } : { color: "#EF767A" }}>
             <p>Resultant Coll. Ratio</p>
-            <p>{resultantCollRatioString}%</p>
+            <p>{implEffCollatRatioString}%</p>
           </div>
           <div className="d-flex justify-content-between text-part mt-2 border_bottom">
             <p style={{ color: "#7D8282" }}>Liquidaiton Coll. Ratio</p>
-            <p style={{ color: "#7D8282" }}>{parseInt(process.env.REACT_APP_COLLATERALIZATION_FACTOR)+5}%</p>
+            <p style={{ color: "#7D8282" }}>{implReqCollatRatioString}%</p>
           </div>
           <div className="d-flex justify-content-between text-part mt-2">
             <p style={{ color: "#7D8282" }}>Minimum Coll. Ratio</p>
-            <p style={{ color: "#7D8282" }}>{process.env.REACT_APP_COLLATERALIZATION_FACTOR}%</p>
+            <p style={{ color: "#7D8282" }}>{toTrimmedString(implReqCollatRatioString * GOOD_COLLAT_RATIO_MULTIPLIER)}%</p>
           </div>
         </div>
 
         <div className="text-center mb-4">
-        {Number(balanceDASSETString) < Number(input) ?
+        {Number(balanceDebtString) < Number(input) ?
               <button
                 className="btn btn-deactive"
               >
@@ -188,7 +201,7 @@ const BorrowMore=({
                     <span className="ms-3">{LoadingContents}</span>
                   </button>
                 :
-                  <button className="btn btn-deactive btn-active " onClick={handleClickBorrow}> Borrow DAI</button>
+                  <button className="btn btn-deactive btn-active " onClick={handleClickBorrow}> Borrow {TICKER}</button>
                 }
                 </>
               }

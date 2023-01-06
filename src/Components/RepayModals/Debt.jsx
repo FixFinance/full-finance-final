@@ -1,21 +1,26 @@
 import React, {useState, useContext, useEffect} from "react";
 import Modal from "react-bootstrap/Modal";
-import { BigNumber as BN } from 'ethers';
+import { ethers, BigNumber as BN } from 'ethers';
 import { EthersContext } from '../EthersProvider/EthersProvider';
 import SuccessModal from "../Success/SuccessModal";
 import ErrorModal from "../ErrorModal/Errormodal";
+import { ENV_MMM_ADDRESS, ENV_TICKERS, ENV_ASSETS, ENV_ASSET_DECIMALS, ENV_ESCROWS } from '../../Utils/Env';
 import { TOTAL_SBPS, INF, _0, INF_CHAR } from '../../Utils/Consts';
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
+import { getAssetInfApprovalAmount, getAssetBalanceString, getImplCollatRatioStrings } from '../../Utils/EthersStateProcessing';
 import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
+import { neg } from '../../Utils/BNtools';
+
+const IMetaMoneyMarketABI = require('../../abi/IMetaMoneyMarket.json');
+const IERC20ABI = require('../../abi/IERC20.json');
 
 const Debt = ({
   handleClose,
   userAddress,
-  CMM,
-  DAI,
-  vault,
-  forceUpdateVault
+  signer,
+  envIndex,
+  basicInfo
 }) => {
   const SUCCESS_STATUS = {
     BASE: 0,
@@ -30,29 +35,35 @@ const Debt = ({
 
 
   const [input, setInput] = useState('');
-  const [balanceDASSET, setBalanceDASSET] = useState(null);
-  const [approvalDASSET, setAllowanceDASSET] = useState(null);
   const [maxClicked, setMaxClicked] = useState(false);
 
   const [, , updateBasicInfo] = useContext(EthersContext);
 
-  useEffect(() => {
-    if (balanceDASSET == null) {
-      DAI.balanceOf(userAddress).then(res => setBalanceDASSET(res));
-    }
-    if (approvalDASSET == null) {
-      DAI.allowance(userAddress, CMM.address).then(res => setAllowanceDASSET(res));
-    }
-  }, [balanceDASSET, approvalDASSET]);
+  const {
+    assetBals,
+    assetAllowances,
+    aggInfo,
+    irmInfo,
+    vault,
+    vaultDetails
+  } = basicInfo;
 
-  const absInputAmt = BN.from(getAbsoluteString(input.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS)));
-  const impliedBorrowObligation = vault.borrowObligation.sub(absInputAmt);
-  const resultantCollateralizationRatio = vault.collateralizationRatio.mul(vault.borrowObligation).div(impliedBorrowObligation);
+  const asset = ENV_ASSETS[envIndex];
+  const TICKER = ENV_TICKERS[envIndex];
 
-  const borrowObligationString = getDecimalString(vault.borrowObligation.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 3);
-  const balanceDAIString = balanceDASSET == null ? '0' : getDecimalString(balanceDASSET.toString(), parseInt(process.env.REACT_APP_BASE_ASSET_DECIMALS), 3);
-  const currentCollRatioString = getDecimalString(vault.collateralizationRatio.toString(), 16, 2);
-  const resultantCollRatioString = impliedBorrowObligation.lte(_0) ? INF_CHAR : getDecimalString(resultantCollateralizationRatio.toString(), 16, 2);
+  const balanceDebtAsset = assetBals === null ? _0 : assetBals[envIndex];
+  const approvalDebtAsset = assetAllowances === null ? _0 : assetAllowances[envIndex];
+  const absInputAmt = BN.from(getAbsoluteString(input.toString(), ENV_ASSET_DECIMALS[envIndex]));
+  const startingBorrowObligation = (vaultDetails === null || vaultDetails[asset] === undefined ? _0 : vaultDetails[asset].borrowedUnderlying);
+  const resultantBorrowObligation = startingBorrowObligation.add(absInputAmt);
+  const currEffCollatRatioString = vaultDetails === null ? '0' : vaultDetails.effCollateralizationRatioString;
+  const {
+    implEffCollatRatioString,
+    implReqCollatRatioString
+  } = getImplCollatRatioStrings(vaultDetails, aggInfo, true, neg(maxClicked ? startingBorrowObligation : absInputAmt), envIndex);
+
+  const borrowObligationString = getDecimalString(startingBorrowObligation.toString(), ENV_ASSET_DECIMALS[envIndex], 5);
+  const balanceDebtString = getAssetBalanceString(assetBals, envIndex, 5);
 
   const handleInput = (param) => {
     let value = param.target.value;
@@ -75,27 +86,35 @@ const Debt = ({
   const TxCallback1 = async () => {
     setSentState(false);
     setDisabled(false);
-    updateBasicInfo();
+    updateBasicInfo({vault: true, irmInfo: true, assetAllowances: true, assetBals: true});
   }
 
   const SendTx = getSendTx(TxCallback0, TxCallback1);
 
   const handleClickRepay = async () => {
     try {
-      if (balanceDASSET != null && approvalDASSET != null && balanceDASSET.gte(absInputAmt)) {
+      if (![balanceDebtAsset, approvalDebtAsset].includes(null) && balanceDebtAsset.gte(absInputAmt)) {
+        setWaitConfirmation(true);
+        setDisabled(true);
+        const MMM = new ethers.Contract(ENV_MMM_ADDRESS, IMetaMoneyMarketABI, signer);
+        let debtIndex = vault === null ? -1 : vault.debtAssets.indexOf(asset);
+        if (debtIndex === -1) {
+          throw Error("Invalid index in vault.debtAssets of target repay asset");
+        }
         if (maxClicked) {
-          setWaitConfirmation(true);
-          setDisabled(true);
-          await SendTx(userAddress, CMM, 'repayCVault', [vault.index, vault.borrowSharesOwed.toString(), false]);
-          setWasError(false);
-          setWaitConfirmation(false);
+          let {
+            collateralAssets,
+            collateralLendShareAmounts,
+            debtAssets,
+            debtShareAmounts
+          } = vault;
+          debtAssets = debtAssets.filter((x, i) => i !== debtIndex);
+          debtShareAmounts = debtShareAmounts.filter((x, i) => i !== debtIndex).map(x => x.toString());
+          collateralLendShareAmounts = collateralLendShareAmounts.map(x => x.toString());
+          await SendTx(userAddress, MMM, 'manageConnectedVault', [userAddress, collateralAssets, collateralLendShareAmounts, debtAssets, debtShareAmounts]);
         }
         else {
-          setWaitConfirmation(true);
-          setDisabled(true);
-          await SendTx(userAddress, CMM, 'repayCVault', [vault.index, absInputAmt.toString(), true]);
-          setWasError(false);
-          setWaitConfirmation(false);
+          await SendTx(userAddress, MMM, 'repayDebt', [userAddress, debtIndex, absInputAmt.toString(), true]);
         }
         setSuccess(SUCCESS_STATUS.REPAY_SUCCESS);
         setWasError(false);
@@ -111,10 +130,12 @@ const Debt = ({
 
   const handleClickApprove = async () => {
     try {
-      if (balanceDASSET != null && approvalDASSET != null) {
+      if (![balanceDebtAsset, approvalDebtAsset].includes(null)) {
         setWaitConfirmation(true);
         setDisabled(true);
-        await SendTx(userAddress, DAI, 'approve', [CMM.address, INF.toString()]);
+        const AssetContract = new ethers.Contract(asset, IERC20ABI, signer);
+        const infApprovalAmount = getAssetInfApprovalAmount(envIndex).toString();
+        await SendTx(userAddress, AssetContract, 'approve', [ENV_ESCROWS[envIndex], infApprovalAmount]);
         setSuccess(SUCCESS_STATUS.APPROVAL_SUCCESS);
         setMaxClicked(false);
         setInput('');
@@ -131,7 +152,6 @@ const Debt = ({
 
   const handleClosesuccess = () => {
     if (success === SUCCESS_STATUS.APPROVAL_SUCCESS) {
-      setAllowanceDASSET(null);
       setSuccess(SUCCESS_STATUS.BASE);
     }
     else {
@@ -142,16 +162,15 @@ const Debt = ({
   const handleErrorClose = () => {
     setSuccess(SUCCESS_STATUS.BASE);
     // force reload
-    setAllowanceDASSET(null);
     setInput('');
     handleClose();
   }
 
-  const sufficientApproval = balanceDASSET == null || approvalDASSET == null || (approvalDASSET.gte(absInputAmt) && !approvalDASSET.eq(_0));
+  const sufficientApproval = [balanceDebtAsset, approvalDebtAsset].includes(null) || (approvalDebtAsset.gte(absInputAmt) && !approvalDebtAsset.eq(_0));
 
-  const buttonMessage = sufficientApproval ? "Repay DAI" : "Approve DAI";
+  const buttonMessage = (sufficientApproval ? "Repay " : "Approve ")+TICKER;
   const onClick = sufficientApproval ? handleClickRepay : handleClickApprove;
-  const txMessage = sufficientApproval ? "Repaying Debt" : "Approving DAI";
+  const txMessage = sufficientApproval ? "Repaying Debt" : "Approving "+TICKER;
   const LoadingContents = sentState ? txMessage : 'Waiting For Confirmation';
 
   const BaseContents = (
@@ -180,32 +199,32 @@ const Debt = ({
             </div>
             <div className="d-flex justify-content-between text-part">
               <p style={{ color: "#7D8282" }}>Current debt</p>
-              <p style={{ color: "#7D8282" }}>{borrowObligationString} DAI</p>
+              <p style={{ color: "#7D8282" }}>{borrowObligationString} {TICKER}</p>
             </div>
             <div className="d-flex justify-content-between text-part border_bottom">
-              <p style={{ color: "#7D8282" }}>Balance DAI</p>
+              <p style={{ color: "#7D8282" }}>Balance {TICKER}</p>
               <div>
-                <p style={{ color: "#7D8282" }}>{balanceDAIString} DAI</p>
+                <p style={{ color: "#7D8282" }}>{balanceDebtString} {TICKER}</p>
               </div>
             </div>
             <div className="d-flex justify-content-between text-part mt-2 border_bottom">
               <p style={{ color: "#7D8282" }}>Resultant Coll. Ratio</p>
-              <p style={{ color: "#7D8282" }}>{resultantCollRatioString}%</p>
+              <p style={{ color: "#7D8282" }}>{implEffCollatRatioString}%</p>
             </div>
 
             <div className="d-flex justify-content-between text-part mt-2 border_bottom">
               <p style={{ color: "#7D8282" }}>Current Coll. Ratio</p>
-              <p style={{ color: "#7D8282" }}>{currentCollRatioString}%</p>
+              <p style={{ color: "#7D8282" }}>{currEffCollatRatioString}%</p>
             </div>
 
             <div className="d-flex justify-content-between text-part mt-2">
               <p style={{ color: "#7D8282" }}>Liquidation Coll. Ratio</p>
-              <p style={{ color: "#7D8282" }}>{process.env.REACT_APP_COLLATERALIZATION_FACTOR}%</p>
+              <p style={{ color: "#7D8282" }}>{implReqCollatRatioString}%</p>
             </div>
           </div>
 
           <div className="text-center mb-4">
-          {Number(balanceDAIString) < Number(input) ?
+          {Number(balanceDebtString) < Number(input) ?
               <button
                 className="btn btn-deactive"
               >

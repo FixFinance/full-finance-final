@@ -6,7 +6,7 @@ import BorrowMore from "../../RepayModals/BorrowMore";
 import Debt from "../../RepayModals/Debt";
 import "./managepopup.scss";
 import { ethers, BigNumber as BN } from 'ethers';
-import { ADDRESS0, TOTAL_SBPS, GOOD_COLLAT_RATIO_MULTIPLIER } from '../../../Utils/Consts';
+import { ADDRESS0, TOTAL_SBPS, GOOD_COLLAT_RATIO_MULTIPLIER, INF_CHAR } from '../../../Utils/Consts';
 import { ENV_TICKERS, ENV_ASSETS } from '../../../Utils/Env';
 
 const IERC20ABI = require('../../../abi/IERC20.json');
@@ -38,7 +38,7 @@ const ManagePopup = ({
     ![signer, vault, vaultDetails].includes(null) &&
     userAddress !== ADDRESS0;
 
-  const hasGoodCollatRatio = !allInitialized ||
+  const hasGoodCollatRatio = !allInitialized || vaultDetails.effCollateralizationRatioString === INF_CHAR ||
     parseFloat(vaultDetails.effCollateralizationRatioString)-1 > 
       (parseFloat(vaultDetails.requiredCollateralizationRatioString)-1) * GOOD_COLLAT_RATIO_MULTIPLIER;
 

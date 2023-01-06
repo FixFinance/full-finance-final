@@ -172,7 +172,12 @@ export function getImplCollatRatioStrings(vaultDetails, aggInfo, isDebt, changeU
 
 		let effCollatRatio = totalBorrowedUSDValue.lte(_0) ? INF : totalSuppliedUSDValue.mul(TOTAL_SBPS).div(totalBorrowedUSDValue);
 		let adjCollatRatio = totalAdjBorrowedUSDValue.lte(_0) ? INF : totalAdjSuppliedUSDValue.mul(TOTAL_SBPS).div(totalAdjBorrowedUSDValue);
-		let reqCollatRatio = effCollatRatio.mul(TOTAL_SBPS).div(adjCollatRatio);
+		let reqCollatRatio = TOTAL_SBPS;
+		if (!totalSuppliedUSDValue.eq(_0) && !totalBorrowedUSDValue.eq(_0)) {
+			let aggregateCollatLTV = totalAdjSuppliedUSDValue.mul(TOTAL_SBPS).div(totalSuppliedUSDValue);
+			let aggregateDebtBFac  = totalAdjBorrowedUSDValue.mul(TOTAL_SBPS).div(totalBorrowedUSDValue);
+			reqCollatRatio = aggregateDebtBFac.mul(TOTAL_SBPS).div(aggregateCollatLTV);
+		}
 		
 		implEffCollatRatioString = effCollatRatio.gte(INF) ? INF_CHAR : getDecimalString(effCollatRatio.toString(), 16, 2);
 		implReqCollatRatioString = getDecimalString(reqCollatRatio.toString(), 16, 2);
@@ -186,5 +191,5 @@ export function getImplCollatRatioStrings(vaultDetails, aggInfo, isDebt, changeU
 }
 
 export function isGoodCollatRatio(effCollatRatioString, requiredCollatRatioString) {
-	return parseFloat(effCollatRatioString)-1 > (parseFloat(requiredCollatRatioString)-1) * GOOD_COLLAT_RATIO_MULTIPLIER;
+	return effCollatRatioString === INF_CHAR || parseFloat(effCollatRatioString)-1 > (parseFloat(requiredCollatRatioString)-1) * GOOD_COLLAT_RATIO_MULTIPLIER;
 }

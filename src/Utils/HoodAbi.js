@@ -106,11 +106,20 @@ function argContainsObj(arg) {
 	if (typeof(arg) !== 'object') {
 		return false;
 	}
-	let paramOrder = arg.paramOrder;
-	for (let i = 0; i < paramOrder.length; i++) {
-		let param = paramOrder[i];
-		if (typeof(arg[param]) === 'object') {
-			return true;
+	if (Array.isArray(arg)) {
+		for (let i = 0; i < arg.length; i++) {
+			if (typeof(arg[i]) === 'object') {
+				return true;
+			}
+		}
+	}
+	else {
+		let paramOrder = arg.paramOrder;
+		for (let i = 0; i < paramOrder.length; i++) {
+			let param = paramOrder[i];
+			if (typeof(arg[param]) === 'object') {
+				return true;
+			}
 		}
 	}
 	return false;

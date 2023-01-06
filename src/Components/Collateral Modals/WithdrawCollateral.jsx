@@ -9,22 +9,11 @@ import { TOTAL_SBPS, INF, _0, GOOD_COLLAT_RATIO_MULTIPLIER } from '../../Utils/C
 import { getNonce, getSendTx } from '../../Utils/SendTx';
 import { ENV_MMM_ADDRESS, ENV_TICKERS, ENV_ASSETS, ENV_ASSET_DECIMALS } from '../../Utils/Env';
 import { hoodEncodeABI } from "../../Utils/HoodAbi";
-import { filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
+import { toTrimmedString, filterInput, getDecimalString, getAbsoluteString } from '../../Utils/StringAlteration';
 import { getImplCollatRatioStrings, isGoodCollatRatio } from '../../Utils/EthersStateProcessing';
 import './add-withdraw.scss';
 
 const IMetaMoneyMarketABI = require('../../abi/IMetaMoneyMarket.json');
-
-const toTrimmedString = x => {
-  let str = x.toString();
-  let halves = str.split('.');
-  if (halves.length < 2) {
-    return str;
-  }
-  else {
-    return halves[0] + '.' + halves[1].substring(0, 2);
-  }
-};
 
 const WithdrawCollateral = ({
   handleClose,

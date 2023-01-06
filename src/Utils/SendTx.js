@@ -24,29 +24,6 @@ export async function BroadcastTx(signer, tx, callback0, callback1) {
 
 	return { rec, resolvedRec };
 }
-/*
-export async function SendTx(userAddress, contractInstance, functionName, argArray, overrides={}, callback0=DEFAULT_CALLBACK, callback1=DEFAULT_CALLBACK) {
-	if (contractInstance == null) {
-		throw "SendTx2 Attempted to Accept Null Contract";
-	}
-
-	const signer = contractInstance.signer;
-
-	let tx = {
-		to: contractInstance.address,
-		from: userAddress,
-		data: hoodEncodeABI(contractInstance, functionName, argArray),
-		nonce: await getNonce(signer.provider, userAddress),
-		gasLimit: (await contractInstance.estimateGas[functionName](...argArray)).toNumber() * 2,
-		...overrides
-	}
-
-	let { resolvedRec } = await BroadcastTx(signer, tx, callback0, callback1);
-
-	return resolvedRec;
-
-}
-*/
 
 export function getSendTx(callback0=DEFAULT_CALLBACK, callback1=DEFAULT_CALLBACK) {
 	return async function(userAddress, contractInstance, functionName, argArray, overrides={}, cb0=callback0, cb1=callback1) {
@@ -56,14 +33,14 @@ export function getSendTx(callback0=DEFAULT_CALLBACK, callback1=DEFAULT_CALLBACK
 
 		const signer = contractInstance.signer;
 
-		let tx = {
-			to: contractInstance.address,
-			from: userAddress,
-			data: hoodEncodeABI(contractInstance, functionName, argArray),
+		let tx = await contractInstance.populateTransaction[functionName](...argArray);
+
+		let info = {
 			nonce: await getNonce(signer.provider, userAddress),
-			gasLimit: (await contractInstance.estimateGas[functionName](...argArray)).toNumber() * 2,
+			gasLimit: Math.floor((await contractInstance.estimateGas[functionName](...argArray)).toNumber() * 1.125),
 			...overrides
 		}
+		tx = {...info, ...tx};
 
 		let { resolvedRec } = await BroadcastTx(signer, tx, cb0, cb1);
 

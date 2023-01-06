@@ -1,3 +1,15 @@
+export function toTrimmedString(x, decimals=2) {
+  let str = x.toString();
+  let halves = str.split('.');
+  if (halves.length < 2) {
+    return str;
+  }
+  else {
+    return halves[0] + '.' + halves[1].substring(0, decimals);
+  }
+};
+
+
 export function filterInput(str) {
 	let ret = '';
 	let usedDecimal = false;
