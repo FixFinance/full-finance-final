@@ -1,8 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
 import "./borrow.scss";
-import dai from "../../assets/image/dai.svg";
-import weth from "../../assets/image/weth.svg";
-import wstETH from "../../assets/image/lidosteth.png";
 import { LOGO_MAP } from '../../Utils/LogoMap';
 import ratio_question from "../../assets/image/ratio_question.svg";
 import t_icon from "../../assets/image/t_icon.png";

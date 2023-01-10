@@ -104,7 +104,7 @@ const EmptyState = () => {
       <div className="flex_class margin_small">
         <div className="d-flex">
           <div className="d-block">
-            <img src={SelectedLogo} alt="img" className="dai_img" />
+            <img src={SelectedLogo} alt="img" className="asset_img" />
             <p className="lend-share-value">$ {usdValString}</p>
           </div>
           <h5 className="lend-share-value-bold">{underlyingValString}</h5>

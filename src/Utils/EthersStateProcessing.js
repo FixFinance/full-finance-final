@@ -27,7 +27,7 @@ export function getFLTUnderlyingValue(fltBals, irmInfo, envIndex) {
 
 export function getFLTUnderlyingValueString(fltBals, irmInfo, envIndex) {
 	let val = getFLTUnderlyingValue(fltBals, irmInfo, envIndex);
-	return getDecimalString(val.toString(), ENV_ASSET_DECIMALS[envIndex], 2);
+	return getDecimalString(val.toString(), ENV_ASSET_DECIMALS[envIndex], 4);
 }
 
 /*

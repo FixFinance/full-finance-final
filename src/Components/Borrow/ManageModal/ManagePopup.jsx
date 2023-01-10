@@ -59,7 +59,7 @@ const ManagePopup = ({
           className={hasGoodCollatRatio ? "btn" : "btn active"}
           onClick={() => setModalType("Supply")}
         >
-          Supply
+          Supply As Collateral
         </button>
       </>
     )
@@ -112,7 +112,7 @@ const ManagePopup = ({
         <div>
           <div className="manage_popup">
             <Modal.Header closeButton>
-              <h5>Withdraw DAI</h5>
+              <h5>Select Action</h5>
             </Modal.Header>
             <Modal.Body style={!hasGoodCollatRatio ? { height: "550px" } : {height: "500px"}}>
               <div className="managepopup_details">

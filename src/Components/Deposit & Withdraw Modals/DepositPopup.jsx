@@ -116,33 +116,6 @@ const DepositPopup = ({ handleClose, basicInfo, assetEnvIndex }) => {
     }
   };
 
-  /// Working on Component to avoid recursion ///
-
-    // const depositOnClick = async () => {
-  //   // try {
-  //     if (DAIbalance === null || DAIapproval === null || balanceLendShares === null) {
-  //       return;
-  //     }
-  //     if (absoluteInput.gt(DAIapproval) || DAIapproval.eq(BN.from(0))) {
-  //       setFunctionMessage('Approving');
-  //       setContractInstance(DAI);
-  //       setFunctionName('approve');
-  //       setArgArray([CMM.address, INF.toString()]);
-  //     }
-  //     else {
-  //       setFunctionMessage('Depositing');
-  //       setContractInstance(CMM);
-  //       setFunctionName('depositSpecificUnderlying');
-  //       setArgArray([userAddress, absoluteInput.toString()]);
-  //     }
-  //     setSuccess(true);
-  //     setWaitConfirmation(false);
-  //   // } catch (err) {
-  //   //   setError(true);
-  //   //   setWaitConfirmation(false);
-  //   // }
-  // };
-
 
   const handleDeposit = async () => {};
   const handleApprove = async () => {};
