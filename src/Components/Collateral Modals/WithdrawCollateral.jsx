@@ -24,11 +24,13 @@ const WithdrawCollateral = ({
 }) => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
-  const [input, setInput] = useState('');
   const [wasError, setWasError] = useState(false);
   const [waitConfirmation, setWaitConfirmation] = useState(false);
   const [sentState, setSentState] = useState(false);
   const [disabled, setDisabled] = useState(false);
+
+  const [input, setInput] = useState('');
+  const [maxClicked, setMaxClicked] = useState(false);
 
   const [, , updateBasicInfo] = useContext(EthersContext);
 
@@ -63,28 +65,50 @@ const WithdrawCollateral = ({
     let value = param.target.value;
     let filteredValue = filterInput(value);
     setInput(filteredValue);
+    if (maxClicked) {
+      setMaxClicked(false);
+    }
   }
 
-  const TxCallback0 = async () => {
-    setSentState(true);
+  const handleClickMax = () => {
+    setInput(amtSuppliedStringAbbreviated);
+    setMaxClicked(true);
   }
-
-  const TxCallback1 = async () => {
-    setSentState(false);
-    setDisabled(false);
-    updateBasicInfo({vault: true, assetBals: true, irmInfo: true});
-  }
-
-  const SendTx = getSendTx(TxCallback0, TxCallback1);
 
   const handleClickWithdraw = async () => {
     try {
+      const TxCallback0 = async () => {
+        setSentState(true);
+      }
+
+      const TxCallback1 = async () => {
+        setSentState(false);
+        setDisabled(false);
+        updateBasicInfo({vault: true, assetBals: true, irmInfo: true});
+      }
+
+      const SendTx = getSendTx(TxCallback0, TxCallback1);
+
       if (absInputAmt.gt(_0) && resultantCollatRatioSafe) {
         setWaitConfirmation(true);
         setDisabled(true);
         let MMM = new ethers.Contract(ENV_MMM_ADDRESS, IMetaMoneyMarketABI, signer);
         const collatAssetIndex = vault.collateralAssets.indexOf(asset);
-        await SendTx(userAddress, MMM, 'withdrawCollateral', [userAddress, collatAssetIndex, absInputAmt.toString(), true]);
+        if (maxClicked) {
+          let {
+            collateralAssets,
+            collateralLendShareAmounts,
+            debtAssets,
+            debtShareAmounts
+          } = vault;
+          collateralAssets = collateralAssets.filter((x, i) => i !== collatAssetIndex);
+          collateralLendShareAmounts = collateralLendShareAmounts.filter((x, i) => i !== collatAssetIndex).map(x => x.toString());
+          debtShareAmounts = debtShareAmounts.map(x => x.toString());
+          await SendTx(userAddress, MMM, 'manageConnectedVault', [userAddress, collateralAssets, collateralLendShareAmounts, debtAssets, debtShareAmounts]);
+        }
+        else {
+          await SendTx(userAddress, MMM, 'withdrawCollateral', [userAddress, collatAssetIndex, absInputAmt.toString(), true]);
+        }
         setSuccess(true);
         setWasError(false);
         setWaitConfirmation(false);
@@ -130,6 +154,13 @@ const WithdrawCollateral = ({
                     onChange={handleInput}
                     disabled={disabled}
                   />
+                  <div
+                    className="highlight"
+                    onClick={handleClickMax}
+                  >
+                    max
+                  </div>
+
                 </div>
             </div>
             <div className="d-flex justify-content-between text-part">

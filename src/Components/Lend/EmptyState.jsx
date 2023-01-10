@@ -35,7 +35,7 @@ const EmptyState = () => {
   const [provider, userAddress] = getWalletInfo();
   const signer = provider == null ? null : provider.getSigner();
 
-  const [selectedAsset, setSelectedAsset] = useState("DAI");
+  const [selectedAsset, setSelectedAsset] = useState(ENV_TICKERS[0]);
   const [menu, setMenu] = useState(false);
 
   const setSelectedAssetHandler = (asset) => {

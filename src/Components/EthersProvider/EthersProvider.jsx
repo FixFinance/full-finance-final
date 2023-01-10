@@ -177,7 +177,7 @@ export default function EthersProvider({children}) {
         let callNum = ++CALL;
         console.log("USE BASIC INFO CALL#", callNum);
 
-        if (chid === LocalhostChain) {
+        if (TargetChains.includes(chid)) {
             const PrimaryUpdateObj = (name, val, inFlight, updateFunction, setState, setInFlight) => ({name, val, inFlight, updateFunction, setState, setInFlight});
             const PrimaryUpdateArr = [
                 PrimaryUpdateObj('vault', vault, vaultInFlight, updateVault, setVault, setVaultInFlight),
