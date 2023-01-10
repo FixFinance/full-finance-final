@@ -86,6 +86,8 @@ const BorrowMore=({
         setWaitConfirmation(true);
         setDisabled(true);
         const MMM = new ethers.Contract(ENV_MMM_ADDRESS, IMetaMoneyMarketABI, signer);
+        console.log("asset to borrow", asset);
+        console.log("vault", vault);
         if (vault.debtAssets.indexOf(asset) === -1) {
           let expectedIndex = 0;
           for (;expectedIndex<vault.debtAssets.length && BN.from(vault.debtAssets[expectedIndex]).lt(BN.from(asset)); expectedIndex++) {}
@@ -162,7 +164,7 @@ const BorrowMore=({
             <p>{implEffCollatRatioString}%</p>
           </div>
           <div className="d-flex justify-content-between text-part mt-2 border_bottom">
-            <p style={{ color: "#7D8282" }}>Liquidaiton Coll. Ratio</p>
+            <p style={{ color: "#7D8282" }}>Liquidation Coll. Ratio</p>
             <p style={{ color: "#7D8282" }}>{implReqCollatRatioString}%</p>
           </div>
           <div className="d-flex justify-content-between text-part mt-2">

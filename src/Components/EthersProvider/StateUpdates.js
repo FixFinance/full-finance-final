@@ -26,7 +26,7 @@ const ENV_ASSETS = JSON.parse(process.env.REACT_APP_LISTED_ASSETS);
 export function updateVault(provider, userAddress, setState) {
     const MMM = new ethers.Contract(process.env.REACT_APP_MMM_ADDRESS, IMetaMoneyMarketABI, provider);
     return MMM.getConnectedVault(userAddress)
-        .then(res => {setState(res); return res});
+        .then(res => {setState(res); console.log("got vault", res); return res});
 }
 
 /*
